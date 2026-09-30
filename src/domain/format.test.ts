@@ -1,6 +1,6 @@
+import { getLayer } from '../layers'
 import { describe, expect, it } from 'vitest'
-import { compareToAverage, formatCompact, formatCount, formatWithUnit, ordinal } from './format'
-import { getStory } from './stories'
+import { compareToAverage, formatCompact, formatCount, formatShort, formatValue, formatWithUnit, ordinal } from './format'
 
 describe('formatCount', () => {
   it.each([
@@ -29,8 +29,8 @@ describe('formatCompact', () => {
 
 describe('formatWithUnit', () => {
   it('adds the layer’s unit', () => {
-    expect(formatWithUnit(getStory('fire').metrics[0], 49)).toBe('49 fires')
-    expect(formatWithUnit(getStory('demographic').metrics[0], 34_512.6)).toBe('34,513 people per sq mi')
+    expect(formatWithUnit(getLayer('structural-fires'), 49)).toBe('49 fires')
+    expect(formatWithUnit(getLayer('population-density'), 34_512.6)).toBe('34,513 people per sq mi')
   })
 })
 
@@ -54,5 +54,45 @@ describe('compareToAverage', () => {
   it('does not divide by a zero average', () => {
     expect(compareToAverage(0, 0, 'the city average')).toBe('Level with the city average')
     expect(compareToAverage(5, 0, 'the city average')).toBe('Above the city average')
+  })
+})
+
+describe('formatValue', () => {
+  it.each([
+    ['count', 1234.4, '1,234'],
+    ['count', 4.26, '4.3'],
+    ['decimal', 8.64, '8.6'],
+    ['decimal', 1234.56, '1,234.6'],
+    ['percent', 24.23, '24.2%'],
+    ['minutes', 9.25, '9.3 min'],
+    ['currency', 77_849, '$77,800'],
+  ] as const)('formats %s %s as %s', (format, value, expected) => {
+    expect(formatValue(format, value)).toBe(expected)
+  })
+})
+
+describe('formatShort', () => {
+  it.each([
+    ['count', 1_613_554, '1.6M'],
+    ['count', 2_401, '2,401'],
+    ['currency', 77_849, '$77.8K'],
+    ['percent', 24.23, '24.2%'],
+    ['minutes', 9.25, '9.3 min'],
+  ] as const)('shortens %s %s to %s', (format, value, expected) => {
+    expect(formatShort(format, value)).toBe(expected)
+  })
+})
+
+describe('formatWithUnit with a format', () => {
+  it('adds the unit to counts and decimals, and leaves self-describing formats alone', () => {
+    expect(formatWithUnit({ unit: 'fires', format: 'count' }, 49)).toBe('49 fires')
+    expect(formatWithUnit({ unit: 'per 10k residents', format: 'decimal' }, 7.44)).toBe('7.4 per 10k residents')
+    expect(formatWithUnit({ unit: 'of fires', format: 'percent' }, 19)).toBe('19.0%')
+    expect(formatWithUnit({ unit: 'minutes', format: 'minutes' }, 9.25)).toBe('9.3 min')
+    expect(formatWithUnit({ unit: 'per household', format: 'currency' }, 77_849)).toBe('$77,800')
+  })
+
+  it('treats a layer without a format as a count', () => {
+    expect(formatWithUnit({ unit: 'calls' }, 49)).toBe('49 calls')
   })
 })

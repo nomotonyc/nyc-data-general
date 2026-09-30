@@ -1,4 +1,3 @@
-import type { Metric } from './stories'
 
 /** Whole numbers with separators; small averages keep one decimal so they stay distinguishable. */
 export function formatCount(v: number): string {
@@ -13,9 +12,38 @@ export function formatCompact(v: number): string {
   return Math.abs(v) < 10_000 ? formatCount(v) : compact.format(v)
 }
 
-/** "49 fires", "34,513 people per sq mi". */
-export function formatWithUnit(metric: Metric, v: number): string {
-  return `${formatCount(v)} ${metric.unit}`
+/** How a layer's values are written (set per layer; count if left out). */
+export type ValueFormat = 'count' | 'decimal' | 'percent' | 'minutes' | 'currency'
+
+const oneDecimal = new Intl.NumberFormat('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+
+export function formatValue(format: ValueFormat, v: number): string {
+  switch (format) {
+    case 'count':
+      return formatCount(v)
+    case 'decimal':
+      return oneDecimal.format(v)
+    case 'percent':
+      return `${v.toFixed(1)}%`
+    case 'minutes':
+      return `${v.toFixed(1)} min`
+    case 'currency':
+      return '$' + (Math.round(v / 100) * 100).toLocaleString('en-US')
+  }
+}
+
+/** For tight spaces (the Where list): large counts and amounts shortened, "1.6M", "$77.8K". */
+export function formatShort(format: ValueFormat, v: number): string {
+  if (format === 'count') return formatCompact(v)
+  if (format === 'currency' && Math.abs(v) >= 10_000) return '$' + compact.format(v)
+  return formatValue(format, v)
+}
+
+/** "49 fires", "7.4 per 10k residents"; percent, minutes and currency already say what they are. */
+export function formatWithUnit(layer: { unit: string; format?: ValueFormat }, v: number): string {
+  const format = layer.format ?? 'count'
+  const value = formatValue(format, v)
+  return format === 'count' || format === 'decimal' ? `${value} ${layer.unit}` : value
 }
 
 export function ordinal(n: number): string {

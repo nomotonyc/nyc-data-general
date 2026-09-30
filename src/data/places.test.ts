@@ -1,14 +1,14 @@
+import { getLayer } from '../layers'
 import { describe, expect, it } from 'vitest'
 import { BOROUGHS } from '../domain/geography'
-import { getStory } from '../domain/stories'
 import { getDataset } from './load'
 import { areaIdsIn, placeValues } from './places'
 import { areaValue } from './selectors'
 
-const fire = getDataset('fire')
-const density = getDataset('demographic')
-const fires = getStory('fire').metrics[0]
-const people = getStory('demographic').metrics[0]
+const fire = getDataset('structural-fires')
+const density = getDataset('population-density')
+const fires = getLayer('structural-fires')
+const people = getLayer('population-density')
 const y2025 = { from: 2025, to: 2025 } as const
 
 describe('areaIdsIn', () => {

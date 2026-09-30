@@ -1,16 +1,16 @@
+import { getLayer } from '../layers'
 import { describe, expect, it } from 'vitest'
 import { getDataset } from '../data/load'
 import { areaIdsIn } from '../data/places'
 import { areaValue, rankOf } from '../data/selectors'
 import { formatCount, formatWithUnit, ordinal } from '../domain/format'
-import { getStory } from '../domain/stories'
 import { initialExplorerState, type ExplorerState } from '../explorer/state'
 import { hoverDetails, tooltipPosition } from './hover'
 import { hoverTarget } from './interaction'
 
 const fire: ExplorerState = { ...initialExplorerState, storyId: 'fire', metricId: 'structural-fires' }
-const ds = getDataset('fire')
-const fires = getStory('fire').metrics[0]
+const ds = getDataset('structural-fires')
+const fires = getLayer('structural-fires')
 const y2025 = { from: 2025, to: 2025 } as const
 const borough = (name: string) => ({ kind: 'borough' as const, properties: { borough: name } })
 const precinct = (n: number, b: string) => ({ kind: 'precinct' as const, properties: { precinct: n, borough: b } })
@@ -117,7 +117,7 @@ describe('hoverDetails for a borough', () => {
   })
 
   it('names its highest precinct instead of a share for density', () => {
-    const density = hoverDetails(initialExplorerState, getDataset('demographic'), { kind: 'borough', borough: 'Queens' })
+    const density = hoverDetails(initialExplorerState, getDataset('population-density'), { kind: 'borough', borough: 'Queens' })
     expect(density.ranks[1].label).toBe('Highest precinct')
     expect(density.ranks[1].rank).toMatch(/^No\. \d+$/)
   })

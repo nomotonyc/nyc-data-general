@@ -1,6 +1,6 @@
 import { useId, useMemo } from 'react'
 import { placeValues } from '../../data/places'
-import { formatCompact, formatCount } from '../../domain/format'
+import { formatShort, formatValue } from '../../domain/format'
 import { BOROUGHS, type Borough } from '../../domain/geography'
 import { useDataset, useExplorerDispatch, useExplorerState } from '../../explorer/context'
 import { activeMetric } from '../../explorer/state'
@@ -16,11 +16,12 @@ export function PlaceList() {
   const ds = useDataset()
   const theme = useTheme()
 
-  const metric = activeMetric(state)
+  const { storyId, metricId, yearFrom, yearTo } = state
+  const format = activeMetric(state).format ?? 'count'
   // Not on every render: toggles and focus changes don't alter the values.
   const values = useMemo(
-    () => placeValues(ds, metric, { from: state.yearFrom, to: state.yearTo }),
-    [ds, metric, state.yearFrom, state.yearTo],
+    () => placeValues(ds, activeMetric({ storyId, metricId }), { from: yearFrom, to: yearTo }),
+    [ds, storyId, metricId, yearFrom, yearTo],
   )
   const colour = equalIntervalScale(BOROUGHS.map((b) => values.boroughs[b]), theme.story[state.storyId].ramp)
   const rows: Row[] = [
@@ -43,8 +44,8 @@ export function PlaceList() {
         >
           <span className="rail__swatch" style={{ background: row.swatch }} aria-hidden="true" />
           <span className="rail__label">{row.label}</span>
-          <span className="rail__value" title={formatCount(row.value)}>
-            {formatCompact(row.value)}
+          <span className="rail__value" title={formatValue(format, row.value)}>
+            {formatShort(format, row.value)}
           </span>
         </button>
       ))}

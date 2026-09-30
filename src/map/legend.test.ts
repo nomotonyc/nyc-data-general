@@ -1,12 +1,12 @@
+import { getLayer } from '../layers'
 import { describe, expect, it } from 'vitest'
 import { formatCount } from '../domain/format'
-import { getStory } from '../domain/stories'
 import { lightTheme } from '../theme/tokens'
 import type { Choropleth } from './choropleth'
 import { legendDetails } from './legend'
 
-const fires = getStory('fire').metrics[0]
-const density = getStory('demographic').metrics[0]
+const fires = getLayer('structural-fires')
+const density = getLayer('population-density')
 const ramp = lightTheme.story.fire.ramp
 const plan: Choropleth = {
   level: 'borough',
@@ -60,5 +60,11 @@ describe('legendDetails', () => {
     expect(legendDetails(adjusted, density, ramp, { from: 2019, to: 2022 }, { from: 2021, to: 2024 }).note).toBe(
       'Estimates cover 2021–2024 · showing 2021–2022',
     )
+  })
+
+  it('writes the lowest and highest values in the layer’s format', () => {
+    const share = { ...fires, format: 'percent' as const, unit: 'of fires' }
+    const details = legendDetails({ ...plan, lo: 6.24, hi: 33.9 }, share, ramp, { from: 2025, to: 2025 }, { from: 2019, to: 2026 })
+    expect([details.lo, details.hi]).toEqual(['6.2%', '33.9%'])
   })
 })

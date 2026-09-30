@@ -1,4 +1,4 @@
-import type { StoryDataset, YearRange } from '../data/dataset'
+import type { LayerDataset, YearRange } from '../data/dataset'
 import { areaIdsIn } from '../data/places'
 import { areaValue, effectiveRange } from '../data/selectors'
 import { BOROUGHS, type Borough } from '../domain/geography'
@@ -24,7 +24,7 @@ export type Choropleth = {
 export type ChoroplethInput = Pick<ExplorerState, 'storyId' | 'metricId' | 'borough' | 'detail' | 'yearFrom' | 'yearTo'>
 
 /** Which colour each borough or precinct gets, from the explorer state and the story's ramp. */
-export function choropleth(state: ChoroplethInput, ds: StoryDataset, ramp: readonly string[]): Choropleth {
+export function choropleth(state: ChoroplethInput, ds: LayerDataset, ramp: readonly string[]): Choropleth {
   const metric = activeMetric(state)
   const { range, adjusted } = effectiveRange(ds, { from: state.yearFrom, to: state.yearTo })
   const level = effectiveDetail(state)

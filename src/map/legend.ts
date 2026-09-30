@@ -1,6 +1,7 @@
 import type { YearRange } from '../data/dataset'
-import { formatCount } from '../domain/format'
-import { yearLabel, type Metric } from '../domain/stories'
+import { formatValue } from '../domain/format'
+import { yearLabel } from '../domain/stories'
+import type { Metric } from '../layers'
 import type { Choropleth } from './choropleth'
 
 export type LegendDetails = {
@@ -36,8 +37,8 @@ export function legendDetails(
   return {
     title: `${metric.label}, ${shown} · by ${plan.level}`,
     steps: [...ramp],
-    lo: formatCount(plan.lo),
-    hi: formatCount(plan.hi),
+    lo: formatValue(metric.format ?? 'count', plan.lo),
+    hi: formatValue(metric.format ?? 'count', plan.hi),
     note,
   }
 }

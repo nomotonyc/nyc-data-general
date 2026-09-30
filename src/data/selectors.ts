@@ -1,5 +1,6 @@
-import type { Metric, Year } from '../domain/stories'
-import type { StoryDataset, YearRange } from './dataset'
+import type { Year } from '../domain/stories'
+import type { Metric } from '../layers'
+import type { LayerDataset, YearRange } from './dataset'
 
 const sum = (xs: readonly number[]) => xs.reduce((a, b) => a + b, 0)
 
@@ -7,7 +8,7 @@ const sum = (xs: readonly number[]) => xs.reduce((a, b) => a + b, 0)
  * The part of `range` the dataset covers. A range entirely outside the data
  * collapses to the nearest year. `adjusted` tells the UI to say so.
  */
-export function effectiveRange(ds: StoryDataset, range: YearRange): { range: YearRange; adjusted: boolean } {
+export function effectiveRange(ds: LayerDataset, range: YearRange): { range: YearRange; adjusted: boolean } {
   const first = ds.periods[0].year
   const last = ds.periods[ds.periods.length - 1].year
   const clamp = (y: Year): Year => (y < first ? first : y > last ? last : y)
@@ -16,7 +17,7 @@ export function effectiveRange(ds: StoryDataset, range: YearRange): { range: Yea
   return { range: { from, to }, adjusted: from !== range.from || to !== range.to }
 }
 
-export function periodIndices(ds: StoryDataset, range: YearRange): number[] {
+export function periodIndices(ds: LayerDataset, range: YearRange): number[] {
   const out: number[] = []
   ds.periods.forEach((p, i) => {
     if (p.year >= range.from && p.year <= range.to) out.push(i)
@@ -25,41 +26,41 @@ export function periodIndices(ds: StoryDataset, range: YearRange): number[] {
 }
 
 /** Periods in the range; throws rather than letting an empty range read as zeros. */
-function indicesIn(ds: StoryDataset, range: YearRange): number[] {
+function indicesIn(ds: LayerDataset, range: YearRange): number[] {
   const indices = periodIndices(ds, range)
   if (indices.length === 0) {
-    throw new Error(`Dataset ${ds.storyId} has no data for ${range.from}–${range.to}; pass effectiveRange(...).range`)
+    throw new Error(`Dataset ${ds.layerId} has no data for ${range.from}–${range.to}; pass effectiveRange(...).range`)
   }
   return indices
 }
 
-type Table = StoryDataset['values']
+type Table = LayerDataset['values']
 
-function valuesFor(ds: StoryDataset, table: Table, metric: Metric, areaId: string): readonly number[] {
+function valuesFor(ds: LayerDataset, table: Table, metric: Metric, areaId: string): readonly number[] {
   const byArea = table[metric.id]
-  if (!byArea) throw new Error(`Dataset ${ds.storyId} has no layer ${metric.id}`)
+  if (!byArea) throw new Error(`Dataset ${ds.layerId} has no layer ${metric.id}`)
   const values = byArea[areaId]
-  if (!values) throw new Error(`Dataset ${ds.storyId} has no ${metric.id} values for area ${areaId}`)
+  if (!values) throw new Error(`Dataset ${ds.layerId} has no ${metric.id} values for area ${areaId}`)
   return values
 }
 
-function total(ds: StoryDataset, table: Table, metric: Metric, areaIds: readonly string[], indices: readonly number[]) {
+function total(ds: LayerDataset, table: Table, metric: Metric, areaIds: readonly string[], indices: readonly number[]) {
   return sum(areaIds.flatMap((id) => {
     const values = valuesFor(ds, table, metric, id)
     return indices.map((i) => values[i])
   }))
 }
 
-function ratio(ds: StoryDataset, metric: Metric, areaIds: readonly string[], indices: readonly number[]) {
+function ratio(ds: LayerDataset, metric: Metric, areaIds: readonly string[], indices: readonly number[]) {
   const denominator = total(ds, ds.denominators, metric, areaIds, indices)
-  if (denominator === 0) throw new Error(`Dataset ${ds.storyId}: ${metric.id} denominator is 0 for ${areaIds.join(', ')}`)
-  return total(ds, ds.values, metric, areaIds, indices) / denominator
+  if (denominator === 0) throw new Error(`Dataset ${ds.layerId}: ${metric.id} denominator is 0 for ${areaIds.join(', ')}`)
+  return (total(ds, ds.values, metric, areaIds, indices) / denominator) * (metric.scale ?? 1)
 }
 
-function precinctCount(ds: StoryDataset, areaIds: readonly string[]): number {
+function precinctCount(ds: LayerDataset, areaIds: readonly string[]): number {
   return sum(areaIds.map((id) => {
     const area = ds.areas.find((a) => a.id === id)
-    if (!area) throw new Error(`Dataset ${ds.storyId} has no area ${id}`)
+    if (!area) throw new Error(`Dataset ${ds.layerId} has no area ${id}`)
     return area.precincts.length
   }))
 }
@@ -69,7 +70,7 @@ function precinctCount(ds: StoryDataset, areaIds: readonly string[]): number {
  * total numerator by the total denominator, never averaging ratios.
  */
 export function areaValue(
-  ds: StoryDataset,
+  ds: LayerDataset,
   metric: Metric,
   areaIds: readonly string[],
   range: YearRange,
@@ -90,7 +91,7 @@ export function rankOf(value: number, peers: readonly number[]): number {
  * precincts), so a precinct, a borough and the city share one scale.
  */
 export function series(
-  ds: StoryDataset,
+  ds: LayerDataset,
   metric: Metric,
   areaIds: readonly string[],
   range: YearRange,
@@ -103,12 +104,12 @@ export function series(
 }
 
 /** Each breakdown part's share of the total over the range; zeros when nothing was recorded. */
-export function breakdownShares(ds: StoryDataset, areaIds: readonly string[], range: YearRange): number[] {
+export function breakdownShares(ds: LayerDataset, areaIds: readonly string[], range: YearRange): number[] {
   const indices = indicesIn(ds, range)
   const totals: number[] = []
   for (const id of areaIds) {
     const periods = ds.parts[id]
-    if (!periods) throw new Error(`Dataset ${ds.storyId} has no breakdown for area ${id}`)
+    if (!periods) throw new Error(`Dataset ${ds.layerId} has no breakdown for area ${id}`)
     for (const i of indices) {
       periods[i].forEach((n, part) => {
         totals[part] = (totals[part] ?? 0) + n

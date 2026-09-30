@@ -18,7 +18,7 @@ export function yearLabel(year: Year): string {
   return year === FINAL_YEAR ? `${year} (Jan–Jun)` : String(year)
 }
 
-export const METHOD_URL = 'https://github.com/nomotonyc/nyc-data-general/blob/main/docs/data-sources.md'
+export const METHOD_URL = 'https://github.com/nomotonyc/nyc-data-general/blob/main/data-sources.md'
 
 export type Source = {
   name: string

@@ -25,6 +25,8 @@ export const FIXED_VIEW = {
 
 export const BOROUGHS_URL = `${import.meta.env.BASE_URL}data/nyc-boroughs.geojson`
 export const BOROUGH_LABELS_URL = `${import.meta.env.BASE_URL}data/nyc-borough-labels.geojson`
+export const PRECINCTS_URL = `${import.meta.env.BASE_URL}data/nyc-precincts.geojson`
+export const PRECINCT_LABELS_URL = `${import.meta.env.BASE_URL}data/nyc-precinct-labels.geojson`
 
 /** Self-hosted SDF glyphs. Only the 0-255 range ships; borough names are ASCII. */
 export const GLYPHS = `${import.meta.env.BASE_URL}fonts/{fontstack}/{range}.pbf`
@@ -33,9 +35,11 @@ export const LABEL_FONT = ['Montserrat']
 export const ATTRIBUTION =
   '<a href="https://www.nyc.gov/site/planning/">NYC Dept. of City Planning</a>'
 
-export const SOURCES = { boroughs: 'boroughs', boroughLabels: 'borough-labels' } as const
+export const SOURCES = { boroughs: 'boroughs', boroughLabels: 'borough-labels', precincts: 'precincts' } as const
 export const LAYERS = {
-  fill: 'borough-fill',
-  line: 'borough-line',
-  label: 'borough-label',
+  boroughFill: 'borough-fill',
+  precinctFill: 'precinct-fill',
+  precinctLine: 'precinct-line',
+  boroughLine: 'borough-line',
+  boroughLabel: 'borough-label',
 } as const

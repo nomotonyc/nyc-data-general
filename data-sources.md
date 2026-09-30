@@ -17,6 +17,8 @@ Audited 2026-09-30 against the live sources. Figures below are from that audit.
 | Used | `precinct`, `the_geom` |
 | Coverage | 78 precincts (current boundaries, including precinct 116 created in 2024) |
 
+Simplified to about 2 m and written to `public/data/nyc-precincts.geojson` (with label points in `nyc-precinct-labels.geojson`) by `npm run data:precincts`.
+
 Borough outlines come from the NYC Department of City Planning
 (https://www.nyc.gov/site/planning/), served from `public/data`. The map shows
 no attribution control (its corner holds the legend), so every layer lists this

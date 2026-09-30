@@ -85,7 +85,7 @@ export function explorerReducer(state: ExplorerState, action: ExplorerAction): E
   }
 }
 
-export function effectiveDetail(state: ExplorerState): Detail {
+export function effectiveDetail(state: Pick<ExplorerState, 'borough' | 'detail'>): Detail {
   return state.borough ? 'precinct' : state.detail
 }
 
@@ -94,7 +94,7 @@ export function yearToOptions(state: ExplorerState): Year[] {
 }
 
 /** The reducer only ever stores a layer of the current story, so this always finds one. */
-export function activeMetric(state: ExplorerState): Metric {
+export function activeMetric(state: Pick<ExplorerState, 'storyId' | 'metricId'>): Metric {
   const story = getStory(state.storyId)
   return findMetric(story, state.metricId) ?? story.metrics[0]
 }

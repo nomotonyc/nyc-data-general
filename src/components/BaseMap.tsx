@@ -1,67 +1,21 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Map as MapLibreMap } from 'maplibre-gl'
 import './BaseMap.css'
-import { useTheme } from '../theme/context'
-import type { Theme } from '../theme/tokens'
-import {
-  ATTRIBUTION,
-  BOROUGHS_URL,
-  BOROUGH_LABELS_URL,
-  FIT_PADDING,
-  FIXED_VIEW,
-  LABEL_FONT,
-  LAYERS,
-  NYC_BOUNDS,
-  SOURCES,
-} from '../map/config'
+import { useDataset, useExplorerState } from '../explorer/context'
+import { choropleth } from '../map/choropleth'
+import { FIT_PADDING, FIXED_VIEW, NYC_BOUNDS } from '../map/config'
+import { mapLayers, mapSources } from '../map/layers'
+import { paintMap } from '../map/paint'
 import { buildStyle } from '../map/style'
-
-/** Fill, outline and name for each borough. */
-function addBoroughs(map: MapLibreMap, theme: Theme) {
-  map.addSource(SOURCES.boroughs, {
-    type: 'geojson',
-    data: BOROUGHS_URL,
-    attribution: ATTRIBUTION,
-  })
-  map.addSource(SOURCES.boroughLabels, { type: 'geojson', data: BOROUGH_LABELS_URL })
-
-  map.addLayer({
-    id: LAYERS.fill,
-    type: 'fill',
-    source: SOURCES.boroughs,
-    paint: { 'fill-color': theme.color.boroughFill },
-  })
-
-  // Above the fill, so adjacent boroughs stay distinct.
-  map.addLayer({
-    id: LAYERS.line,
-    type: 'line',
-    source: SOURCES.boroughs,
-    paint: { 'line-color': theme.color.boroughLine, 'line-width': 1.5 },
-  })
-
-  map.addLayer({
-    id: LAYERS.label,
-    type: 'symbol',
-    source: SOURCES.boroughLabels,
-    layout: {
-      'text-field': ['get', 'borough'],
-      'text-font': LABEL_FONT,
-      'text-size': ['interpolate', ['linear'], ['zoom'], 9, 11, 13, 20],
-      'text-letter-spacing': 0.14,
-      'text-transform': 'uppercase',
-    },
-    paint: {
-      'text-color': theme.color.boroughLabel,
-      'text-halo-color': theme.color.boroughLabelHalo,
-      'text-halo-width': 1.2,
-    },
-  })
-}
+import { useTheme } from '../theme/context'
 
 export default function BaseMap() {
   const container = useRef<HTMLDivElement>(null)
+  const mapRef = useRef<MapLibreMap | null>(null)
+  const [ready, setReady] = useState(false)
   const theme = useTheme()
+  const state = useExplorerState()
+  const ds = useDataset()
 
   // For the mount effect, which must not re-run on theme change.
   const themeRef = useRef(theme)
@@ -81,8 +35,13 @@ export default function BaseMap() {
       // The legend takes this corner; sources are credited in the panel.
       attributionControl: false,
     })
+    mapRef.current = map
 
-    map.on('style.load', () => addBoroughs(map, themeRef.current))
+    map.on('style.load', () => {
+      for (const [id, source] of Object.entries(mapSources())) map.addSource(id, source)
+      for (const layer of mapLayers(themeRef.current)) map.addLayer(layer)
+    })
+    map.once('load', () => setReady(true))
 
     // The whole city always fills the map's area, whatever its size.
     const fitCity = () => map.fitBounds(NYC_BOUNDS, { padding: FIT_PADDING, animate: false })
@@ -91,8 +50,24 @@ export default function BaseMap() {
     return () => {
       map.off('resize', fitCity)
       map.remove()
+      mapRef.current = null
+      setReady(false)
     }
   }, [])
+
+  const { storyId, metricId, borough, detail, yearFrom, yearTo } = state
+  const ramp = theme.story[storyId].ramp
+  // Only what the colours depend on, so the map toggles don't recompute them.
+  const plan = useMemo(
+    () => choropleth({ storyId, metricId, borough, detail, yearFrom, yearTo }, ds, ramp),
+    [ds, ramp, storyId, metricId, borough, detail, yearFrom, yearTo],
+  )
+
+  useEffect(() => {
+    if (ready && mapRef.current) {
+      paintMap(mapRef.current, plan, { outlines: state.showOutlines, labels: state.showLabels })
+    }
+  }, [ready, plan, state.showOutlines, state.showLabels])
 
   return <div ref={container} className="map" />
 }

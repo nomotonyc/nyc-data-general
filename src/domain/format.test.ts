@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { compareToAverage, formatCount, formatWithUnit, ordinal } from './format'
+import { compareToAverage, formatCompact, formatCount, formatWithUnit, ordinal } from './format'
 import { getStory } from './stories'
 
 describe('formatCount', () => {
@@ -11,6 +11,19 @@ describe('formatCount', () => {
     [0, '0'],
   ])('formats %s as %s', (value, expected) => {
     expect(formatCount(value)).toBe(expected)
+  })
+})
+
+describe('formatCompact', () => {
+  it.each([
+    [1_613_554, '1.6M'],
+    [31_717, '31.7K'],
+    [120_169, '120.2K'],
+    [9_999, '9,999'],
+    [2_401, '2,401'],
+    [4.26, '4.3'],
+  ])('shortens %s to %s', (value, expected) => {
+    expect(formatCompact(value)).toBe(expected)
   })
 })
 

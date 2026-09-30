@@ -77,6 +77,10 @@ describe('layer sources', () => {
     for (const m of layers) expect(m.sources.map((s) => s.url), m.id).toContain('https://data.cityofnewyork.us/d/y76i-bdw7')
   })
 
+  it('credits the borough boundaries on every layer, since the map no longer shows a credit', () => {
+    for (const m of layers) expect(m.sources.map((s) => s.publisher), m.id).toContain('NYC Department of City Planning')
+  })
+
   it('points each layer at the dataset the audit verified', () => {
     const urls = (id: 'demographic' | 'fire' | 'medical') => getStory(id).metrics[0].sources.map((s) => s.url).join(' ')
     expect(urls('fire')).toContain('8m42-w767')

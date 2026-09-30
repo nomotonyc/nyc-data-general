@@ -17,6 +17,11 @@ Audited 2026-09-30 against the live sources. Figures below are from that audit.
 | Used | `precinct`, `the_geom` |
 | Coverage | 78 precincts (current boundaries, including precinct 116 created in 2024) |
 
+Borough outlines come from the NYC Department of City Planning
+(https://www.nyc.gov/site/planning/), served from `public/data`. The map shows
+no attribution control (its corner holds the legend), so every layer lists this
+source in the app instead.
+
 Precinct → borough follows NYPD's numbering blocks: 1–34 Manhattan, 40–52
 Bronx, 60–94 Brooklyn, 100–116 Queens, 120–123 Staten Island.
 

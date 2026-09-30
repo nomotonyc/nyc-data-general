@@ -8,9 +8,9 @@ import {
   BOROUGHS_URL,
   BOROUGH_LABELS_URL,
   FIT_PADDING,
+  FIXED_VIEW,
   LABEL_FONT,
   LAYERS,
-  MAX_BOUNDS_SLACK,
   NYC_BOUNDS,
   SOURCES,
 } from '../map/config'
@@ -59,42 +59,6 @@ function addBoroughs(map: MapLibreMap, theme: Theme) {
   })
 }
 
-/** True when zoomed all the way out. */
-function isAtOverview(map: MapLibreMap) {
-  return map.getZoom() <= map.getMinZoom() + 0.01
-}
-
-/**
- * Sets the zoom floor to the zoom that fits NYC, and maxBounds to what that
- * view spans plus slack. Both depend on container size, so this runs on load
- * and on resize. Measured rather than hardcoded because the required span
- * varies with aspect ratio.
- */
-function applyViewConstraints(map: MapLibreMap) {
-  const wasAtOverview = isAtOverview(map)
-  const before = { center: map.getCenter(), zoom: map.getZoom() }
-
-  // Cleared first; either would distort the measurement.
-  map.setMaxBounds(null)
-  map.setMinZoom(0)
-
-  map.fitBounds(NYC_BOUNDS, { padding: FIT_PADDING, animate: false })
-  const overview = map.getBounds()
-  map.setMinZoom(map.getZoom())
-
-  const lngSlack = (overview.getEast() - overview.getWest()) * MAX_BOUNDS_SLACK
-  const latSlack = (overview.getNorth() - overview.getSouth()) * MAX_BOUNDS_SLACK
-  map.setMaxBounds([
-    [overview.getWest() - lngSlack, overview.getSouth() - latSlack],
-    [overview.getEast() + lngSlack, overview.getNorth() + latSlack],
-  ])
-
-  // Keep the user's view if they had zoomed in.
-  if (!wasAtOverview) {
-    map.jumpTo({ center: before.center, zoom: before.zoom })
-  }
-}
-
 export default function BaseMap() {
   const container = useRef<HTMLDivElement>(null)
   const theme = useTheme()
@@ -113,17 +77,19 @@ export default function BaseMap() {
       style: buildStyle(themeRef.current),
       bounds: NYC_BOUNDS,
       fitBoundsOptions: { padding: FIT_PADDING },
-      dragRotate: false,
+      ...FIXED_VIEW,
+      // The legend takes this corner; sources are credited in the panel.
+      attributionControl: false,
     })
 
     map.on('style.load', () => addBoroughs(map, themeRef.current))
 
-    const onResize = () => applyViewConstraints(map)
-    map.once('load', () => applyViewConstraints(map))
-    map.on('resize', onResize)
+    // The whole city always fills the map's area, whatever its size.
+    const fitCity = () => map.fitBounds(NYC_BOUNDS, { padding: FIT_PADDING, animate: false })
+    map.on('resize', fitCity)
 
     return () => {
-      map.off('resize', onResize)
+      map.off('resize', fitCity)
       map.remove()
     }
   }, [])

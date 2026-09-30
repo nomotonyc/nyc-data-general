@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  activeMetric,
   effectiveDetail,
   explorerReducer as reduce,
   initialExplorerState as initial,
@@ -144,5 +145,12 @@ describe('trend dialog', () => {
     const open = reduce(initial, { type: 'openTrend' })
     expect(open.trendOpen).toBe(true)
     expect(reduce(open, { type: 'closeTrend' }).trendOpen).toBe(false)
+  })
+})
+
+describe('activeMetric', () => {
+  it('returns the selected layer of the current story', () => {
+    expect(activeMetric(initial).label).toBe('Population density')
+    expect(activeMetric(reduce(initial, { type: 'selectStory', storyId: 'medical' })).label).toBe('EMS calls')
   })
 })

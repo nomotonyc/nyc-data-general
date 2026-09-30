@@ -1,5 +1,5 @@
 import { boroughOfPrecinct, isPrecinct, type Borough } from '../domain/geography'
-import { STORIES, YEARS, findMetric, getStory, isYear, type StoryId, type Year } from '../domain/stories'
+import { STORIES, YEARS, findMetric, getStory, isYear, type Metric, type StoryId, type Year } from '../domain/stories'
 
 export type Detail = 'borough' | 'precinct'
 
@@ -91,4 +91,10 @@ export function effectiveDetail(state: ExplorerState): Detail {
 
 export function yearToOptions(state: ExplorerState): Year[] {
   return YEARS.filter((y) => y >= state.yearFrom)
+}
+
+/** The reducer only ever stores a layer of the current story, so this always finds one. */
+export function activeMetric(state: ExplorerState): Metric {
+  const story = getStory(state.storyId)
+  return findMetric(story, state.metricId) ?? story.metrics[0]
 }

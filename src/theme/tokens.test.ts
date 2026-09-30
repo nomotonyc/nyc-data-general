@@ -38,6 +38,20 @@ describe('lightTheme', () => {
     }
   })
 
+  it('draws land lighter than the water around it', () => {
+    expect(luminance(lightTheme.color.boroughFill)).toBeGreaterThan(luminance(lightTheme.color.mapWater))
+  })
+
+  it('keeps each story number readable on the story-button track', () => {
+    for (const [story, p] of Object.entries(lightTheme.story)) {
+      expect(contrastRatio(p.accent, lightTheme.color.tabTrack), story).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+
+  it('keeps non-text UI colours at 3:1 or better on the background', () => {
+    expect(contrastRatio(lightTheme.color.inkFaint, lightTheme.color.background)).toBeGreaterThanOrEqual(3)
+  })
+
   it('keeps text colours at 4.5:1 or better on their backgrounds', () => {
     const c = lightTheme.color
     const pairs: Array<[string, string, string]> = [

@@ -86,7 +86,7 @@ describe('layer sources', () => {
   })
 
   it('links to the full method document', () => {
-    expect(METHOD_URL).toBe('https://github.com/nomotonyc/nyc-data-general/blob/main/docs/data-sources.md')
+    expect(METHOD_URL).toBe('https://github.com/nomotonyc/nyc-data-general/blob/main/data-sources.md')
   })
 })
 

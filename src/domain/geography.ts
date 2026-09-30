@@ -63,7 +63,7 @@ const SOUTHEAST_QUEENS: Area = {
 /**
  * Fire and EMS dispatch data file southeast Queens under 105 and 116
  * inconsistently since NYPD split them in 2024, so those layers treat the two
- * as one area. See docs/data-sources.md.
+ * as one area. See data-sources.md.
  */
 export const DISPATCH_AREAS: readonly Area[] = PRECINCT_AREAS.flatMap((a) =>
   a.id === '105' ? [SOUTHEAST_QUEENS] : a.id === '116' ? [] : [a],

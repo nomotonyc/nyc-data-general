@@ -1,19 +1,10 @@
-/**
- * The colour source for the whole application.
- *
- * Nothing else — no stylesheet, no component — may define a colour. Stylesheets
- * read these through the `--color-*` custom properties that ThemeProvider
- * writes onto :root; TypeScript reads them through `useTheme()`. Adding a
- * stylesheet never adds a second place colours can live.
- */
+/** Every colour in the app. Nothing else defines one. */
 export const lightTheme = {
   color: {
-    /** Page background, behind and around the city. */
     background: '#ffffff',
-    /** Borough surface. Flat and neutral: data will colour this later. */
-    boroughFill: '#dde3ea',
-    /** Separator between adjacent boroughs. */
-    boroughLine: '#ffffff',
+    /** Flat and neutral; data will colour this later. */
+    boroughFill: '#ebecee',
+    boroughLine: '#cbcdd0',
     boroughLabel: '#39414c',
     boroughLabelHalo: '#ffffff',
   },

@@ -7,14 +7,9 @@ type Props = {
   children: ReactNode
 }
 
-/**
- * Publishes the theme twice from one definition: as React context for
- * TypeScript, and as --color-* custom properties for every stylesheet. Any
- * number of CSS files can consume the colours without redefining them.
- */
+/** Exposes the theme as React context and as --color-* properties on :root. */
 export function ThemeProvider({ theme = lightTheme, children }: Props) {
-  // Layout effect, not effect: the custom properties must exist before the
-  // browser paints, or the first frame renders unstyled.
+  // Layout effect: the properties must exist before first paint.
   useLayoutEffect(() => {
     const root = document.documentElement
     for (const [token, value] of Object.entries(theme.color)) {

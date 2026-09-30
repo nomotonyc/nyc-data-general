@@ -1,10 +1,10 @@
 import { BOROUGHS, type Borough } from '../domain/geography'
-import type { Metric } from '../domain/stories'
-import type { StoryDataset, YearRange } from './dataset'
+import type { Metric } from '../layers'
+import type { LayerDataset, YearRange } from './dataset'
 import { areaValue, effectiveRange } from './selectors'
 
 /** The dataset's areas in a borough, or every area for null (the whole city). */
-export function areaIdsIn(ds: StoryDataset, borough: Borough | null): string[] {
+export function areaIdsIn(ds: LayerDataset, borough: Borough | null): string[] {
   return ds.areas.filter((a) => borough === null || a.borough === borough).map((a) => a.id)
 }
 
@@ -16,7 +16,7 @@ export type PlaceValues = {
   adjusted: boolean
 }
 
-export function placeValues(ds: StoryDataset, metric: Metric, requested: YearRange): PlaceValues {
+export function placeValues(ds: LayerDataset, metric: Metric, requested: YearRange): PlaceValues {
   const { range, adjusted } = effectiveRange(ds, requested)
   const boroughs = Object.fromEntries(
     BOROUGHS.map((b) => [b, areaValue(ds, metric, areaIdsIn(ds, b), range)]),

@@ -1,4 +1,4 @@
-import { getStory } from '../../domain/stories'
+import { layersOf } from '../../layers'
 import { useExplorerDispatch, useExplorerState } from '../../explorer/context'
 
 /** One layer per story for now; more appear here as radio options. */
@@ -11,7 +11,7 @@ export function LayerPicker() {
       <legend className="rail__legend">
         <h2 className="rail__heading">Layer</h2>
       </legend>
-      {getStory(state.storyId).metrics.map((metric) => (
+      {layersOf(state.storyId).map((metric) => (
         <label key={metric.id} className="rail__option rail__layer">
           <input
             type="radio"

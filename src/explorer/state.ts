@@ -1,5 +1,6 @@
 import { boroughOfPrecinct, isPrecinct, type Borough } from '../domain/geography'
-import { STORIES, YEARS, findMetric, getStory, isYear, type Metric, type StoryId, type Year } from '../domain/stories'
+import { STORIES, YEARS, isYear, type StoryId, type Year } from '../domain/stories'
+import { LAYERS, layersOf, type Metric } from '../layers'
 
 export type Detail = 'borough' | 'precinct'
 
@@ -25,7 +26,7 @@ const LATEST_FULL_YEAR = YEARS[YEARS.length - 2]
 
 export const initialExplorerState: ExplorerState = {
   storyId: STORIES[0].id,
-  metricId: STORIES[0].metrics[0].id,
+  metricId: layersOf(STORIES[0].id)[0].id,
   borough: null,
   pinnedPrecinct: null,
   detail: 'borough',
@@ -55,9 +56,9 @@ export function explorerReducer(state: ExplorerState, action: ExplorerAction): E
   switch (action.type) {
     case 'selectStory':
       if (action.storyId === state.storyId) return state
-      return { ...state, storyId: action.storyId, metricId: getStory(action.storyId).metrics[0].id }
+      return { ...state, storyId: action.storyId, metricId: layersOf(action.storyId)[0].id }
     case 'selectMetric':
-      if (!findMetric(getStory(state.storyId), action.metricId)) return state
+      if (!LAYERS.some((l) => l.id === action.metricId && l.story === state.storyId)) return state
       return { ...state, metricId: action.metricId }
     case 'focusBorough':
       return { ...state, borough: action.borough, pinnedPrecinct: null }
@@ -96,6 +97,6 @@ export function yearToOptions(state: ExplorerState): Year[] {
 
 /** The reducer only ever stores a layer of the current story, so this always finds one. */
 export function activeMetric(state: Pick<ExplorerState, 'storyId' | 'metricId'>): Metric {
-  const story = getStory(state.storyId)
-  return findMetric(story, state.metricId) ?? story.metrics[0]
+  const layers = layersOf(state.storyId)
+  return layers.find((l) => l.id === state.metricId) ?? layers[0]
 }

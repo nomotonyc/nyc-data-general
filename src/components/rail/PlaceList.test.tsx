@@ -1,10 +1,10 @@
+import { getLayer } from '../../layers'
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { getDataset } from '../../data/load'
 import { placeValues } from '../../data/places'
 import { formatCompact, formatCount } from '../../domain/format'
-import { getStory } from '../../domain/stories'
 import { renderWithExplorer } from '../../test/renderWithExplorer'
 import { lightTheme } from '../../theme/tokens'
 import { PlaceList } from './PlaceList'
@@ -33,13 +33,13 @@ describe('PlaceList', () => {
 
   it('shows each place’s value for the layer and years', () => {
     renderWithExplorer(<PlaceList />, { storyId: 'fire', metricId: 'structural-fires' })
-    const v = placeValues(getDataset('fire'), getStory('fire').metrics[0], { from: 2025, to: 2025 })
+    const v = placeValues(getDataset('structural-fires'), getLayer('structural-fires'), { from: 2025, to: 2025 })
     expect(place(/^Queens/)).toHaveTextContent(formatCompact(v.boroughs.Queens))
   })
 
   it('shortens large values so the names keep their room, with the full value on hover', () => {
     renderWithExplorer(<PlaceList />, { storyId: 'medical', metricId: 'ems-calls' })
-    const v = placeValues(getDataset('medical'), getStory('medical').metrics[0], { from: 2025, to: 2025 })
+    const v = placeValues(getDataset('ems-calls'), getLayer('ems-calls'), { from: 2025, to: 2025 })
     const value = place(/^All of New York City/).querySelector('.rail__value')!
     expect(value).toHaveTextContent(/^[\d.]+[KM]$/)
     expect(value).toHaveAttribute('title', formatCount(v.city))
@@ -47,7 +47,7 @@ describe('PlaceList', () => {
 
   it('shows the nearest available year when density has no data for the years chosen', () => {
     renderWithExplorer(<PlaceList />)
-    const v = placeValues(getDataset('demographic'), getStory('demographic').metrics[0], { from: 2024, to: 2024 })
+    const v = placeValues(getDataset('population-density'), getLayer('population-density'), { from: 2024, to: 2024 })
     expect(place(/^Brooklyn/)).toHaveTextContent(formatCompact(v.boroughs.Brooklyn))
   })
 

@@ -1,9 +1,10 @@
-import type { StoryDataset, YearRange } from '../data/dataset'
+import type { LayerDataset, YearRange } from '../data/dataset'
 import { areaIdsIn } from '../data/places'
 import { areaValue, effectiveRange, rankOf } from '../data/selectors'
-import { compareToAverage, formatCount, formatWithUnit, ordinal } from '../domain/format'
+import { compareToAverage, formatValue, formatWithUnit, ordinal } from '../domain/format'
 import { BOROUGHS, areaOfPrecinct, boroughInSentence, precinctsIn } from '../domain/geography'
-import { yearLabel, type Metric } from '../domain/stories'
+import { yearLabel } from '../domain/stories'
+import type { Metric } from '../layers'
 import { activeMetric, type ExplorerState } from '../explorer/state'
 import type { Target } from './interaction'
 
@@ -27,17 +28,18 @@ export type HoverDetails = {
 const mean = (xs: readonly number[]) => xs.reduce((a, b) => a + b, 0) / xs.length
 
 /** A place's average peer: the mean area for counts; the place as a whole for ratios. */
-function average(ds: StoryDataset, metric: Metric, areaIds: readonly string[], values: readonly number[], range: YearRange) {
+function average(ds: LayerDataset, metric: Metric, areaIds: readonly string[], values: readonly number[], range: YearRange) {
   return metric.aggregation === 'sum' ? mean(values) : areaValue(ds, metric, areaIds, range)
 }
 
 /** What the hover card says about a borough or precinct. */
 export function hoverDetails(
   state: Pick<ExplorerState, 'storyId' | 'metricId' | 'yearFrom' | 'yearTo' | 'pinnedPrecinct'>,
-  ds: StoryDataset,
+  ds: LayerDataset,
   target: Target,
 ): HoverDetails {
   const metric = activeMetric(state)
+  const format = metric.format ?? 'count'
   const { range } = effectiveRange(ds, { from: state.yearFrom, to: state.yearTo })
   const years = range.from === range.to ? yearLabel(range.from) : `${range.from}–${yearLabel(range.to)}`
   const value = (ids: readonly string[]) => areaValue(ds, metric, ids, range)
@@ -68,8 +70,8 @@ export function hoverDetails(
         cityAverage: at(cityAverage),
         boroughAverage: at(boroughAverage),
         caption: `Among all ${cityValues.length} precincts`,
-        lo: formatCount(Math.min(...cityValues)),
-        hi: formatCount(Math.max(...cityValues)),
+        lo: formatValue(format, Math.min(...cityValues)),
+        hi: formatValue(format, Math.max(...cityValues)),
       },
       comparisons: [
         compareToAverage(own, cityAverage, 'the city average'),
@@ -106,8 +108,8 @@ export function hoverDetails(
       cityAverage: at(cityAverage),
       boroughAverage: null,
       caption: 'Among the 5 boroughs',
-      lo: formatCount(Math.min(...boroughValues)),
-      hi: formatCount(Math.max(...boroughValues)),
+      lo: formatValue(format, Math.min(...boroughValues)),
+      hi: formatValue(format, Math.max(...boroughValues)),
     },
     comparisons: [compareToAverage(own, cityAverage, metric.aggregation === 'sum' ? 'the average borough' : 'the city as a whole')],
     hint: `Click to focus on ${borough}`,

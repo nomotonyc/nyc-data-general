@@ -1,5 +1,5 @@
 import { createContext, useContext, type Dispatch } from 'react'
-import type { StoryDataset } from '../data/dataset'
+import type { LayerDataset } from '../data/dataset'
 import { getDataset } from '../data/load'
 import type { ExplorerAction, ExplorerState } from './state'
 
@@ -18,7 +18,7 @@ export function useExplorerDispatch(): Dispatch<ExplorerAction> {
   return dispatch
 }
 
-/** The current story's dataset. */
-export function useDataset(): StoryDataset {
-  return getDataset(useExplorerState().storyId)
+/** The active layer's dataset. */
+export function useDataset(): LayerDataset {
+  return getDataset(useExplorerState().metricId)
 }

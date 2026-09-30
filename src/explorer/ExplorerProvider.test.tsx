@@ -12,7 +12,7 @@ function Probe() {
   return (
     <>
       <p>story {state.storyId}</p>
-      <p>dataset {ds.storyId}</p>
+      <p>dataset {ds.layerId}</p>
       <button type="button" onClick={() => dispatch({ type: 'selectStory', storyId: 'fire' })}>
         Fire
       </button>
@@ -35,7 +35,8 @@ describe('ExplorerProvider', () => {
     render(<ExplorerProvider><Probe /></ExplorerProvider>)
     await userEvent.click(screen.getByRole('button', { name: 'Fire' }))
     expect(screen.getByText('story fire')).toBeInTheDocument()
-    expect(screen.getByText('dataset fire')).toBeInTheDocument()
+    // The dataset follows the story's first layer.
+    expect(screen.getByText('dataset structural-fires')).toBeInTheDocument()
   })
 
   it('names the provider when a hook is used outside it', () => {

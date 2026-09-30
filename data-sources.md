@@ -7,6 +7,34 @@ shown in the app for the layer on screen.
 
 Audited 2026-09-30 against the live sources. Figures below are from that audit.
 
+## Adding a layer
+
+A layer is one file: `src/layers/<id>.layer.ts`. Add the file and the layer
+appears in its story's Layer picker, on the map, in the legend, the hover card
+and the Where list. Nothing else needs editing. The file holds:
+
+| Field | What it is |
+|---|---|
+| `id` | Unique, lower-case and hyphenated; also the file name |
+| `story`, `order` | Which story's picker it appears in, and where |
+| `label`, `note` | The title, and the one-line subtitle under it |
+| `unit` | Shown after values: "fires", "people per sq mi" |
+| `aggregation` | `sum` for counts; `ratio` for rates like density (numerator ÷ denominator) |
+| `data` | Monthly or yearly, whether 105 & 116 are merged (`dispatch`) or separate (`precincts`), first and last year |
+| `breakdown` | The panel's breakdown title and parts |
+| `sources` | This layer's own data sources (boundary credits are added for every layer) |
+| `method` | Caveats specific to this layer, in plain sentences |
+| `sample` | The value range and seasonality to fake until real data lands |
+
+Added automatically from those fields: the precinct and borough boundary
+credits, the 105 & 116 caveat for `dispatch` layers, the partial-year caveat
+for layers reaching the final year, and the legend's note when chosen years
+fall outside `data`.
+
+The tests check every layer file is complete (a known story, sources, caveats,
+breakdown, sample range, valid years) and name the file that is not. Record the
+source audit for a new layer in this document too.
+
 ## Shared: police precinct boundaries
 
 | | |

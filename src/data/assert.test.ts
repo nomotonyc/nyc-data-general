@@ -1,14 +1,14 @@
+import { getLayer, LAYERS } from '../layers'
 import { describe, expect, it } from 'vitest'
-import { STORIES, getStory } from '../domain/stories'
 import { assertDataset } from './assert'
-import type { StoryDataset } from './dataset'
+import type { LayerDataset } from './dataset'
 import { generateSampleDataset } from './sample'
 
-const fire = getStory('fire')
-const demographic = getStory('demographic')
+const fire = getLayer('structural-fires')
+const demographic = getLayer('population-density')
 
 /** The fire sample with one area's structural-fires series replaced. */
-function fireWith(values: number[] | undefined): StoryDataset {
+function fireWith(values: number[] | undefined): LayerDataset {
   const ds = generateSampleDataset(fire)
   const byArea: Record<string, readonly number[]> = { ...ds.values['structural-fires'] }
   if (values) byArea['1'] = values
@@ -17,12 +17,12 @@ function fireWith(values: number[] | undefined): StoryDataset {
 }
 
 describe('assertDataset', () => {
-  it.each(STORIES.map((s) => [s.id, s] as const))('accepts the %s sample dataset', (_, story) => {
+  it.each(LAYERS.map((l) => [l.id, l] as const))('accepts the %s sample dataset', (_, story) => {
     expect(() => assertDataset(generateSampleDataset(story), story)).not.toThrow()
   })
 
-  it('rejects a dataset built for another story', () => {
-    expect(() => assertDataset(generateSampleDataset(fire), demographic)).toThrow(/expected story demographic/)
+  it('rejects a dataset built for another layer', () => {
+    expect(() => assertDataset(generateSampleDataset(fire), demographic)).toThrow(/expected layer population-density/)
   })
 
   it('rejects a dataset with no periods', () => {

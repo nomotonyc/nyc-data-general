@@ -1,7 +1,8 @@
+import { getLayer } from '../layers'
 import { describe, expect, it } from 'vitest'
 import { areaOfPrecinct } from '../domain/geography'
-import { getStory, type Metric } from '../domain/stories'
-import type { StoryDataset } from './dataset'
+import type { Metric } from '../layers'
+import type { LayerDataset } from './dataset'
 import {
   areaValue,
   breakdownShares,
@@ -13,14 +14,28 @@ import {
 import { generateSampleDataset } from './sample'
 
 const source = { name: 's', publisher: 'p', url: 'https://example.org', used: 'u' }
-const count: Metric = { id: 'n', label: 'N', note: '', unit: 'fires', aggregation: 'sum', sources: [source], method: ['m'] }
-const density: Metric = { id: 'd', label: 'D', note: '', unit: 'people per sq mi', aggregation: 'ratio', sources: [source], method: ['m'] }
+const layer = (id: string, aggregation: Metric['aggregation']): Metric => ({
+  id,
+  story: 'fire',
+  order: 1,
+  label: id,
+  note: '',
+  unit: 'units',
+  aggregation,
+  data: { resolution: 'month', areas: 'precincts', firstYear: 2023, lastYear: 2024 },
+  breakdown: { title: 'Parts', parts: ['p0', 'p1'] },
+  sources: [source],
+  method: ['m'],
+  sample: { lo: 0, hi: 1 },
+})
+const count = layer('n', 'sum')
+const density = layer('d', 'ratio')
 
 const area = (id: string, precincts: number[]) => ({ id, label: id, borough: 'Queens' as const, precincts })
 
 // Two areas; two months in 2023 and two in 2024 (real monthly data has twelve a year).
-const monthly: StoryDataset = {
-  storyId: 'fire',
+const monthly: LayerDataset = {
+  layerId: 'fire',
   isSample: true,
   periods: [
     { year: 2023, month: 0 },
@@ -43,7 +58,7 @@ const monthly: StoryDataset = {
   },
 }
 
-const yearly: StoryDataset = {
+const yearly: LayerDataset = {
   ...monthly,
   periods: ([2021, 2022, 2023, 2024] as const).map((year) => ({ year, month: null })),
 }
@@ -164,8 +179,8 @@ describe('zero denominators', () => {
 })
 
 describe('precincts 105 and 116 in dispatch data', () => {
-  const ds = generateSampleDataset(getStory('fire'))
-  const fires = getStory('fire').metrics[0]
+  const ds = generateSampleDataset(getLayer('structural-fires'))
+  const fires = getLayer('structural-fires')
   const range = { from: 2025, to: 2025 } as const
 
   it('has no separate values for either precinct', () => {
@@ -184,5 +199,13 @@ describe('precincts 105 and 116 in dispatch data', () => {
     const merged = areaValue(ds, fires, ['105+116'], range)
     expect(rankOf(merged, values)).toBeLessThanOrEqual(77)
     expect(values.filter((v) => v === merged)).toHaveLength(1)
+  })
+})
+
+describe('scaled ratios', () => {
+  it('multiplies a ratio by the layer’s scale, e.g. a share as a percentage', () => {
+    const share = { ...density, scale: 100 }
+    expect(areaValue(monthly, share, ['a'], y2024)).toBe((70 / 4) * 100)
+    expect(series(monthly, share, ['a', 'b'], y2024)).toEqual([(80 / 12) * 100, (90 / 12) * 100])
   })
 })

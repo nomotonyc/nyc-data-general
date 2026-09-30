@@ -1,6 +1,6 @@
 import type { LngLatBoundsLike } from 'maplibre-gl'
 
-/** Bounding box of the NYC borough geometry: the initial fit and the zoom floor. */
+/** Bounding box of the NYC borough geometry: the view the map fits. */
 export const NYC_BOUNDS: LngLatBoundsLike = [
   [-74.2556, 40.4961], // south-west
   [-73.7, 40.9155], // north-east
@@ -8,8 +8,20 @@ export const NYC_BOUNDS: LngLatBoundsLike = [
 
 export const FIT_PADDING = 40
 
-/** Extra room around the furthest-out view, as a fraction of its span. */
-export const MAX_BOUNDS_SLACK = 0.06
+/**
+ * The map never moves on its own: no scroll, drag, keyboard or gesture zoom.
+ * The explorer moves it (fit the city, focus a borough).
+ */
+export const FIXED_VIEW = {
+  scrollZoom: false,
+  dragPan: false,
+  dragRotate: false,
+  boxZoom: false,
+  doubleClickZoom: false,
+  keyboard: false,
+  touchZoomRotate: false,
+  touchPitch: false,
+} as const
 
 export const BOROUGHS_URL = `${import.meta.env.BASE_URL}data/nyc-boroughs.geojson`
 export const BOROUGH_LABELS_URL = `${import.meta.env.BASE_URL}data/nyc-borough-labels.geojson`

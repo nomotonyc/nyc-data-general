@@ -2,8 +2,8 @@
 export const lightTheme = {
   color: {
     background: '#ffffff',
-    /** Flat and neutral; data will colour this later. */
-    boroughFill: '#ebecee',
+    /** Land before data colours it: white on the pale water, as in the design. */
+    boroughFill: '#ffffff',
     boroughLine: '#cbcdd0',
     boroughLabel: '#39414c',
     boroughLabelHalo: '#ffffff',
@@ -13,8 +13,12 @@ export const lightTheme = {
     inkMuted: '#56606b',
     line: '#dde1e5',
     lineStrong: '#c9ced4',
+    /** Separators and unselected control rings; UI-only, never body text. */
+    inkFaint: '#8a939d',
+    /** Track behind the story buttons. */
+    tabTrack: '#f0f2f5',
     surfaceSunken: '#eef1f4',
-    mapWater: '#edf1f4',
+    mapWater: '#f5f6f8',
     focus: '#2a5db8',
     badge: '#fff4d6',
     badgeInk: '#6b4e00',

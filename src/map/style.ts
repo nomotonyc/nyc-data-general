@@ -12,7 +12,7 @@ export function buildStyle(theme: Theme): StyleSpecification {
       {
         id: 'background',
         type: 'background',
-        paint: { 'background-color': theme.color.background },
+        paint: { 'background-color': theme.color.mapWater },
       },
     ],
   }

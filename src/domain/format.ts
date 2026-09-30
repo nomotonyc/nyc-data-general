@@ -6,6 +6,13 @@ export function formatCount(v: number): string {
   return Math.round(v).toLocaleString('en-US')
 }
 
+const compact = new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 })
+
+/** For tight spaces: "1.6M", "31.7K"; values under 10,000 are shown in full. */
+export function formatCompact(v: number): string {
+  return Math.abs(v) < 10_000 ? formatCount(v) : compact.format(v)
+}
+
 /** "49 fires", "34,513 people per sq mi". */
 export function formatWithUnit(metric: Metric, v: number): string {
   return `${formatCount(v)} ${metric.unit}`

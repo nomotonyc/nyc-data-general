@@ -1,13 +1,12 @@
-/* Fills the viewport; other UI sits on top.
-   Ties with MapLibre's .maplibregl-map on the same element, so main.tsx
-   imports maplibre-gl.css first. */
-.map {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  background: var(--color-background);
+/* Fills its layout slot (.explorer__map). Ties with MapLibre's .maplibregl-map
+   on the same element, so main.tsx imports maplibre-gl.css first. */
+.map .maplibregl-canvas:focus-visible {
+  outline-offset: -2px;
 }
 
-.maplibregl-ctrl-attrib {
-  font-size: 11px;
+.map {
+  position: absolute;
+  inset: 0;
+  background: var(--color-map-water);
 }
+

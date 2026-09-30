@@ -67,6 +67,13 @@ const PRECINCT_BOUNDARIES: Source = {
   used: 'Precinct boundaries',
 }
 
+const BOROUGH_BOUNDARIES: Source = {
+  name: 'Borough Boundaries',
+  publisher: 'NYC Department of City Planning',
+  url: 'https://www.nyc.gov/site/planning/',
+  used: 'Borough outlines',
+}
+
 export const STORIES: readonly Story[] = [
   {
     id: 'demographic',
@@ -95,6 +102,7 @@ export const STORIES: readonly Story[] = [
             used: 'Census blocks: population weights, land area and location',
           },
           PRECINCT_BOUNDARIES,
+          BOROUGH_BOUNDARIES,
         ],
         method: [
           'Each 2020 census block is assigned to the precinct containing its interior point.',
@@ -127,6 +135,7 @@ export const STORIES: readonly Story[] = [
             used: 'Structural fires by precinct, month and building type',
           },
           PRECINCT_BOUNDARIES,
+          BOROUGH_BOUNDARIES,
         ],
         method: [
           'Counts dispatches whose classification group is “Structural Fires”, by the precinct and month recorded.',
@@ -162,6 +171,7 @@ export const STORIES: readonly Story[] = [
             used: 'EMS incidents by precinct, month and call type, with FDNY’s call type descriptions',
           },
           PRECINCT_BOUNDARIES,
+          BOROUGH_BOUNDARIES,
         ],
         method: [
           'Counts every EMS incident by the precinct and month recorded.',

@@ -27,15 +27,6 @@ export const LABEL_FONT = ['Montserrat']
 export const ATTRIBUTION =
   '<a href="https://www.nyc.gov/site/planning/">NYC Dept. of City Planning</a>'
 
-/** Borough fill is flat and neutral: it is the surface data will later colour. */
-export const COLORS = {
-  background: '#ffffff',
-  fill: '#dde3ea',
-  line: '#ffffff',
-  label: '#39414c',
-  labelHalo: '#ffffff',
-} as const
-
 export const SOURCES = { boroughs: 'boroughs', boroughLabels: 'borough-labels' } as const
 export const LAYERS = {
   fill: 'borough-fill',

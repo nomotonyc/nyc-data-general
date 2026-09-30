@@ -35,11 +35,37 @@ export const LABEL_FONT = ['Montserrat']
 export const ATTRIBUTION =
   '<a href="https://www.nyc.gov/site/planning/">NYC Dept. of City Planning</a>'
 
-export const SOURCES = { boroughs: 'boroughs', boroughLabels: 'borough-labels', precincts: 'precincts' } as const
-export const LAYERS = {
-  boroughFill: 'borough-fill',
-  precinctFill: 'precinct-fill',
-  precinctLine: 'precinct-line',
-  boroughLine: 'borough-line',
-  boroughLabel: 'borough-label',
+export const SOURCES = {
+  boroughs: 'boroughs',
+  boroughLabels: 'borough-labels',
+  precincts: 'precincts',
+  precinctLabels: 'precinct-labels',
 } as const
+/** City-wide layers. Borough and precinct shapes have one layer set per borough (boroughLayers). */
+export const LAYERS = {
+  boroughHover: 'borough-hover',
+  precinctHover: 'precinct-hover',
+  precinctHighlight: 'precinct-highlight',
+  boroughLabel: 'borough-label',
+  precinctLabel: 'precinct-label',
+} as const
+
+/** Each borough's own layers, so it can fade in and out by itself. */
+export function boroughLayers(borough: string) {
+  const slug = borough.toLowerCase().replace(/\s+/g, '-')
+  return {
+    boroughFill: `borough-fill-${slug}`,
+    precinctFill: `precinct-fill-${slug}`,
+    precinctLine: `precinct-line-${slug}`,
+    boroughLine: `borough-line-${slug}`,
+  }
+}
+
+/** How long the camera takes to glide between the city and a borough. */
+export const FLY_DURATION = 1000
+
+/** How long the pointer must rest on a place before its hover card appears. */
+export const HOVER_DELAY = 300
+
+/** How long areas and labels take to fade in or out (as in the prototype). */
+export const FADE_DURATION = 450

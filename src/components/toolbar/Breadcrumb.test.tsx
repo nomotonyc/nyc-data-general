@@ -39,6 +39,13 @@ describe('Breadcrumb', () => {
     for (const s of separators) expect(s).toHaveAttribute('aria-hidden', 'true')
   })
 
+  it('shows a precinct pinned from the city view straight after the city', async () => {
+    renderWithExplorer(<Breadcrumb />, { detail: 'precinct', pinnedPrecinct: 14 })
+    expect(current()).toHaveTextContent('Precinct 14')
+    await userEvent.click(screen.getByRole('button', { name: 'New York City' }))
+    expect(current()).toHaveTextContent('New York City')
+  })
+
   it('names precincts 105 and 116 together where the data merges them', () => {
     renderWithExplorer(<Breadcrumb />, { storyId: 'fire', metricId: 'structural-fires', borough: 'Queens', pinnedPrecinct: 116 })
     expect(current()).toHaveTextContent('Precincts 105 & 116')

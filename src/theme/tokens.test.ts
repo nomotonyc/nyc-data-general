@@ -52,6 +52,12 @@ describe('lightTheme', () => {
     expect(contrastRatio(lightTheme.color.inkFaint, lightTheme.color.background)).toBeGreaterThanOrEqual(3)
   })
 
+  it('keeps the hover card’s strip visible against the card', () => {
+    const c = lightTheme.color
+    expect(contrastRatio(c.tooltipInkFaint, c.tooltipTrack), 'borough average tick').toBeGreaterThanOrEqual(1.8)
+    expect(contrastRatio(c.tooltipInk, c.tooltipTrack), 'city average tick').toBeGreaterThanOrEqual(3)
+  })
+
   it('keeps text colours at 4.5:1 or better on their backgrounds', () => {
     const c = lightTheme.color
     const pairs: Array<[string, string, string]> = [
@@ -63,6 +69,10 @@ describe('lightTheme', () => {
       ['badgeInk', c.badgeInk, c.badge],
       ['tooltipInk', c.tooltipInk, c.tooltip],
       ['tooltipInkMuted', c.tooltipInkMuted, c.tooltip],
+      ['tooltipInkFaint', c.tooltipInkFaint, c.tooltip],
+      ['tooltipInkMuted on raised', c.tooltipInkMuted, c.tooltipRaised],
+      ['tooltipInkFaint on raised', c.tooltipInkFaint, c.tooltipRaised],
+      ['tooltipInk on raised', c.tooltipInk, c.tooltipRaised],
       ...Object.entries(lightTheme.story).map(
         ([story, p]): [string, string, string] => [`${story} accent`, p.accent, c.background],
       ),

@@ -43,6 +43,11 @@ describe('choropleth', () => {
     expect(colours).toContain(fireRamp[4])
   })
 
+  it('names the focused borough, or none for the whole city', () => {
+    expect(choropleth(fire, getDataset('fire'), fireRamp).focus).toBeNull()
+    expect(choropleth({ ...fire, borough: 'Queens' }, getDataset('fire'), fireRamp).focus).toBe('Queens')
+  })
+
   it('reports the value range shown, for the legend', () => {
     const plan = choropleth(fire, getDataset('fire'), fireRamp)
     expect(plan.lo).toBeLessThan(plan.hi)

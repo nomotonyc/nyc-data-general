@@ -26,6 +26,12 @@ export const lightTheme = {
     tooltip: '#16202b',
     tooltipInk: '#ffffff',
     tooltipInkMuted: '#b8c0c9',
+    /** Secondary labels on the hover card; also the borough-average tick. */
+    tooltipInkFaint: '#8fa0b2',
+    /** Rank boxes on the hover card. */
+    tooltipRaised: '#222e3b',
+    /** The average strip's track on the hover card. */
+    tooltipTrack: '#3a4958',
     /** The dimmed New York City line behind a focused place's trend. */
     trendCity: '#a7afb8',
   },

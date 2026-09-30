@@ -1,26 +1,53 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Map as MapLibreMap } from 'maplibre-gl'
+import { Map as MapLibreMap, type MapMouseEvent } from 'maplibre-gl'
 import './BaseMap.css'
-import { useDataset, useExplorerState } from '../explorer/context'
+import { BOROUGHS, areaOfPrecinct } from '../domain/geography'
+import { useDataset, useExplorerDispatch, useExplorerState } from '../explorer/context'
+import { cameraTarget } from '../map/camera'
 import { choropleth } from '../map/choropleth'
-import { FIT_PADDING, FIXED_VIEW, NYC_BOUNDS } from '../map/config'
+import { FIT_PADDING, FIXED_VIEW, FLY_DURATION, HOVER_DELAY, NYC_BOUNDS, boroughLayers } from '../map/config'
+import { cameraEasing } from '../map/easing'
+import { hoverDetails } from '../map/hover'
+import { clickAction, hitKind, hoverTarget, type Hit, type Target } from '../map/interaction'
 import { mapLayers, mapSources } from '../map/layers'
-import { paintMap } from '../map/paint'
+import { paintHover, paintMap } from '../map/paint'
 import { buildStyle } from '../map/style'
 import { useTheme } from '../theme/context'
+import { MapTooltip } from './MapTooltip'
+
+const sameTarget = (a: Target | null, b: Target | null) =>
+  a === b ||
+  (a !== null &&
+    b !== null &&
+    (a.kind === 'borough' ? b.kind === 'borough' && a.borough === b.borough : b.kind === 'precinct' && a.precinct === b.precinct))
+
+const CLICKABLE = BOROUGHS.flatMap((b) => [boroughLayers(b).precinctFill, boroughLayers(b).boroughFill])
+
+/** Respect a request for less motion: jump instead of flying. */
+function flyDuration() {
+  return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : FLY_DURATION
+}
 
 export default function BaseMap() {
   const container = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
   const [ready, setReady] = useState(false)
+  // What the pointer is over changes rarely; where it is changes on every move.
+  const [hovered, setHovered] = useState<Target | null>(null)
+  const [pointer, setPointer] = useState({ x: 0, y: 0, width: 0, height: 0 })
+  // The card waits HOVER_DELAY after the pointer settles on a place.
+  const [carded, setCarded] = useState<Target | null>(null)
   const theme = useTheme()
   const state = useExplorerState()
+  const dispatch = useExplorerDispatch()
   const ds = useDataset()
 
-  // For the mount effect, which must not re-run on theme change.
+  // Read by the map's own event handlers, which are registered once.
   const themeRef = useRef(theme)
+  const stateRef = useRef(state)
   useEffect(() => {
     themeRef.current = theme
+    stateRef.current = state
   })
 
   useEffect(() => {
@@ -43,31 +70,107 @@ export default function BaseMap() {
     })
     map.once('load', () => setReady(true))
 
-    // The whole city always fills the map's area, whatever its size.
-    const fitCity = () => map.fitBounds(NYC_BOUNDS, { padding: FIT_PADDING, animate: false })
-    map.on('resize', fitCity)
+    const hitsAt = (e: MapMouseEvent): Hit[] =>
+      map.queryRenderedFeatures(e.point, { layers: CLICKABLE }).flatMap((f) => {
+        const kind = hitKind(f.layer.id)
+        return kind ? [{ kind, properties: f.properties }] : []
+      })
+    // The place under the pointer, as last seen by these handlers.
+    let lastTarget: Target | null = null
+    // Forget the hover: the pointer is over something new once the view moves.
+    const clearHover = () => {
+      lastTarget = null
+      map.getCanvas().style.cursor = ''
+      setHovered(null)
+      setCarded(null)
+    }
+    const onClick = (e: MapMouseEvent) => {
+      const action = clickAction(stateRef.current, hitsAt(e))
+      if (!action) return
+      clearHover()
+      dispatch(action)
+    }
+    const onMove = (e: MapMouseEvent) => {
+      const target = hoverTarget(stateRef.current, hitsAt(e))
+      map.getCanvas().style.cursor = target ? 'pointer' : ''
+      if (!sameTarget(lastTarget, target)) {
+        lastTarget = target
+        setHovered(target)
+        setCarded(null) // a new place waits its own pause
+      }
+      // The map's size too, so the card can keep inside it.
+      const el = container.current
+      setPointer({ x: e.point.x, y: e.point.y, width: el?.clientWidth ?? 0, height: el?.clientHeight ?? 0 })
+    }
+    const onLeave = clearHover
+    map.on('click', onClick)
+    map.on('mousemove', onMove)
+    map.on('mouseout', onLeave)
+
+    // Whatever is in view (the city or a focused borough) keeps filling the area.
+    const refit = () => map.fitBounds(cameraTarget(stateRef.current.borough), { padding: FIT_PADDING, animate: false })
+    map.on('resize', refit)
 
     return () => {
-      map.off('resize', fitCity)
+      map.off('click', onClick)
+      map.off('mousemove', onMove)
+      map.off('mouseout', onLeave)
+      map.off('resize', refit)
       map.remove()
       mapRef.current = null
       setReady(false)
     }
-  }, [])
+  }, [dispatch])
 
-  const { storyId, metricId, borough, detail, yearFrom, yearTo } = state
+  const { storyId, metricId, borough, detail, yearFrom, yearTo, pinnedPrecinct, showOutlines, showLabels } = state
   const ramp = theme.story[storyId].ramp
   // Only what the colours depend on, so the map toggles don't recompute them.
   const plan = useMemo(
     () => choropleth({ storyId, metricId, borough, detail, yearFrom, yearTo }, ds, ramp),
     [ds, ramp, storyId, metricId, borough, detail, yearFrom, yearTo],
   )
+  // Pinning 105 or 116 in dispatch data outlines both.
+  const pinned = useMemo(
+    () => (pinnedPrecinct === null ? [] : areaOfPrecinct(ds.areas, pinnedPrecinct).precincts),
+    [ds, pinnedPrecinct],
+  )
 
   useEffect(() => {
-    if (ready && mapRef.current) {
-      paintMap(mapRef.current, plan, { outlines: state.showOutlines, labels: state.showLabels })
-    }
-  }, [ready, plan, state.showOutlines, state.showLabels])
+    if (ready && mapRef.current) paintMap(mapRef.current, plan, { outlines: showOutlines, labels: showLabels, pinned })
+  }, [ready, plan, showOutlines, showLabels, pinned])
 
-  return <div ref={container} className="map" />
+  // Outline what the pointer is over straight away; the card follows after a pause.
+  useEffect(() => {
+    if (ready && mapRef.current) paintHover(mapRef.current, hovered, ds.areas)
+    if (!hovered) return
+    const timer = setTimeout(() => setCarded(hovered), HOVER_DELAY)
+    return () => clearTimeout(timer)
+  }, [ready, hovered, ds])
+
+  // Fly to the focused borough, or back out to the city.
+  const flownTo = useRef(borough)
+  useEffect(() => {
+    if (!ready || !mapRef.current || flownTo.current === borough) return
+    flownTo.current = borough
+    // linear: a straight glide. MapLibre's default "fly" arcs out and back in, which jolts on short moves.
+    mapRef.current.fitBounds(cameraTarget(borough), { padding: FIT_PADDING, duration: flyDuration(), easing: cameraEasing, linear: true })
+  }, [ready, borough])
+
+  // Only once the pause is over for the place the pointer is still on.
+  const card = carded && sameTarget(carded, hovered) && hoverDetails(state, ds, carded)
+
+  return (
+    <>
+      <div ref={container} className="map" />
+      {card && <MapTooltip details={card} dotColor={ramp[1]} pointer={pointer} area={pointer} />}
+      {borough && (
+        <button type="button" className="map__back" onClick={() => dispatch({ type: 'focusBorough', borough: null })}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+            <path d="M10 3L5 8l5 5" />
+          </svg>
+          All of New York City
+        </button>
+      )}
+    </>
+  )
 }

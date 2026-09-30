@@ -7,6 +7,8 @@ import { equalIntervalScale } from './colorScale'
 
 export type Choropleth = {
   level: Detail
+  /** The focused borough; everything else is hidden. */
+  focus: Borough | null
   /** Fill per borough at borough level; empty at precinct level. */
   boroughs: Partial<Record<Borough, string>>
   /** Fill per precinct number at precinct level; a merged area colours all its precincts. */
@@ -31,7 +33,7 @@ export function choropleth(state: ChoroplethInput, ds: StoryDataset, ramp: reado
     const values = BOROUGHS.map((b) => areaValue(ds, metric, areaIdsIn(ds, b), range))
     const colour = equalIntervalScale(values, ramp)
     const boroughs = Object.fromEntries(BOROUGHS.map((b, i) => [b, colour(values[i])]))
-    return { level, boroughs, precincts: {}, lo: Math.min(...values), hi: Math.max(...values), range, adjusted }
+    return { level, focus: state.borough, boroughs, precincts: {}, lo: Math.min(...values), hi: Math.max(...values), range, adjusted }
   }
 
   // A focused borough scales to its own areas, so its extremes use the whole ramp.
@@ -42,5 +44,5 @@ export function choropleth(state: ChoroplethInput, ds: StoryDataset, ramp: reado
   areas.forEach((area, i) => {
     for (const p of area.precincts) precincts[p] = colour(values[i])
   })
-  return { level, boroughs: {}, precincts, lo: Math.min(...values), hi: Math.max(...values), range, adjusted }
+  return { level, focus: state.borough, boroughs: {}, precincts, lo: Math.min(...values), hi: Math.max(...values), range, adjusted }
 }

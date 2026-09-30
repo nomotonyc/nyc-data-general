@@ -4,7 +4,8 @@ export const lightTheme = {
     background: '#ffffff',
     /** Land before data colours it: white on the pale water, as in the design. */
     boroughFill: '#ffffff',
-    boroughLine: '#cbcdd0',
+    /** Stroke between filled areas. */
+    boroughLine: '#ffffff',
     boroughLabel: '#39414c',
     boroughLabelHalo: '#ffffff',
 

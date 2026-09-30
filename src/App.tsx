@@ -1,5 +1,6 @@
 import BaseMap from './components/BaseMap'
 import { ExplorerLayout } from './components/ExplorerLayout'
+import { FocusPanel } from './components/panel/FocusPanel'
 import { Rail } from './components/rail/Rail'
 import { Toolbar } from './components/toolbar/Toolbar'
 import { useExplorerState } from './explorer/context'
@@ -15,7 +16,7 @@ function Explorer() {
       toolbar={<Toolbar />}
       rail={<Rail />}
       map={<BaseMap />}
-      panel={null}
+      panel={<FocusPanel />}
     />
   )
 }

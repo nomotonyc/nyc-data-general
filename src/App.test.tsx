@@ -27,6 +27,7 @@ describe('App', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'NYC Data Atlas' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Where' })).toBeInTheDocument()
     expect(screen.getByRole('radio', { name: /Population density/ })).toBeChecked()
+    expect(screen.getByRole('region', { name: 'In focus' })).toHaveTextContent('New York City')
   })
 
   it('colours the page with the current story', async () => {

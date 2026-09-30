@@ -59,3 +59,11 @@ export function compareToAverage(value: number, average: number, what: string): 
   if (Math.abs(diff) < 0.5) return `Level with ${what}`
   return `${Math.abs(diff).toFixed(0)}% ${diff > 0 ? 'above' : 'below'} ${what}`
 }
+
+/** "+18% vs. the average borough" / "−24% vs. …": the sign shows the direction at a glance. */
+export function compareSigned(value: number, average: number, what: string): string {
+  if (average === 0) return value === 0 ? `Level with ${what}` : `Above ${what}`
+  const diff = ((value - average) / average) * 100
+  if (Math.abs(diff) < 0.5) return `Level with ${what}`
+  return `${diff > 0 ? '+' : '−'}${Math.abs(diff).toFixed(0)}% vs. ${what}`
+}

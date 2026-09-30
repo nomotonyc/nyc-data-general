@@ -25,10 +25,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      # Report lint failures even when the build already failed, so a pull
-      # request surfaces both problems in one run.
+      # Report lint and test failures even when the build already failed, so a
+      # pull request surfaces every problem in one run.
       - if: '!cancelled()'
         run: npm run lint
+      - if: '!cancelled()'
+        run: npm test
       - uses: actions/upload-pages-artifact@v3
         if: github.ref == 'refs/heads/main'
         with:

@@ -1,17 +1,19 @@
 import type { StyleSpecification } from 'maplibre-gl'
-import { COLORS, GLYPHS } from './config'
+import type { Theme } from '../theme/tokens'
+import { GLYPHS } from './config'
 
-/**
- * A bare style: background only. There is no basemap — the city's own shape is
- * the map, so nothing outside NYC is drawn. Borough layers are added on load.
- */
-export function buildStyle(): StyleSpecification {
+/** Background only — no basemap. Borough layers are added on style load. */
+export function buildStyle(theme: Theme): StyleSpecification {
   return {
     version: 8,
     glyphs: GLYPHS,
     sources: {},
     layers: [
-      { id: 'background', type: 'background', paint: { 'background-color': COLORS.background } },
+      {
+        id: 'background',
+        type: 'background',
+        paint: { 'background-color': theme.color.background },
+      },
     ],
   }
 }

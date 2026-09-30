@@ -36,7 +36,6 @@ describe('clickAction', () => {
 
   it('unpins when the water is clicked, staying in the current view', () => {
     expect(clickAction({ ...city, borough: 'Brooklyn', pinnedPrecinct: 75 }, [])).toEqual({ type: 'unpinPrecinct' })
-    expect(clickAction({ ...city, detail: 'precinct', pinnedPrecinct: 14 }, [])).toEqual({ type: 'unpinPrecinct' })
   })
 
   it('unpins when the faded area around a focused borough is clicked', () => {

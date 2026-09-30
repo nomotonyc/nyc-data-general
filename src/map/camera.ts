@@ -1,6 +1,6 @@
 import type { LngLatBoundsLike } from 'maplibre-gl'
 import type { Borough } from '../domain/geography'
-import { NYC_BOUNDS } from './config'
+import { BOROUGH_PADDING, CITY_PADDING, NYC_BOUNDS } from './config'
 
 type Bounds = [[number, number], [number, number]]
 
@@ -16,4 +16,9 @@ export const BOROUGH_BOUNDS: Record<Borough, Bounds> = {
 /** What the camera fits: the focused borough, or the whole city. */
 export function cameraTarget(borough: Borough | null): LngLatBoundsLike {
   return borough ? BOROUGH_BOUNDS[borough] : NYC_BOUNDS
+}
+
+/** The margin around what the camera fits (checked in the browser to clear the legend). */
+export function cameraPadding(borough: Borough | null) {
+  return borough ? BOROUGH_PADDING : CITY_PADDING
 }

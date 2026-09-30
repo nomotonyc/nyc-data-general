@@ -237,3 +237,147 @@
 .panel__sources .panel__title {
   color: var(--color-ink);
 }
+
+.panel__trend-meta {
+  display: flex;
+  justify-content: space-between;
+  color: var(--color-ink-muted);
+  font-size: 12px;
+}
+
+.panel__trend-change {
+  font-family: var(--font-mono);
+}
+
+.panel__trend-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.panel__trend-axis {
+  stroke: var(--color-line);
+  stroke-width: 1px;
+}
+
+.panel__trend-tick {
+  fill: var(--color-ink-muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.panel__trend-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--color-ink-secondary);
+  font-size: 12px;
+}
+
+.panel__trend-key li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.panel__trend-swatch {
+  width: 16px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.panel__trend-note,
+.panel__trend-empty {
+  margin: 0;
+  color: var(--color-ink-muted);
+  font-size: 11px;
+}
+
+.panel__trend-empty {
+  padding: 16px 12px;
+  border-radius: 8px;
+  background: var(--color-surface-sunken);
+  font-size: 12px;
+}
+
+.panel__stack {
+  display: flex;
+  gap: 2px;
+  height: 14px;
+  overflow: hidden;
+  border-radius: 3px;
+}
+
+.panel__parts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.panel__part {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.panel__part-swatch {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.panel__part-label {
+  flex-grow: 1;
+}
+
+.panel__part-share {
+  color: var(--color-ink-secondary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.panel__trend-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.panel__expand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--story-accent);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.panel__expand:hover,
+.panel__trend-open:hover {
+  background: var(--color-surface-sunken);
+}
+
+.panel__trend-open {
+  display: block;
+  width: 100%;
+  padding: 4px 0;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  cursor: zoom-in;
+}

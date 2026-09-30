@@ -19,6 +19,10 @@ export const lightTheme = {
     /** Track behind the story buttons. */
     tabTrack: '#f0f2f5',
     surfaceSunken: '#eef1f4',
+    /** Stat cards in the expanded trend. */
+    surfaceSubtle: '#f5f6f7',
+    /** Dims the page behind a dialog (at 45% opacity). */
+    scrim: '#16202b',
     mapWater: '#f5f6f8',
     focus: '#2a5db8',
     badge: '#fff4d6',

@@ -1,8 +1,8 @@
 import { act, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { BOROUGH_BOUNDS } from '../map/camera'
-import { FIT_PADDING, FLY_DURATION, HOVER_DELAY, LAYERS, NYC_BOUNDS, boroughLayers } from '../map/config'
+import { BOROUGH_BOUNDS, cameraPadding } from '../map/camera'
+import { FLY_DURATION, HOVER_DELAY, LAYERS, NYC_BOUNDS, boroughLayers } from '../map/config'
 import { cameraEasing } from '../map/easing'
 import { renderWithExplorer } from '../test/renderWithExplorer'
 import { lightTheme } from '../theme/tokens'
@@ -114,7 +114,7 @@ describe('BaseMap', () => {
   it('refits the whole city when its area changes size', () => {
     renderWithExplorer(<BaseMap />)
     map().fire('resize')
-    expect(map().fitBounds).toHaveBeenCalledWith(NYC_BOUNDS, { padding: FIT_PADDING, animate: false })
+    expect(map().fitBounds).toHaveBeenCalledWith(NYC_BOUNDS, { padding: cameraPadding(null), animate: false })
   })
 
   it('removes the map when it unmounts', () => {
@@ -123,12 +123,24 @@ describe('BaseMap', () => {
     expect(map().remove).toHaveBeenCalled()
   })
 
+  it('shows a legend for the layer, years and level', () => {
+    renderWithExplorer(<BaseMap />, { storyId: 'fire', metricId: 'structural-fires' })
+    expect(screen.getByRole('region', { name: 'Map legend' })).toHaveTextContent('Structural fires, 2025 · by borough')
+  })
+
+  it('notes in the legend when density falls back to the latest estimate', () => {
+    renderWithExplorer(<BaseMap />)
+    expect(screen.getByRole('region', { name: 'Map legend' })).toHaveTextContent('No 2025 estimates yet · showing 2024')
+  })
+
   it('paints the boroughs in the story’s colours once the map has loaded', () => {
     renderWithExplorer(<BaseMap />, { storyId: 'fire', metricId: 'structural-fires' })
     expect(fills()).toHaveLength(0)
     load()
-    // Borough level: the five boroughs are coloured, the precincts are not.
-    expect(fills()).toHaveLength(5)
+    const boroughFills = map()
+      .setFeatureState.mock.calls.filter(([feature]) => (feature as { source: string }).source === 'boroughs')
+      .map(([, state]) => (state as { fill: string }).fill)
+    expect(boroughFills).toHaveLength(5)
     for (const fill of fills()) expect(lightTheme.story.fire.ramp).toContain(fill)
   })
 
@@ -176,7 +188,7 @@ describe('BaseMap', () => {
     load()
     clickMapOn(feature(boroughLayers('Queens').boroughFill, { borough: 'Queens' }))
     expect(current()).toHaveTextContent('Queens')
-    expect(map().fitBounds).toHaveBeenLastCalledWith(BOROUGH_BOUNDS.Queens, { padding: FIT_PADDING, duration: FLY_DURATION, easing: cameraEasing, linear: true })
+    expect(map().fitBounds).toHaveBeenLastCalledWith(BOROUGH_BOUNDS.Queens, { padding: cameraPadding('Queens'), duration: FLY_DURATION, easing: cameraEasing, linear: true })
   })
 
   it('pins a precinct clicked inside the focused borough', () => {
@@ -205,14 +217,14 @@ describe('BaseMap', () => {
     )
     load()
     await userEvent.click(screen.getByRole('button', { name: /^Bronx/ }))
-    expect(map().fitBounds).toHaveBeenLastCalledWith(BOROUGH_BOUNDS.Bronx, { padding: FIT_PADDING, duration: FLY_DURATION, easing: cameraEasing, linear: true })
+    expect(map().fitBounds).toHaveBeenLastCalledWith(BOROUGH_BOUNDS.Bronx, { padding: cameraPadding('Bronx'), duration: FLY_DURATION, easing: cameraEasing, linear: true })
   })
 
   it('offers a way back to the whole city from a focused borough', async () => {
     renderWithExplorer(<BaseMap />, { borough: 'Queens' })
     load()
     await userEvent.click(screen.getByRole('button', { name: 'All of New York City' }))
-    expect(map().fitBounds).toHaveBeenLastCalledWith(NYC_BOUNDS, { padding: FIT_PADDING, duration: FLY_DURATION, easing: cameraEasing, linear: true })
+    expect(map().fitBounds).toHaveBeenLastCalledWith(NYC_BOUNDS, { padding: cameraPadding(null), duration: FLY_DURATION, easing: cameraEasing, linear: true })
     expect(screen.queryByRole('button', { name: 'All of New York City' })).not.toBeInTheDocument()
   })
 
@@ -220,7 +232,7 @@ describe('BaseMap', () => {
     renderWithExplorer(<BaseMap />, { borough: 'Bronx' })
     load()
     map().fire('resize')
-    expect(map().fitBounds).toHaveBeenLastCalledWith(BOROUGH_BOUNDS.Bronx, { padding: FIT_PADDING, animate: false })
+    expect(map().fitBounds).toHaveBeenLastCalledWith(BOROUGH_BOUNDS.Bronx, { padding: cameraPadding('Bronx'), animate: false })
   })
 
   it('shows a pointer over things that respond to a click', () => {

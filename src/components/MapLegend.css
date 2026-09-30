@@ -1,0 +1,58 @@
+.map-legend {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 360px;
+  max-width: calc(100% - 32px);
+  box-sizing: border-box;
+  padding: 8px 12px;
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  background: var(--color-background);
+}
+
+.map-legend__title,
+.map-legend__note {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.map-legend__title {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Lowest value, the five steps, highest value: one row. */
+.map-legend__scale {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.map-legend__steps {
+  display: flex;
+  gap: 2px;
+}
+
+.map-legend__step {
+  flex-grow: 1;
+  height: 10px;
+}
+
+.map-legend__end {
+  color: var(--color-ink-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.map-legend__note {
+  margin: 0;
+  color: var(--color-ink-muted);
+  font-size: 11px;
+}

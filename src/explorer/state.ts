@@ -8,7 +8,7 @@ export type ExplorerState = {
   metricId: string
   /** Focused borough; null is the whole city. */
   borough: Borough | null
-  /** Inside `borough` when one is focused; at city level it can be any precinct. */
+  /** Always inside `borough`: pinning a precinct focuses its borough. */
   pinnedPrecinct: number | null
   /** Map level at city scale. A focused borough always shows precincts. */
   detail: Detail
@@ -61,19 +61,14 @@ export function explorerReducer(state: ExplorerState, action: ExplorerAction): E
       return { ...state, metricId: action.metricId }
     case 'focusBorough':
       return { ...state, borough: action.borough, pinnedPrecinct: null }
-    case 'pinPrecinct': {
+    case 'pinPrecinct':
       if (!isPrecinct(action.precinct)) return state
-      // At city level the view stays put; inside a borough, a precinct elsewhere moves the focus.
-      const borough = state.borough === null ? null : boroughOfPrecinct(action.precinct)
-      return { ...state, borough, pinnedPrecinct: action.precinct }
-    }
+      // Pinning zooms into the precinct's borough, from the city view too.
+      return { ...state, borough: boroughOfPrecinct(action.precinct), pinnedPrecinct: action.precinct }
     case 'unpinPrecinct':
       return { ...state, pinnedPrecinct: null }
-    case 'setDetail': {
-      // Precincts aren't outlined at city borough level, so a city-level pin goes.
-      const dropPin = state.borough === null && action.detail === 'borough'
-      return { ...state, detail: action.detail, pinnedPrecinct: dropPin ? null : state.pinnedPrecinct }
-    }
+    case 'setDetail':
+      return { ...state, detail: action.detail }
     case 'toggleOutlines':
       return { ...state, showOutlines: !state.showOutlines }
     case 'toggleLabels':

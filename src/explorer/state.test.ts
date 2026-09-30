@@ -69,14 +69,9 @@ describe('focusBorough', () => {
 })
 
 describe('pinPrecinct', () => {
-  it('pins a precinct from the city view without zooming in', () => {
+  it('zooms into the borough of a precinct pinned from the city view', () => {
     const s = reduce(at({ detail: 'precinct' }), { type: 'pinPrecinct', precinct: 14 })
-    expect(s).toMatchObject({ borough: null, pinnedPrecinct: 14 })
-  })
-
-  it('drops a city-level pin when Detail goes back to boroughs', () => {
-    const s = reduce(at({ detail: 'precinct', pinnedPrecinct: 14 }), { type: 'setDetail', detail: 'borough' })
-    expect(s).toMatchObject({ detail: 'borough', pinnedPrecinct: null })
+    expect(s).toMatchObject({ borough: 'Manhattan', pinnedPrecinct: 14 })
   })
 
   it('keeps a pin inside a focused borough when Detail changes', () => {

@@ -6,7 +6,11 @@ export const NYC_BOUNDS: LngLatBoundsLike = [
   [-73.7, 40.9155], // north-east
 ]
 
-export const FIT_PADDING = 40
+/** Room around the whole city. The land nearest the legend's corner (the Rockaways) sits well above its lowest point. */
+export const CITY_PADDING = { top: 24, right: 24, bottom: 24, left: 24 }
+
+/** Room around a focused borough; the bottom clears the legend card, since a borough's land can reach that corner. */
+export const BOROUGH_PADDING = { top: 24, right: 24, bottom: 100, left: 24 }
 
 /**
  * The map never moves on its own: no scroll, drag, keyboard or gesture zoom.

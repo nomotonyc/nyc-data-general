@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import boundariesJson from '../../public/data/nyc-precincts.geojson?raw'
 import labelsJson from '../../public/data/nyc-precinct-labels.geojson?raw'
-import { PRECINCTS, boroughOfPrecinct } from '../domain/geography'
+import { PRECINCTS, boroughOfPrecinct, type Borough } from '../domain/geography'
+import { BOROUGH_BOUNDS } from './camera'
 
 type Feature = { properties: { precinct: number; borough: string }; geometry: { type: string; coordinates: unknown } }
 const boundaries: Feature[] = JSON.parse(boundariesJson).features
@@ -31,6 +32,16 @@ describe('precinct boundaries', () => {
 
   it('stays small enough to load quickly', () => {
     expect(boundariesJson.length).toBeLessThan(600_000)
+  })
+})
+
+describe('precinct geography', () => {
+  it('puts every precinct inside the borough NYPD assigns it to', () => {
+    for (const f of labels) {
+      const [[w, s], [e, n]] = BOROUGH_BOUNDS[boroughOfPrecinct(f.properties.precinct) as Borough]
+      const [lng, lat] = f.geometry.coordinates as number[]
+      expect(lng >= w && lng <= e && lat >= s && lat <= n, `precinct ${f.properties.precinct}`).toBe(true)
+    }
   })
 })
 

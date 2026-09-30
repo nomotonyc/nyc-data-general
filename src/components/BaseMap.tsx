@@ -3,16 +3,19 @@ import { Map as MapLibreMap, type MapMouseEvent } from 'maplibre-gl'
 import './BaseMap.css'
 import { BOROUGHS, areaOfPrecinct } from '../domain/geography'
 import { useDataset, useExplorerDispatch, useExplorerState } from '../explorer/context'
-import { cameraTarget } from '../map/camera'
+import { activeMetric } from '../explorer/state'
+import { cameraPadding, cameraTarget } from '../map/camera'
 import { choropleth } from '../map/choropleth'
-import { FIT_PADDING, FIXED_VIEW, FLY_DURATION, HOVER_DELAY, NYC_BOUNDS, boroughLayers } from '../map/config'
+import { FIXED_VIEW, FLY_DURATION, HOVER_DELAY, NYC_BOUNDS, boroughLayers } from '../map/config'
 import { cameraEasing } from '../map/easing'
 import { hoverDetails } from '../map/hover'
+import { legendDetails } from '../map/legend'
 import { clickAction, hitKind, hoverTarget, type Hit, type Target } from '../map/interaction'
 import { mapLayers, mapSources } from '../map/layers'
 import { paintHover, paintMap } from '../map/paint'
 import { buildStyle } from '../map/style'
 import { useTheme } from '../theme/context'
+import { MapLegend } from './MapLegend'
 import { MapTooltip } from './MapTooltip'
 
 const sameTarget = (a: Target | null, b: Target | null) =>
@@ -57,7 +60,7 @@ export default function BaseMap() {
       container: container.current,
       style: buildStyle(themeRef.current),
       bounds: NYC_BOUNDS,
-      fitBoundsOptions: { padding: FIT_PADDING },
+      fitBoundsOptions: { padding: cameraPadding(null) },
       ...FIXED_VIEW,
       // The legend takes this corner; sources are credited in the panel.
       attributionControl: false,
@@ -108,7 +111,10 @@ export default function BaseMap() {
     map.on('mouseout', onLeave)
 
     // Whatever is in view (the city or a focused borough) keeps filling the area.
-    const refit = () => map.fitBounds(cameraTarget(stateRef.current.borough), { padding: FIT_PADDING, animate: false })
+    const refit = () => {
+      const { borough } = stateRef.current
+      map.fitBounds(cameraTarget(borough), { padding: cameraPadding(borough), animate: false })
+    }
     map.on('resize', refit)
 
     return () => {
@@ -153,7 +159,7 @@ export default function BaseMap() {
     if (!ready || !mapRef.current || flownTo.current === borough) return
     flownTo.current = borough
     // linear: a straight glide. MapLibre's default "fly" arcs out and back in, which jolts on short moves.
-    mapRef.current.fitBounds(cameraTarget(borough), { padding: FIT_PADDING, duration: flyDuration(), easing: cameraEasing, linear: true })
+    mapRef.current.fitBounds(cameraTarget(borough), { padding: cameraPadding(borough), duration: flyDuration(), easing: cameraEasing, linear: true })
   }, [ready, borough])
 
   // Only once the pause is over for the place the pointer is still on.
@@ -162,6 +168,12 @@ export default function BaseMap() {
   return (
     <>
       <div ref={container} className="map" />
+      <MapLegend
+        details={legendDetails(plan, activeMetric(state), ramp, { from: yearFrom, to: yearTo }, {
+          from: ds.periods[0].year,
+          to: ds.periods[ds.periods.length - 1].year,
+        })}
+      />
       {card && <MapTooltip details={card} dotColor={ramp[1]} pointer={pointer} area={pointer} />}
       {borough && (
         <button type="button" className="map__back" onClick={() => dispatch({ type: 'focusBorough', borough: null })}>

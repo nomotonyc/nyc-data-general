@@ -1,6 +1,6 @@
 import { getLayer } from '../layers'
 import { describe, expect, it } from 'vitest'
-import { compareToAverage, formatCompact, formatCount, formatShort, formatValue, formatWithUnit, ordinal } from './format'
+import { compareSigned, compareToAverage, formatCompact, formatCount, formatShort, formatValue, formatWithUnit, ordinal } from './format'
 
 describe('formatCount', () => {
   it.each([
@@ -94,5 +94,21 @@ describe('formatWithUnit with a format', () => {
 
   it('treats a layer without a format as a count', () => {
     expect(formatWithUnit({ unit: 'calls' }, 49)).toBe('49 calls')
+  })
+})
+
+describe('compareSigned', () => {
+  it('writes the difference with its sign, as in the design', () => {
+    expect(compareSigned(118, 100, 'the average borough')).toBe('+18% vs. the average borough')
+    expect(compareSigned(76, 100, 'the average borough')).toBe('−24% vs. the average borough')
+  })
+
+  it('calls values within half a percent level', () => {
+    expect(compareSigned(100.4, 100, 'the average borough')).toBe('Level with the average borough')
+  })
+
+  it('does not divide by a zero average', () => {
+    expect(compareSigned(0, 0, 'the average borough')).toBe('Level with the average borough')
+    expect(compareSigned(5, 0, 'the average borough')).toBe('Above the average borough')
   })
 })

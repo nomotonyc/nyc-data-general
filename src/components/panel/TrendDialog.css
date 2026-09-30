@@ -1,0 +1,196 @@
+/* The expanded trend, as in the design. */
+.trend-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.trend-dialog__backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--color-scrim);
+  opacity: 0.45;
+  cursor: pointer;
+}
+
+.trend-dialog__box {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+  max-width: 1000px;
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 24px 28px 28px;
+  border-radius: 16px;
+  background: var(--color-background);
+  box-shadow: 0 24px 60px color-mix(in srgb, var(--color-scrim) 30%, transparent);
+  color: var(--color-ink);
+}
+
+.trend-dialog__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.trend-dialog__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.trend-dialog__kicker {
+  color: var(--story-accent);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.trend-dialog__title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.trend-dialog__sub,
+.trend-dialog__stat-label,
+.trend-dialog__stat-note,
+.trend-dialog__note {
+  color: var(--color-ink-muted);
+}
+
+.trend-dialog__sub {
+  font-size: 14px;
+}
+
+.trend-dialog__close {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  background: var(--color-background);
+  color: var(--color-ink);
+  cursor: pointer;
+}
+
+.trend-dialog__close:hover {
+  background: var(--color-surface-sunken);
+}
+
+.trend-dialog__stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.trend-dialog__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--color-surface-subtle);
+}
+
+.trend-dialog__stat-label,
+.trend-dialog__stat-note {
+  font-size: 12px;
+}
+
+.trend-dialog__stat-value {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.trend-dialog__readout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  min-height: 28px;
+}
+
+.trend-dialog__readout-period {
+  min-width: 84px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.trend-dialog__readout-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-ink-secondary);
+  font-size: 13px;
+}
+
+.trend-dialog__readout-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.trend-dialog__readout-value {
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+
+.trend-dialog__chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.trend-dialog__grid {
+  stroke: var(--color-surface-sunken);
+  stroke-width: 1px;
+}
+
+.trend-dialog__baseline {
+  stroke: var(--color-line-strong);
+  stroke-width: 1px;
+}
+
+.trend-dialog__guide {
+  stroke: var(--color-ink-faint);
+  stroke-width: 1px;
+  stroke-dasharray: 3 3;
+}
+
+.trend-dialog__tick {
+  fill: var(--color-ink-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.trend-dialog__tick--current {
+  fill: var(--color-ink);
+  font-weight: 600;
+}
+
+.trend-dialog__note {
+  margin: 0;
+  font-size: 12px;
+}
+
+@media (max-width: 720px) {
+  .trend-dialog__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

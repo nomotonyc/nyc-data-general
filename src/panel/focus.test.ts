@@ -69,6 +69,13 @@ describe('focusSummary', () => {
     expect(below.tone).toBe('neutral')
   })
 
+  it('leaves out the unit when the value already says it', () => {
+    const minutes = focusSummary({ ...fire, storyId: 'medical', metricId: 'ambulance-response-time' }, getDataset('ambulance-response-time'))
+    expect(minutes.value).toMatch(/ min$/)
+    expect(minutes.unit).toBe('')
+    expect(focusSummary(fire, ds).unit).toBe('fires')
+  })
+
   it('uses the nearest available year for density', () => {
     const density = getDataset('population-density')
     const s = focusSummary(initialExplorerState, density)

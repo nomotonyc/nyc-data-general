@@ -1,7 +1,9 @@
 // Builds a layer's real data from its `build` config: node scripts/build-layer.mjs <layer-id>
 // Writes public/data/layers/<id>.json and prints what was counted per year. Each month's API
-// response is cached in .cache/layers/<id>/, so a rerun only fetches what it doesn't have;
+// response is cached in .cache/layers/<id>/ by month and query, so a rerun only fetches what it
+// doesn't have and a changed build config refetches;
 // pass --refresh to fetch everything again.
+import { createHash } from 'node:crypto'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { runnerImport } from 'vite'
 
@@ -41,11 +43,13 @@ async function fetchMonth(url, attempts = 5) {
 const rows = []
 for (const period of layerPeriods(layer)) {
   const key = periodKey(period)
-  const cached = `${cacheDir}/${key}.json`
+  const url = countQuery(layer.build, period)
+  // Keyed by the query too, so changing the layer's filter, fields or parts refetches.
+  const cached = `${cacheDir}/${key}-${createHash('sha256').update(url).digest('hex').slice(0, 12)}.json`
   let batch = refresh ? null : await readFile(cached, 'utf8').then(JSON.parse, () => null)
   if (!batch) {
     const started = Date.now()
-    batch = await fetchMonth(countQuery(layer.build, period))
+    batch = await fetchMonth(url)
     await writeFile(cached, JSON.stringify(batch))
     console.log(`${key}: ${batch.length} groups in ${((Date.now() - started) / 1000).toFixed(1)}s`)
   }

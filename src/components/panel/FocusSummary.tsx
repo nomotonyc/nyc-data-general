@@ -11,7 +11,7 @@ export function FocusSummary() {
       <div className="panel__context">{s.context}</div>
       <div className="panel__headline">
         <span className="panel__value">{s.value}</span>
-        <span className="panel__unit">{s.unit}</span>
+        {s.unit && <span className="panel__unit">{s.unit}</span>}
       </div>
       <div className="panel__measure">{s.measure}</div>
       <div className={`panel__comparison panel__comparison--${s.tone}`}>{s.comparison}</div>

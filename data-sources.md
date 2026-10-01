@@ -269,22 +269,42 @@ travel variants, and `T-` codes (text and TTY calls), go with their base code.
 Standbys, mass-casualty incidents (fires, collapses, active shooters), special
 events, death confirmations and transfers count as Unknown or other.
 
-## 03 Medical — Ambulance response time
+## 03 Medical — Life-threatening response time
 
-Average minutes from a call entering FDNY's dispatch system to the first
-ambulance arriving, by precinct, per month.
+Average minutes for an ambulance to reach a life-threatening emergency, by
+precinct, per month.
 
 | Source | Publisher | Link | Used |
 |---|---|---|---|
-| EMS Incident Dispatch Data | FDNY, via NYC Open Data | https://data.cityofnewyork.us/d/76xm-jjuj | `incident_response_seconds_qy`, `valid_incident_rspns_time_indc`, plus the fields used for ambulance calls |
+| EMS Incident Dispatch Data | FDNY, via NYC Open Data | https://data.cityofnewyork.us/d/76xm-jjuj | `incident_response_seconds_qy`, `valid_incident_rspns_time_indc`, `final_severity_level_code`, plus the fields used for ambulance calls |
+| Reviving EMS | Citizens Budget Commission | https://cbcny.org/research/reviving-ems | FDNY segments 1–3 are life-threatening, 4–8 are not |
 
 `incident_response_seconds_qy` is, in FDNY's words, the time between
 `incident_datetime` ("the incident was created in the dispatch system") and
 `first_on_scene_datetime` ("the first unit signals that it has arrived").
 
-**Filter:** the ambulance calls filter (dispositions 82, 83, 90–96) and
-`valid_incident_rspns_time_indc = 'Y'`, FDNY's flag that the times making up
-the response time are valid (about 2% of responses are not).
+**Filter:** life-threatening calls (`final_severity_level_code` 1, 2 or 3, the
+segment after triage), an ambulance responded (dispositions 82, 83, 90–96), and
+FDNY marks the response time valid (`valid_incident_rspns_time_indc = 'Y'`).
+
+**Why life-threatening only.** Response time depends mostly on priority. 2025,
+all valid responses:
+
+| Segments | Share | Average | Over 2 hours |
+|---|---|---|---|
+| 1–3 (life-threatening) | 40% | 9.4 min | 745 |
+| 4–7 | 60% | 16.5–27.9 min | 15,084 |
+| 8 | 0.2% | 78 min | 559 |
+
+Lower-priority calls wait in a queue, and their multi-hour waits dominate an
+all-priority average (16.1 min for 2025, rising to 21–25 min by mid-2026), which
+would read as "ambulances take 20 minutes" when it measures the queue. FDNY and
+the Mayor's Management Report track life-threatening calls separately for the
+same reason.
+
+**Compared with the Mayor's Management Report:** its figure (13:09 for fiscal
+2026) is end-to-end, from the 911 call being answered; this one starts when the
+incident enters FDNY's EMS dispatch system, so it runs a few minutes shorter.
 
 **Method:** per precinct and month, the API returns the number of responses and
 the sum of their response times; the layer is a ratio, total seconds ÷
@@ -294,14 +314,6 @@ same way (total ÷ total), never by averaging averages. Built with
 
 **Breakdown:** responses by how long they took (under 5, 5–10, 10–15, 15–20,
 20 minutes or more), bucketed by the API with a SoQL `case()`.
-
-**Caveats**
-
-- All priorities are included. FDNY's own reports separate life-threatening
-  calls, which are answered faster; places with more low-priority calls average
-  higher here.
-- An average is pulled up by a few very long waits (March 2025: up to 8.8
-  hours, against an average of 12.7 minutes). The breakdown shows the spread.
 
 ## Years
 

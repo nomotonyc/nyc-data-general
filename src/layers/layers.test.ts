@@ -219,12 +219,17 @@ describe('the ambulance calls build', () => {
 describe('ambulance response time', () => {
   const layer = getLayer('ambulance-response-time')
 
+  it('says it starts later than the city’s end-to-end figure', () => {
+    expect(layer.method.join(' ')).toMatch(/Mayor’s Management Report/)
+    expect(layer.sources.map((s) => s.url)).toContain('https://cbcny.org/research/reviving-ems')
+  })
+
   it('is the Medical story’s second layer', () => {
     expect(layersOf('medical').map((l) => l.id)).toEqual(['ambulance-calls', 'ambulance-response-time'])
     expect(layer).toMatchObject({
-      label: 'Ambulance response time',
-      note: 'Average minutes from call to first ambulance on scene',
-      measure: 'Average minutes from a call entering FDNY’s dispatch system to the first ambulance arriving',
+      label: 'Life-threatening response time',
+      note: 'Average minutes for an ambulance to reach a life-threatening emergency',
+      measure: 'Average minutes from a life-threatening call entering FDNY’s EMS dispatch system to the first ambulance arriving',
       unit: 'minutes',
       format: 'minutes',
       aggregation: 'ratio',
@@ -232,10 +237,12 @@ describe('ambulance response time', () => {
     })
   })
 
-  it('averages valid response times of incidents an ambulance responded to', () => {
+  it('averages valid response times to life-threatening calls an ambulance responded to', () => {
     expect(layer.build).toMatchObject({
       dataset: '76xm-jjuj',
-      where: "valid_incident_rspns_time_indc = 'Y' AND incident_disposition_code IN ('82', '83', '90', '91', '92', '93', '94', '95', '96')",
+      where:
+        "final_severity_level_code IN ('1', '2', '3') AND valid_incident_rspns_time_indc = 'Y' AND " +
+        "incident_disposition_code IN ('82', '83', '90', '91', '92', '93', '94', '95', '96')",
       sumField: 'incident_response_seconds_qy',
     })
   })

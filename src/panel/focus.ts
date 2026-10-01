@@ -1,7 +1,7 @@
 import type { LayerDataset } from '../data/dataset'
 import { areaIdsIn } from '../data/places'
 import { areaValue, effectiveRange, rankOf } from '../data/selectors'
-import { compareSigned, formatValue, ordinal } from '../domain/format'
+import { compareSigned, formatValue, ordinal, unitAfter } from '../domain/format'
 import { BOROUGHS, PRECINCTS, areaOfPrecinct, boroughInSentence, precinctsIn, type Borough } from '../domain/geography'
 import { yearLabel } from '../domain/stories'
 import { activeMetric, type ExplorerState } from '../explorer/state'
@@ -53,7 +53,7 @@ export function focusSummary(state: Input, ds: LayerDataset): FocusSummary {
       name: area.label,
       context: `${area.borough} · ${ordinal(rankOf(own, boroughValuesOfAreas))} of ${boroughValuesOfAreas.length} in ${boroughInSentence(area.borough)} · ${ordinal(rankOf(own, cityValues))} of ${cityValues.length} citywide`,
       value: show(own),
-      unit: metric.unit,
+      unit: unitAfter(metric),
     measure,
       comparison,
       tone: tone(comparison),
@@ -67,7 +67,7 @@ export function focusSummary(state: Input, ds: LayerDataset): FocusSummary {
       name: state.borough,
       context: `${rankOf(own, boroughValues) === 1 ? 'Highest' : `${ordinal(rankOf(own, boroughValues))} highest`} of 5 boroughs · ${precinctsIn(state.borough).length} precincts`,
       value: show(own),
-      unit: metric.unit,
+      unit: unitAfter(metric),
     measure,
       comparison,
       tone: tone(comparison),
@@ -79,7 +79,7 @@ export function focusSummary(state: Input, ds: LayerDataset): FocusSummary {
     name: 'New York City',
     context: `All five boroughs · ${PRECINCTS.length} precincts`,
     value: show(value(cityIds)),
-    unit: metric.unit,
+    unit: unitAfter(metric),
     measure,
     comparison: `Highest: ${highest}`,
     tone: 'neutral',

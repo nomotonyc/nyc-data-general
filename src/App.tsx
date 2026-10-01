@@ -1,4 +1,5 @@
 import BaseMap from './components/BaseMap'
+import { DataGate } from './components/data/DataGate'
 import { ExplorerLayout } from './components/ExplorerLayout'
 import { FocusPanel } from './components/panel/FocusPanel'
 import { Rail } from './components/rail/Rail'
@@ -23,8 +24,10 @@ function Explorer() {
 
 export default function App() {
   return (
-    <ExplorerProvider>
-      <Explorer />
-    </ExplorerProvider>
+    <DataGate>
+      <ExplorerProvider>
+        <Explorer />
+      </ExplorerProvider>
+    </DataGate>
   )
 }

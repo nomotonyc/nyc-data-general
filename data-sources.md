@@ -18,18 +18,37 @@ and the Where list. Nothing else needs editing. The file holds:
 | `id` | Unique, lower-case and hyphenated; also the file name |
 | `story`, `order` | Which story's picker it appears in, and where |
 | `label`, `note` | The title, and the one-line subtitle under it |
+| `measure` | Exactly what the number is, in one sentence, shown under the headline value with its years |
 | `unit` | Shown after values: "fires", "people per sq mi" |
 | `aggregation` | `sum` for counts; `ratio` for rates like density (numerator ÷ denominator) |
-| `data` | Monthly or yearly, whether 105 & 116 are merged (`dispatch`) or separate (`precincts`), first and last year |
+| `data` | Monthly or yearly, first and last year |
 | `breakdown` | The panel's breakdown title and parts |
 | `sources` | This layer's own data sources (boundary credits are added for every layer) |
 | `method` | Caveats specific to this layer, in plain sentences |
+| `build` | How real data is made (see below). Without it the layer shows sample values, and says so |
 | `sample` | The value range and seasonality to fake until real data lands |
 
 Added automatically from those fields: the precinct and borough boundary
-credits, the 105 & 116 caveat for `dispatch` layers, the partial-year caveat
+credits, the 105 & 116 caveat for layers built from dispatch records, the partial-year caveat
 for layers reaching the final year, and the legend's note when chosen years
 fall outside `data`.
+
+### Building a layer's data
+
+For counts from NYC Open Data, `build` names the dataset, the SoQL filter, the
+date and precinct fields, and which raw values of a field make up each
+breakdown part. Then:
+
+```
+npm run data:layer -- <layer-id>
+```
+
+queries the API one year at a time (counts grouped by precinct, month and
+part, computed by the API), writes `public/data/layers/<layer-id>.json`, and
+prints what it counted per year. It stops, naming the value, if a record has a
+part value no part lists or a precinct NYPD doesn't have, so nothing is dropped
+silently. Records with no precinct are left out and reported. The app loads the
+file at startup and checks it covers every area and month.
 
 The tests check every layer file is complete (a known story, sources, caveats,
 breakdown, sample range, valid years) and name the file that is not. Record the
@@ -66,10 +85,15 @@ tagged 116 is 2024-12-19. The two dispatch datasets adopted it unevenly:
 | 2024 | 773 | 16 | 28,023 | 653 |
 | 2025 | 373 | 447 | 27,778 | 759 |
 
-EMS still files almost all southeast Queens calls under 105. To keep the time
-series honest, **the fire and EMS layers treat 105 and 116 as one area
-("Precincts 105 & 116")** for every year. Population density can separate them
-(it is built from census blocks) and does.
+EMS still files almost all southeast Queens calls under 105. Both datasets
+record a ZIP code, and the two precincts follow ZIP lines: in 2025+ fire
+records, ZIPs 11413, 11422, 11430, 11434 and 11436 are 116 and the rest are
+105 (11411 splits 99% to 105). **The fire and EMS builds assign every record
+tagged 105 or 116 by its ZIP code** (`dispatchPrecinct` in
+`src/domain/geography.ts`); records without a ZIP keep the precinct recorded.
+Checked against FDNY's own tagging: 99.9% of 2025+ fire records agree, and the
+ZIP split reproduces the 2025 fire counts above exactly (105: 373, 116: 447).
+So every layer shows all 78 precincts.
 
 ## 01 Demographic — Population density
 
@@ -126,6 +150,8 @@ Fires in buildings that FDNY was dispatched to, by precinct, per month.
 
 **Method:** count per precinct per calendar month of `incident_datetime`,
 aggregated server-side with SoQL (`$group=policeprecinct,date_trunc_ym(incident_datetime)`).
+Built with `npm run data:layer -- structural-fires`, last on 2026-09-30; its
+counts plus the records with no precinct reproduce the totals below exactly.
 
 **Coverage checked**
 
@@ -164,7 +190,7 @@ fires). It shares no ID with dispatch data; matching on precinct and time found
 is unreliable. It is the source for a future "fire causes" layer, aggregated
 separately by precinct and month.
 
-## 03 Medical — EMS calls
+## 03 Medical — Ambulance calls
 
 Medical emergencies that FDNY EMS was dispatched to, by precinct, per month.
 

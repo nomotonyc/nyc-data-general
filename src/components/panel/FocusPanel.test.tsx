@@ -7,6 +7,7 @@ import { renderWithExplorer } from '../../test/renderWithExplorer'
 import { FocusPanel } from './FocusPanel'
 
 const fire = { storyId: 'fire' as const, metricId: 'structural-fires' }
+const ems = { storyId: 'medical' as const, metricId: 'ambulance-calls' }
 const section = (name: string) => screen.getByRole('region', { name })
 
 describe('FocusPanel', () => {
@@ -16,6 +17,11 @@ describe('FocusPanel', () => {
     expect(within(focus).getByRole('heading', { name: 'New York City' })).toBeInTheDocument()
     expect(focus).toHaveTextContent('All five boroughs · 78 precincts')
     expect(focus).toHaveTextContent('fires')
+  })
+
+  it('says under the number what it counts', () => {
+    renderWithExplorer(<FocusPanel />, fire)
+    expect(section('In focus')).toHaveTextContent('Incidents FDNY was dispatched to and classified as structural fires · 2025')
   })
 
   it('headlines a pinned precinct with both ranks', () => {
@@ -68,13 +74,24 @@ describe('data sources', () => {
   })
 
   it('says it holds sample values even while closed', () => {
-    renderWithExplorer(<FocusPanel />, fire)
+    renderWithExplorer(<FocusPanel />, ems)
     expect(section('Data sources').querySelector('summary')).toHaveTextContent('Data sources · sample values')
   })
 
   it('says plainly when the values are samples', () => {
-    renderWithExplorer(<FocusPanel />, fire)
+    renderWithExplorer(<FocusPanel />, ems)
     expect(section('Data sources')).toHaveTextContent('These values are samples')
+  })
+
+  it('dates real data by when it was built', () => {
+    renderWithExplorer(<FocusPanel />, fire)
+    expect(section('Data sources')).toHaveTextContent(/Data as of \d{1,2} [A-Z][a-z]+ 20\d\d/)
+  })
+
+  it('says nothing about samples once a layer has real data', () => {
+    renderWithExplorer(<FocusPanel />, fire)
+    expect(section('Data sources').querySelector('summary')).toHaveTextContent(/^Data sources$/)
+    expect(section('Data sources')).not.toHaveTextContent('samples')
   })
 
   it('follows the story', () => {

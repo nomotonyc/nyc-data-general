@@ -13,7 +13,7 @@ describe('generateSampleDataset', () => {
     expect(ds.layerId).toBe('structural-fires')
   })
 
-  it.each(['structural-fires', 'ems-calls'])('gives %s every month from January 2019 to June 2026', (id) => {
+  it.each(['structural-fires', 'ambulance-calls'])('gives %s every month from January 2019 to June 2026', (id) => {
     const { periods } = generateSampleDataset(getLayer(id))
     expect(periods).toHaveLength(7 * 12 + 6)
     expect(periods[0]).toEqual({ year: 2019, month: 0 })
@@ -29,10 +29,11 @@ describe('generateSampleDataset', () => {
     ])
   })
 
-  it('uses merged dispatch areas for fire and EMS, and every precinct for density', () => {
-    expect(generateSampleDataset(getLayer('structural-fires')).areas.map((a) => a.id)).toContain('105+116')
-    expect(generateSampleDataset(getLayer('structural-fires')).areas).toHaveLength(77)
-    expect(generateSampleDataset(getLayer('population-density')).areas).toHaveLength(78)
+  it('reports every precinct, 105 and 116 apart', () => {
+    for (const id of ['ambulance-calls', 'population-density']) {
+      expect(generateSampleDataset(getLayer(id)).areas.map((a) => a.id)).toEqual(expect.arrayContaining(['105', '116']))
+      expect(generateSampleDataset(getLayer(id)).areas).toHaveLength(78)
+    }
   })
 
   it.each(LAYERS.map((l) => [l.id, l] as const))('gives %s a finite, non-negative value for every area and period', (_, layer) => {

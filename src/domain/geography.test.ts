@@ -1,15 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  BOROUGHS,
-  DISPATCH_AREAS,
-  PRECINCTS,
-  PRECINCT_AREAS,
-  areaOfPrecinct,
-  boroughInSentence,
-  boroughOfPrecinct,
-  isPrecinct,
-  precinctsIn,
-} from './geography'
+import { BOROUGHS, PRECINCTS, PRECINCT_AREAS, areaOfPrecinct, boroughInSentence, boroughOfPrecinct, isPrecinct, precinctsIn, dispatchPrecinct } from './geography'
 
 describe('PRECINCTS', () => {
   it('lists the 78 NYPD precincts once each, in ascending order', () => {
@@ -77,19 +67,31 @@ describe('map areas', () => {
     coversEveryPrecinctOnce(PRECINCT_AREAS)
   })
 
-  it('merges 105 and 116 for dispatch layers', () => {
-    expect(DISPATCH_AREAS).toHaveLength(77)
-    coversEveryPrecinctOnce(DISPATCH_AREAS)
-    const merged = areaOfPrecinct(DISPATCH_AREAS, 116)
-    expect(merged).toEqual({ id: '105+116', label: 'Precincts 105 & 116', borough: 'Queens', precincts: [105, 116] })
-    expect(areaOfPrecinct(DISPATCH_AREAS, 105)).toBe(merged)
-  })
-
-  it('keeps 105 and 116 apart for census-based layers', () => {
+  it('keeps 105 and 116 apart', () => {
     expect(areaOfPrecinct(PRECINCT_AREAS, 116).id).toBe('116')
   })
 
   it('rejects a precinct no area contains', () => {
     expect(() => areaOfPrecinct(PRECINCT_AREAS, 2)).toThrow(/precinct 2/)
+  })
+})
+
+describe('dispatchPrecinct', () => {
+  // NYPD created 116 from 105 in late 2024; older records, and most EMS records, still say 105.
+  it('places 105 and 116 records by ZIP code', () => {
+    expect(dispatchPrecinct('105', '11413')).toBe(116)
+    expect(dispatchPrecinct('105', '11434')).toBe(116)
+    expect(dispatchPrecinct('116', '11429')).toBe(105)
+    expect(dispatchPrecinct('105', '11411')).toBe(105)
+  })
+
+  it('keeps the recorded precinct when there is no ZIP code', () => {
+    expect(dispatchPrecinct('105', undefined)).toBe(105)
+    expect(dispatchPrecinct('116', '')).toBe(116)
+  })
+
+  it('leaves every other precinct as recorded, even in a shared ZIP code', () => {
+    expect(dispatchPrecinct('113', '11434')).toBe(113)
+    expect(dispatchPrecinct('044', '10452')).toBe(44)
   })
 })

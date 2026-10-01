@@ -1,14 +1,15 @@
 import type { Metric } from './types'
 
 export default {
-  id: 'ems-calls',
+  id: 'ambulance-calls',
   story: 'medical',
   order: 1,
-  label: 'EMS calls',
-  note: 'Medical emergencies FDNY EMS was dispatched to',
+  label: 'Ambulance calls',
+  note: 'Medical emergencies ambulances responded to',
+  measure: 'Medical emergencies ambulances responded to',
   unit: 'calls',
   aggregation: 'sum',
-  data: { resolution: 'month', areas: 'dispatch', firstYear: 2019, lastYear: 2026 },
+  data: { resolution: 'month', firstYear: 2019, lastYear: 2026 },
   breakdown: {
     title: 'Call type',
     parts: ['Illness', 'Injury', 'Breathing or cardiac', 'Psychiatric', 'Drugs or alcohol', 'Unconscious or altered', 'Unknown or other'],
@@ -18,7 +19,7 @@ export default {
       name: 'EMS Incident Dispatch Data',
       publisher: 'FDNY, via NYC Open Data',
       url: 'https://data.cityofnewyork.us/d/76xm-jjuj',
-      used: 'EMS incidents by precinct, month and call type, with FDNY’s call type descriptions',
+      used: 'Ambulance calls by precinct, month and call type, with FDNY’s call type descriptions',
     },
   ],
   method: [

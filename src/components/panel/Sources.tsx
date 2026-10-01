@@ -4,6 +4,8 @@ import { useDataset, useExplorerState } from '../../explorer/context'
 import { activeMetric } from '../../explorer/state'
 import { layerMethod, layerSources } from '../../layers'
 
+const asOfDate = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+
 /** Where the active layer's numbers come from, straight from its layer file. Closed until opened. */
 export function Sources() {
   const labelId = useId()
@@ -19,6 +21,7 @@ export function Sources() {
           {ds.isSample && <span className="panel__sample-flag"> · sample values</span>}
         </summary>
         <div className="panel__sources-body">
+          {ds.asOf && <p className="panel__as-of">Data as of {asOfDate(ds.asOf)}</p>}
           {ds.isSample && (
             <p className="panel__sample">
               These values are samples, generated to show how the page works. Real data from the sources below is on the way.

@@ -38,7 +38,7 @@ export function boroughInSentence(borough: Borough): string {
   return borough === 'Bronx' ? 'the Bronx' : borough
 }
 
-/** The unit a layer's values are reported for: one precinct, or several that can't be told apart. */
+/** The unit a layer's values are reported for: a precinct. */
 export type Area = {
   id: string
   label: string
@@ -53,24 +53,23 @@ export const PRECINCT_AREAS: readonly Area[] = PRECINCTS.map((n) => ({
   precincts: [n],
 }))
 
-const SOUTHEAST_QUEENS: Area = {
-  id: '105+116',
-  label: 'Precincts 105 & 116',
-  borough: 'Queens',
-  precincts: [105, 116],
-}
-
-/**
- * Fire and EMS dispatch data file southeast Queens under 105 and 116
- * inconsistently since NYPD split them in 2024, so those layers treat the two
- * as one area. See data-sources.md.
- */
-export const DISPATCH_AREAS: readonly Area[] = PRECINCT_AREAS.flatMap((a) =>
-  a.id === '105' ? [SOUTHEAST_QUEENS] : a.id === '116' ? [] : [a],
-)
-
 export function areaOfPrecinct(areas: readonly Area[], precinct: number): Area {
   const area = areas.find((a) => a.precincts.includes(precinct))
   if (!area) throw new RangeError(`No area contains precinct ${precinct}`)
   return area
+}
+
+/** ZIP codes in precinct 116, which NYPD created from the southeast of 105 in late 2024. */
+const PRECINCT_116_ZIPS = new Set(['11413', '11422', '11430', '11434', '11436'])
+
+/**
+ * The precinct a dispatch record belongs in. Records from before the split, and most EMS
+ * records since, say 105 for addresses now in 116, so 105 and 116 are told apart by ZIP
+ * code (checked against 2025 fire records, which FDNY tags 116: 99.9% agree). Other
+ * precincts are kept as recorded. See data-sources.md.
+ */
+export function dispatchPrecinct(precinct: string, zip: string | undefined): number {
+  const n = Number(precinct)
+  if ((n !== 105 && n !== 116) || !zip) return n
+  return PRECINCT_116_ZIPS.has(zip) ? 116 : 105
 }

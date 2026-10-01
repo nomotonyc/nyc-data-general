@@ -6,9 +6,10 @@ export default {
   order: 1,
   label: 'Population density',
   note: 'Residents per square mile of land',
+  measure: 'Residents per square mile of land, from Census Bureau estimates',
   unit: 'people per sq mi',
   aggregation: 'ratio',
-  data: { resolution: 'year', areas: 'precincts', firstYear: 2021, lastYear: 2024 },
+  data: { resolution: 'year', firstYear: 2021, lastYear: 2024 },
   breakdown: { title: 'Age mix', parts: ['Under 18', '18–34', '35–64', '65 and over'] },
   sources: [
     {

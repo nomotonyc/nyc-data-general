@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "data:precincts": "node scripts/build-precincts.mjs"
+    "data:precincts": "node scripts/build-precincts.mjs",
+    "data:layer": "node scripts/build-layer.mjs"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.3.0",

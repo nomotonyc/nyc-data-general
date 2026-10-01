@@ -13,6 +13,7 @@ export function FocusSummary() {
         <span className="panel__value">{s.value}</span>
         <span className="panel__unit">{s.unit}</span>
       </div>
+      <div className="panel__measure">{s.measure}</div>
       <div className={`panel__comparison panel__comparison--${s.tone}`}>{s.comparison}</div>
     </section>
   )

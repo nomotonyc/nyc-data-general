@@ -1,22 +1,14 @@
-import { BOROUGHS, DISPATCH_AREAS, PRECINCT_AREAS } from '../domain/geography'
-import { FINAL_YEAR, FINAL_YEAR_LAST_MONTH, STORIES, YEARS } from '../domain/stories'
+import { BOROUGHS, PRECINCT_AREAS } from '../domain/geography'
+import { STORIES, YEARS } from '../domain/stories'
 import { layersOf, type Metric } from '../layers'
 import { assertDataset } from './assert'
-import type { LayerDataset, Period } from './dataset'
+import { layerPeriods } from './coverage'
+import type { LayerDataset } from './dataset'
 
 /** Deterministic pseudo-random number in [0, 1). */
 function rnd(a: number, b: number): number {
   const x = Math.sin(a * 127.1 + b * 311.7) * 43758.5453
   return x - Math.floor(x)
-}
-
-function periodsFor(layer: Metric): Period[] {
-  const { resolution, firstYear, lastYear } = layer.data
-  const years = YEARS.filter((y) => y >= firstYear && y <= lastYear)
-  if (resolution === 'year') return years.map((year) => ({ year, month: null }))
-  return years.flatMap((year) =>
-    Array.from({ length: year === FINAL_YEAR ? FINAL_YEAR_LAST_MONTH + 1 : 12 }, (_, month) => ({ year, month })),
-  )
 }
 
 /** Clearly synthetic values in the shape real data will take, from the layer's `sample` settings. */
@@ -28,8 +20,8 @@ export function generateSampleDataset(layer: Metric): LayerDataset {
   const { lo, hi, seasonality } = layer.sample
   const amplitude = seasonality?.amplitude ?? 0
   const peak = seasonality?.peakMonth ?? 0
-  const periods = periodsFor(layer)
-  const areas = layer.data.areas === 'dispatch' ? DISPATCH_AREAS : PRECINCT_AREAS
+  const periods = layerPeriods(layer)
+  const areas = PRECINCT_AREAS
   const ratio = layer.aggregation === 'ratio'
 
   const byArea: Record<string, number[]> = {}
@@ -66,6 +58,7 @@ export function generateSampleDataset(layer: Metric): LayerDataset {
   const ds: LayerDataset = {
     layerId: layer.id,
     isSample: true,
+    asOf: null,
     periods,
     areas,
     values: { [layer.id]: byArea },

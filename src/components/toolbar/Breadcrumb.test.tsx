@@ -39,13 +39,8 @@ describe('Breadcrumb', () => {
     for (const s of separators) expect(s).toHaveAttribute('aria-hidden', 'true')
   })
 
-  it('names precincts 105 and 116 together where the data merges them', () => {
+  it('names precinct 116 on its own', () => {
     renderWithExplorer(<Breadcrumb />, { storyId: 'fire', metricId: 'structural-fires', borough: 'Queens', pinnedPrecinct: 116 })
-    expect(current()).toHaveTextContent('Precincts 105 & 116')
-  })
-
-  it('names precinct 116 alone where the data separates it', () => {
-    renderWithExplorer(<Breadcrumb />, { borough: 'Queens', pinnedPrecinct: 116 })
     expect(current()).toHaveTextContent('Precinct 116')
   })
 })

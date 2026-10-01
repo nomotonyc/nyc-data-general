@@ -135,7 +135,6 @@ export default function BaseMap() {
     () => choropleth({ storyId, metricId, borough, detail, yearFrom, yearTo }, ds, ramp),
     [ds, ramp, storyId, metricId, borough, detail, yearFrom, yearTo],
   )
-  // Pinning 105 or 116 in dispatch data outlines both.
   const pinned = useMemo(
     () => (pinnedPrecinct === null ? [] : areaOfPrecinct(ds.areas, pinnedPrecinct).precincts),
     [ds, pinnedPrecinct],

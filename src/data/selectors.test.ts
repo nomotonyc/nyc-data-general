@@ -1,6 +1,4 @@
-import { getLayer } from '../layers'
 import { describe, expect, it } from 'vitest'
-import { areaOfPrecinct } from '../domain/geography'
 import type { Metric } from '../layers'
 import type { LayerDataset } from './dataset'
 import {
@@ -11,7 +9,6 @@ import {
   rankOf,
   series,
 } from './selectors'
-import { generateSampleDataset } from './sample'
 
 const source = { name: 's', publisher: 'p', url: 'https://example.org', used: 'u' }
 const layer = (id: string, aggregation: Metric['aggregation']): Metric => ({
@@ -20,9 +17,10 @@ const layer = (id: string, aggregation: Metric['aggregation']): Metric => ({
   order: 1,
   label: id,
   note: '',
+  measure: 'Units counted',
   unit: 'units',
   aggregation,
-  data: { resolution: 'month', areas: 'precincts', firstYear: 2023, lastYear: 2024 },
+  data: { resolution: 'month', firstYear: 2023, lastYear: 2024 },
   breakdown: { title: 'Parts', parts: ['p0', 'p1'] },
   sources: [source],
   method: ['m'],
@@ -37,6 +35,7 @@ const area = (id: string, precincts: number[]) => ({ id, label: id, borough: 'Qu
 const monthly: LayerDataset = {
   layerId: 'fire',
   isSample: true,
+  asOf: null,
   periods: [
     { year: 2023, month: 0 },
     { year: 2023, month: 1 },
@@ -175,30 +174,6 @@ describe('zero denominators', () => {
     const noLand = { ...monthly, denominators: { d: { a: [0, 0, 0, 0], b: [10, 10, 10, 10] } } }
     expect(() => areaValue(noLand, density, ['a'], y2024)).toThrow(/d denominator is 0 for a/)
     expect(() => series(noLand, density, ['a'], y2024)).toThrow(/d denominator is 0 for a/)
-  })
-})
-
-describe('precincts 105 and 116 in dispatch data', () => {
-  const ds = generateSampleDataset(getLayer('structural-fires'))
-  const fires = getLayer('structural-fires')
-  const range = { from: 2025, to: 2025 } as const
-
-  it('has no separate values for either precinct', () => {
-    expect(() => areaValue(ds, fires, ['105'], range)).toThrow(/area 105/)
-    expect(() => areaValue(ds, fires, ['116'], range)).toThrow(/area 116/)
-  })
-
-  it('resolves both precincts to the one merged area', () => {
-    expect(areaOfPrecinct(ds.areas, 105).id).toBe('105+116')
-    expect(areaOfPrecinct(ds.areas, 116).id).toBe('105+116')
-  })
-
-  it('ranks the merged area once among 77', () => {
-    const values = ds.areas.map((a) => areaValue(ds, fires, [a.id], range))
-    expect(values).toHaveLength(77)
-    const merged = areaValue(ds, fires, ['105+116'], range)
-    expect(rankOf(merged, values)).toBeLessThanOrEqual(77)
-    expect(values.filter((v) => v === merged)).toHaveLength(1)
   })
 })
 

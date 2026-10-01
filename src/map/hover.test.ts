@@ -78,8 +78,8 @@ describe('hoverDetails for a precinct', () => {
     expect(hoverDetails({ ...state, pinnedPrecinct: 44 }, ds, { kind: 'precinct', precinct: 44 }).hint).toBe('Pinned')
   })
 
-  it('names 105 and 116 together where the data merges them', () => {
-    expect(hoverDetails(state, ds, { kind: 'precinct', precinct: 116 }).title).toBe('Precincts 105 & 116')
+  it('names precinct 116 on its own, under its borough', () => {
+    expect(hoverDetails(state, ds, { kind: 'precinct', precinct: 116 })).toMatchObject({ title: 'Precinct 116', subtitle: 'Queens' })
   })
 })
 

@@ -23,11 +23,10 @@ describe('choropleth', () => {
     expect(colours).toContain(fireRamp[4])
   })
 
-  it('colours every precinct at precinct level, both halves of 105 & 116 alike', () => {
+  it('colours every precinct at precinct level', () => {
     const plan = choropleth({ ...fire, detail: 'precinct' }, getDataset('structural-fires'), fireRamp)
     expect(plan.level).toBe('precinct')
     expect(Object.keys(plan.precincts)).toHaveLength(78)
-    expect(plan.precincts[105]).toBe(plan.precincts[116])
   })
 
   it('always colours both boroughs and precincts, so a fade between levels goes colour to colour, never through white', () => {
@@ -39,7 +38,7 @@ describe('choropleth', () => {
     expect(Object.keys(choropleth(fire, getDataset('structural-fires'), fireRamp).precincts)).toHaveLength(78)
   })
 
-  it('keeps 105 and 116 separate where the data does, each coloured from its own value', () => {
+  it('colours 105 and 116 each from its own value', () => {
     const ds = getDataset('population-density')
     const plan = choropleth({ ...density, detail: 'precinct', yearFrom: 2024, yearTo: 2024 }, ds, densityRamp)
     const people = getLayer('population-density')

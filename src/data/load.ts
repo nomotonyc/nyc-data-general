@@ -27,7 +27,14 @@ export class DatasetStore {
       LAYERS.filter((l) => l.build && !this.cache.has(l.id)).map(async (layer) => {
         const res = await this.fetcher(layerFileUrl(layer.id))
         if (!res.ok) throw new Error(`Couldn’t load ${layer.label} data (${res.status})`)
-        this.add(datasetFromFile(layer, (await res.json()) as LayerFile))
+        let file: LayerFile
+        try {
+          file = (await res.json()) as LayerFile
+        } catch {
+          // A dev server answers a missing file with its HTML page.
+          throw new Error(`Couldn’t load ${layer.label} data (not a data file; has it been built?)`)
+        }
+        this.add(datasetFromFile(layer, file))
       }),
     )
       .then(() => undefined)

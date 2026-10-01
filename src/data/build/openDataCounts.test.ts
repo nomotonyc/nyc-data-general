@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { getLayer, type Metric } from '../../layers'
+import { getLayer, type Metric, type OpenDataCountsBuild } from '../../layers'
 import { aggregateCounts, countQuery, type CountRow } from './openDataCounts'
 
 const fires = getLayer('structural-fires')
-const build = fires.build!
+const build = fires.build as OpenDataCountsBuild
 const row = (precinct: string | undefined, month: string, part: string, n: number, zip?: string): CountRow => ({
   precinct,
   zip,
@@ -105,7 +105,7 @@ describe('ratio layers', () => {
   })
 
   it('also asks the API for the sum of the field', () => {
-    expect(new URL(countQuery(responseTime.build!, { year: 2025, month: 2 })).searchParams.get('$select')).toMatch(
+    expect(new URL(countQuery(responseTime.build as OpenDataCountsBuild, { year: 2025, month: 2 })).searchParams.get('$select')).toMatch(
       /, count\(\*\) as n, sum\(incident_response_seconds_qy\) as total$/,
     )
   })

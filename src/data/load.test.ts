@@ -45,6 +45,11 @@ describe('DatasetStore', () => {
     await expect(store.load()).rejects.toThrow(/Structural fires data \(404\)/)
   })
 
+  it('names the layer when its file is missing and the server answers with a page instead', async () => {
+    const store = new DatasetStore(fakeFetch({ 'structural-fires': new Response('<!doctype html><html></html>') }).fetcher)
+    await expect(store.load()).rejects.toThrow('Couldn’t load Structural fires data (not a data file; has it been built?)')
+  })
+
   it('names the layer when its file is incomplete', async () => {
     const broken = JSON.parse(fileFor('structural-fires'))
     delete broken.values['44']

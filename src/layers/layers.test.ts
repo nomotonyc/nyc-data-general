@@ -259,3 +259,36 @@ describe('ambulance response time', () => {
     )
   })
 })
+
+describe('fire apparatus accidents', () => {
+  const layer = getLayer('fire-apparatus-accidents')
+  const build = layer.build!
+
+  it('is the Fire story’s second layer', () => {
+    expect(layersOf('fire').map((l) => l.id)).toEqual(['structural-fires', 'fire-apparatus-accidents'])
+    expect(layer).toMatchObject({
+      label: 'Fire apparatus accidents',
+      note: 'Police-reported crashes involving a fire truck',
+      measure: 'Police-reported crashes involving an FDNY fire truck, engine or ladder',
+      unit: 'crashes',
+      aggregation: 'sum',
+    })
+  })
+
+  it('locates crashes from the Motor Vehicle Collisions data', () => {
+    expect(build).toMatchObject({ kind: 'open-data-points', dataset: 'h9gi-nx95', dateField: 'crash_date', latitudeField: 'latitude', longitudeField: 'longitude' })
+  })
+
+  it('matches fire apparatus in vehicle type codes 1 to 3, however it was typed', () => {
+    for (const field of ['vehicle_type_code1', 'vehicle_type_code2', 'vehicle_type_code_3']) expect(build.where).toContain(`upper(trim(${field})) IN (`)
+    for (const v of ['FIRE TRUCK', 'FIRETRUCK', 'FDNY FIRET', 'FIRE ENGIN', 'LADDER TRU', 'FIRE TRUVK']) expect(build.where).toContain(`'${v}'`)
+  })
+
+  it('leaves out ambulances, tankers and vehicles that could be any FDNY car', () => {
+    for (const v of ['TANKER', 'FDNY AMBUL', 'FDNY EMS', 'FDNY', 'FDNY CHIEF', 'FIRE DEPT', 'FRIEGHTLIN', 'PUMP']) expect(build.where).not.toContain(`'${v}'`)
+  })
+
+  it('breaks crashes down by their worst injury', () => {
+    expect(layer.breakdown).toEqual({ title: 'Injuries', parts: ['No one hurt', 'Someone injured', 'Someone killed'] })
+  })
+})

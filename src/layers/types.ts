@@ -36,6 +36,43 @@ export type OpenDataCountsBuild = {
 }
 
 /**
+ * How a count layer is built from NYC Open Data records that have coordinates but no
+ * precinct: each record matching `where` is placed in the precinct containing it (the
+ * map's precinct shapes), then counted by precinct, month and breakdown part.
+ */
+export type OpenDataPointsBuild = {
+  kind: 'open-data-points'
+  /** The dataset id, as in https://data.cityofnewyork.us/d/<id>. */
+  dataset: string
+  /** SoQL condition for the records counted. */
+  where: string
+  /** Timestamp field that decides the month. */
+  dateField: string
+  latitudeField: string
+  longitudeField: string
+  /** The field (or SoQL expression) the breakdown groups. */
+  partField: string
+  /** Breakdown part -> the raw values of partField it covers, in breakdown order. */
+  parts: Readonly<Record<string, readonly string[]>>
+  sumField?: never
+}
+
+/**
+ * How population density is built from Census Bureau bulk files: 2020 census blocks
+ * (population, land area, interior point) place people and land in precincts, and each
+ * year's ACS 5-year tract estimates of table B01001 (sex by age) are split among precincts
+ * by where the tract's 2020 residents live (scripts/build-layer.mjs).
+ */
+export type CensusDensityBuild = {
+  kind: 'census-density'
+  /** The 2020 P.L. 94-171 redistricting file for New York State (zip). */
+  blocks: string
+  /** An ACS table-based summary file for B01001, with {year} for the release year. */
+  acs: string
+  sumField?: never
+}
+
+/**
  * A layer: everything the app needs to show one measure. Each lives in its own
  * `src/layers/<id>.layer.ts` file and is picked up automatically.
  */
@@ -87,7 +124,7 @@ export type Metric = {
    */
   method: readonly string[]
   /** How real data is built. Without it the layer shows sample values. */
-  build?: OpenDataCountsBuild
+  build?: OpenDataCountsBuild | OpenDataPointsBuild | CensusDensityBuild
   /** Until real data lands: the yearly range per area, and any seasonal swing (peakMonth 0 = January). */
   sample: { lo: number; hi: number; seasonality?: { amplitude: number; peakMonth: number } }
 }

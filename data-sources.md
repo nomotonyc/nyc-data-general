@@ -68,7 +68,13 @@ source audit for a new layer in this document too.
 Simplified to about 2 m and written to `public/data/nyc-precincts.geojson` (with label points in `nyc-precinct-labels.geojson`) by `npm run data:precincts`.
 
 Borough outlines come from the NYC Department of City Planning
-(https://www.nyc.gov/site/planning/), served from `public/data`. The map shows
+(https://www.nyc.gov/site/planning/), with each
+island and sliver moved to the borough whose precincts cover it
+(`scripts/align-boroughs.mjs`, run by `npm run data:precincts`), so a borough on
+the map is the area whose numbers it adds up: Rikers and Roosevelt Islands are
+drawn with Queens (precinct 114), Marble Hill with the Bronx (precinct 50),
+Jamaica Bay's islands with Queens (precinct 100), and Brooklyn Bridge Park's
+piers with Brooklyn. The outlines are served from `public/data`. The map shows
 no attribution control (its corner holds the legend), so every layer lists this
 source in the app instead.
 
@@ -190,6 +196,51 @@ fires). It shares no ID with dispatch data; matching on precinct and time found
 34 of 40 sampled cases within 30 minutes and none exactly, so a row-level join
 is unreliable. It is the source for a future "fire causes" layer, aggregated
 separately by precinct and month.
+
+## 02 Fire — Fire apparatus accidents
+
+Police-reported crashes involving an FDNY fire truck, engine or ladder, by
+precinct, per month.
+
+| Source | Publisher | Link | Used |
+|---|---|---|---|
+| Motor Vehicle Collisions – Crashes | NYPD, via NYC Open Data | https://data.cityofnewyork.us/d/h9gi-nx95 | `crash_date`, `latitude`, `longitude`, `vehicle_type_code1`–`vehicle_type_code_3`, `number_of_persons_injured`, `number_of_persons_killed` |
+
+**Which crashes.** The vehicle types are typed by officers and cut to 10
+characters, so a fire truck appears as FIRE TRUCK, FIRETRUCK, FDNY FIRET, FIRE
+ENGIN, LADDER TRU, Fire Truvk and so on. The layer file lists the 46 spellings
+seen 2019–2026 (matched upper-cased) in vehicle type codes 1 to 3. Left out:
+
+| Values | Crashes 2019–2026 | Why |
+|---|---|---|
+| Tanker | 1,072 | Fuel tankers |
+| FDNY AMBUL, FDNY EMS, FD AMBULAN | ~150 | Ambulances are not fire apparatus |
+| FDNY, FDNY VEHIC, FDNY CHIEF, FDNY PICKU, FDNY VAN, FIRE DEPT | ~150 | Could be any FDNY vehicle |
+| FRIEGHTLIN, PUMP | few | A truck make; concrete pumps |
+
+**Where.** The dataset has no precinct, so the build places each crash in the
+precinct its coordinates fall in, using the map's precinct shapes
+(`src/data/build/openDataPoints.ts`). Crashes without coordinates are left out
+and reported (4–14 a year).
+
+**Built** 2026-09-30:
+
+| Year | Counted | No location |
+|---|---|---|
+| 2019 | 154 | 4 |
+| 2020 | 163 | 12 |
+| 2021 | 194 | 6 |
+| 2022 | 163 | 14 |
+| 2023 | 156 | 11 |
+| 2024 | 136 | 13 |
+| 2025 | 180 | 5 |
+| 2026 (Jan–Jun) | 136 | 8 |
+
+**Breakdown:** the crash's worst outcome: no one hurt, someone injured, someone
+killed.
+
+**Caveats:** only crashes police reported are in the dataset (anyone hurt or
+killed, or $1,000+ damage). Numbers per precinct are small, a few a year.
 
 ## 03 Medical — Ambulance calls
 

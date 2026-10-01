@@ -14,11 +14,17 @@ if (!id) throw new Error('Usage: npm run data:layer -- <layer-id> [--refresh]')
 const load = async (path) => (await runnerImport(path, { root: process.cwd(), configFile: false, logLevel: 'silent' })).module
 const { getLayer } = await load('/src/layers/index.ts')
 const { aggregateCounts, countQuery } = await load('/src/data/build/openDataCounts.ts')
+const { pointsQuery, pointsToCountRows } = await load('/src/data/build/openDataPoints.ts')
 const { layerPeriods, periodKey } = await load('/src/data/coverage.ts')
 const { datasetFromFile } = await load('/src/data/file.ts')
 
 const layer = getLayer(id)
-if (layer.build?.kind !== 'open-data-counts') throw new Error(`Layer ${id} has no Open Data build config`)
+const kind = layer.build?.kind
+if (kind !== 'open-data-counts' && kind !== 'open-data-points') throw new Error(`Layer ${id} has no Open Data build config`)
+const points = kind === 'open-data-points'
+// Records with coordinates are placed in the precincts the map draws.
+const shapes = points ? JSON.parse(await readFile('public/data/nyc-precincts.geojson', 'utf8')) : null
+const query = points ? pointsQuery : countQuery
 
 const cacheDir = `.cache/layers/${id}`
 await mkdir(cacheDir, { recursive: true })
@@ -43,7 +49,7 @@ async function fetchMonth(url, attempts = 5) {
 const rows = []
 for (const period of layerPeriods(layer)) {
   const key = periodKey(period)
-  const url = countQuery(layer.build, period)
+  const url = query(layer.build, period)
   // Keyed by the query too, so changing the layer's filter, fields or parts refetches.
   const cached = `${cacheDir}/${key}-${createHash('sha256').update(url).digest('hex').slice(0, 12)}.json`
   let batch = refresh ? null : await readFile(cached, 'utf8').then(JSON.parse, () => null)
@@ -53,7 +59,7 @@ for (const period of layerPeriods(layer)) {
     await writeFile(cached, JSON.stringify(batch))
     console.log(`${key}: ${batch.length} groups in ${((Date.now() - started) / 1000).toFixed(1)}s`)
   }
-  rows.push(...batch)
+  rows.push(...(points ? pointsToCountRows(batch, shapes) : batch))
 }
 
 const { file, report } = aggregateCounts(layer, rows)

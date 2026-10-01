@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "data:precincts": "node scripts/build-precincts.mjs",
+    "data:precincts": "node scripts/build-precincts.mjs && node scripts/align-boroughs.mjs",
     "data:layer": "node scripts/build-layer.mjs"
   },
   "dependencies": {

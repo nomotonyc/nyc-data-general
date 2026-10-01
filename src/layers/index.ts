@@ -1,7 +1,7 @@
 import { FINAL_YEAR, FINAL_YEAR_LAST_MONTH, STORIES, type StoryId } from '../domain/stories'
 import type { Metric, Source } from './types'
 
-export type { Metric, OpenDataCountsBuild, Source } from './types'
+export type { CensusDensityBuild, Metric, OpenDataCountsBuild, OpenDataPointsBuild, Source } from './types'
 
 // Every *.layer.ts file in this folder is a layer. Adding one needs no other change.
 const files = import.meta.glob<{ default: Metric }>('./*.layer.ts', { eager: true })

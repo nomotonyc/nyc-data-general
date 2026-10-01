@@ -242,7 +242,7 @@ describe('ambulance response time', () => {
     expect(layer.build).toMatchObject({
       dataset: '76xm-jjuj',
       where:
-        "final_severity_level_code IN ('1', '2', '3') AND valid_incident_rspns_time_indc = 'Y' AND " +
+        "initial_severity_level_code IN ('1', '2', '3') AND valid_incident_rspns_time_indc = 'Y' AND " +
         "incident_disposition_code IN ('82', '83', '90', '91', '92', '93', '94', '95', '96')",
       sumField: 'incident_response_seconds_qy',
     })

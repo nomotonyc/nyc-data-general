@@ -43,6 +43,7 @@ export default {
     'Only crashes police reported are included: anyone hurt or killed, or at least $1,000 of damage.',
     'Crashes are placed in precincts by their coordinates; about 5% have none and are left out.',
     'Numbers are small, a few a year in most precincts, so differences between precincts are not meaningful on their own.',
+    'NYPD publishes crashes with a delay: when this was built, records ran to 11 June 2026, so June 2026 is incomplete.',
   ],
   build: {
     kind: 'open-data-points',

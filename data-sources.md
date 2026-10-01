@@ -257,6 +257,9 @@ killed.
 
 **Caveats:** only crashes police reported are in the dataset (anyone hurt or
 killed, or $1,000+ damage). Numbers per precinct are small, a few a year.
+NYPD publishes crashes with a delay: at the 2026-09-30 build the dataset ran to
+11 June 2026, so June 2026 is incomplete (2,322 crashes of all kinds, against
+about 7,000 in a typical month).
 
 ## 03 Medical — Ambulance calls
 
@@ -343,15 +346,15 @@ precinct, per month.
 
 | Source | Publisher | Link | Used |
 |---|---|---|---|
-| EMS Incident Dispatch Data | FDNY, via NYC Open Data | https://data.cityofnewyork.us/d/76xm-jjuj | `incident_response_seconds_qy`, `valid_incident_rspns_time_indc`, `final_severity_level_code`, plus the fields used for ambulance calls |
+| EMS Incident Dispatch Data | FDNY, via NYC Open Data | https://data.cityofnewyork.us/d/76xm-jjuj | `incident_response_seconds_qy`, `valid_incident_rspns_time_indc`, `initial_severity_level_code`, plus the fields used for ambulance calls |
 | Reviving EMS | Citizens Budget Commission | https://cbcny.org/research/reviving-ems | FDNY segments 1–3 are life-threatening, 4–8 are not |
 
 `incident_response_seconds_qy` is, in FDNY's words, the time between
 `incident_datetime` ("the incident was created in the dispatch system") and
 `first_on_scene_datetime` ("the first unit signals that it has arrived").
 
-**Filter:** life-threatening calls (`final_severity_level_code` 1, 2 or 3, the
-segment after triage), an ambulance responded (dispositions 82, 83, 90–96), and
+**Filter:** life-threatening calls (`initial_severity_level_code` 1, 2 or 3,
+the segment the call was dispatched with), an ambulance responded (dispositions 82, 83, 90–96), and
 FDNY marks the response time valid (`valid_incident_rspns_time_indc = 'Y'`).
 
 **Why life-threatening only.** Response time depends mostly on priority. 2025,
@@ -368,6 +371,12 @@ all-priority average (16.1 min for 2025, rising to 21–25 min by mid-2026), whi
 would read as "ambulances take 20 minutes" when it measures the queue. FDNY and
 the Mayor's Management Report track life-threatening calls separately for the
 same reason.
+
+**Initial rather than final severity.** About 8% of calls change segment after
+dispatch. Using the final segment would add calls upgraded only after a
+lower-priority ambulance was sent, which measures the queue rather than the
+response to calls known to be life-threatening (2025: 9.42 min by final
+segment, 8.19 min by initial).
 
 **Compared with the Mayor's Management Report:** its figure (13:09 for fiscal
 2026) is end-to-end, from the 911 call being answered; this one starts when the

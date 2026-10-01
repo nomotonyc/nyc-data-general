@@ -33,16 +33,16 @@ export default {
     },
   ],
   method: [
-    'Life-threatening calls only: those FDNY’s triage places in segments 1 to 3 (cardiac arrest, choking, unconscious, difficulty breathing and the like), about 40% of responses. Lower-priority calls wait in a queue and are left out.',
+    'Life-threatening calls only: those dispatched as FDNY segments 1 to 3 (cardiac arrest, choking, unconscious, difficulty breathing and the like), about 40% of responses. Lower-priority calls wait in a queue and are left out, including calls upgraded only after an ambulance was sent.',
     'Averages FDNY’s incident response time: from the call entering the EMS dispatch system to the first ambulance signalling it has arrived, for responses whose times FDNY marks valid.',
     'The Mayor’s Management Report’s figure is end-to-end, starting when the 911 call is answered, so it runs a few minutes longer than this one.',
   ],
   build: {
     kind: 'open-data-counts',
     dataset: '76xm-jjuj',
-    // FDNY segments 1 to 3 are life-threatening (final severity, after triage).
+    // FDNY segments 1 to 3 are life-threatening; the initial severity is the priority the call was dispatched with.
     where:
-      "final_severity_level_code IN ('1', '2', '3') AND valid_incident_rspns_time_indc = 'Y' AND " +
+      "initial_severity_level_code IN ('1', '2', '3') AND valid_incident_rspns_time_indc = 'Y' AND " +
       "incident_disposition_code IN ('82', '83', '90', '91', '92', '93', '94', '95', '96')",
     dateField: 'incident_datetime',
     precinctField: 'policeprecinct',

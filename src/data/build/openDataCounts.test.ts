@@ -17,18 +17,24 @@ const partIndex = (label: string) => fires.breakdown.parts.indexOf(label)
 const at = (year: number, month: number) => (year - 2019) * 12 + month
 
 describe('countQuery', () => {
-  it('asks the API for one year, grouped by precinct, month and part', () => {
-    const url = new URL(countQuery(build, 2025))
+  it('asks the API for one month, grouped by precinct, ZIP code, month and part', () => {
+    const url = new URL(countQuery(build, { year: 2025, month: 2 }))
     expect(url.origin + url.pathname).toBe('https://data.cityofnewyork.us/resource/8m42-w767.json')
     const p = url.searchParams
     expect(p.get('$select')).toBe(
       'policeprecinct as precinct, zipcode as zip, date_trunc_ym(incident_datetime) as month, incident_classification as part, count(*) as n',
     )
     expect(p.get('$where')).toBe(
-      "(incident_classification_group = 'Structural Fires') AND incident_datetime >= '2025-01-01T00:00:00' AND incident_datetime < '2026-01-01T00:00:00'",
+      "(incident_classification_group = 'Structural Fires') AND incident_datetime >= '2025-03-01T00:00:00' AND incident_datetime < '2025-04-01T00:00:00'",
     )
     expect(p.get('$group')).toBe('precinct, zip, month, part')
     expect(Number(p.get('$limit'))).toBeGreaterThanOrEqual(50000)
+  })
+
+  it('ends December at the start of the next year', () => {
+    expect(new URL(countQuery(build, { year: 2025, month: 11 })).searchParams.get('$where')).toContain(
+      "incident_datetime >= '2025-12-01T00:00:00' AND incident_datetime < '2026-01-01T00:00:00'",
+    )
   })
 })
 
@@ -84,5 +90,30 @@ describe('aggregateCounts', () => {
   it('refuses layers it cannot build', () => {
     const density = getLayer('population-density') as Metric
     expect(() => aggregateCounts(density, [])).toThrow(/population-density/)
+  })
+})
+
+describe('ratio layers', () => {
+  const responseTime = getLayer('ambulance-response-time')
+  const rt = (precinct: string, part: string, n: number, total: number): CountRow => ({
+    precinct,
+    zip: '10001',
+    month: '2025-03-01T00:00:00.000',
+    part,
+    n: String(n),
+    total: String(total),
+  })
+
+  it('also asks the API for the sum of the field', () => {
+    expect(new URL(countQuery(responseTime.build!, { year: 2025, month: 2 })).searchParams.get('$select')).toMatch(
+      /, count\(\*\) as n, sum\(incident_response_seconds_qy\) as total$/,
+    )
+  })
+
+  it('keeps the summed field as values and the count as denominators', () => {
+    const { file } = aggregateCounts(responseTime, [rt('14', 'Under 5 minutes', 10, 2400), rt('14', '5 to 10 minutes', 5, 2100)])
+    expect(file.values['14'][at(2025, 2)]).toBe(4500)
+    expect(file.denominators!['14'][at(2025, 2)]).toBe(15)
+    expect(file.parts['14'][at(2025, 2)]).toEqual([10, 5, 0, 0, 0])
   })
 })

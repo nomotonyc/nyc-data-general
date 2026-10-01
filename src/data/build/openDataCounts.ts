@@ -1,22 +1,32 @@
 import { PRECINCT_AREAS, dispatchPrecinct, isPrecinct } from '../../domain/geography'
-import type { Year } from '../../domain/stories'
 import type { Metric, OpenDataCountsBuild } from '../../layers'
 import { layerPeriods, periodKey } from '../coverage'
 import type { LayerFile } from '../file'
 
 /** One row of the grouped API response. `precinct` and `zip` are missing for records without them. */
-export type CountRow = { precinct?: string; zip?: string; month: string; part: string; n: string }
+export type CountRow = { precinct?: string; zip?: string; month: string; part: string; n: string; total?: string }
 
 export type YearReport = { year: number; counted: number; noPrecinct: number }
 
 const API = 'https://data.cityofnewyork.us/resource'
 
-/** The SoQL request for one year of a layer's records, grouped by precinct, ZIP code, month and part. */
-export function countQuery(build: OpenDataCountsBuild, year: Year): string {
+const stamp = (year: number, month: number) => `${year}-${String(month + 1).padStart(2, '0')}-01T00:00:00`
+
+/**
+ * The SoQL request for one month of a layer's records, grouped by precinct, ZIP code, month and
+ * part. One month at a time keeps each aggregation well inside the API's response time.
+ */
+export function countQuery(build: OpenDataCountsBuild, period: { year: number; month: number }): string {
   const url = new URL(`${API}/${build.dataset}.json`)
   const d = build.dateField
-  url.searchParams.set('$select', `${build.precinctField} as precinct, ${build.zipField} as zip, date_trunc_ym(${d}) as month, ${build.partField} as part, count(*) as n`)
-  url.searchParams.set('$where', `(${build.where}) AND ${d} >= '${year}-01-01T00:00:00' AND ${d} < '${year + 1}-01-01T00:00:00'`)
+  const { year, month } = period
+  const end = month === 11 ? stamp(year + 1, 0) : stamp(year, month + 1)
+  const sum = build.sumField ? `, sum(${build.sumField}) as total` : ''
+  url.searchParams.set(
+    '$select',
+    `${build.precinctField} as precinct, ${build.zipField} as zip, date_trunc_ym(${d}) as month, ${build.partField} as part, count(*) as n${sum}`,
+  )
+  url.searchParams.set('$where', `(${build.where}) AND ${d} >= '${stamp(year, month)}' AND ${d} < '${end}'`)
   url.searchParams.set('$group', 'precinct, zip, month, part')
   url.searchParams.set('$limit', '100000')
   return url.toString()
@@ -38,10 +48,13 @@ export function aggregateCounts(layer: Metric, rows: readonly CountRow[]): { fil
   const partOf = new Map(Object.values(build.parts).flatMap((values, i) => values.map((v) => [v, i])))
   const width = layer.breakdown.parts.length
 
+  const ratio = build.sumField !== undefined
   const values: Record<string, number[]> = {}
+  const denominators: Record<string, number[]> = {}
   const parts: Record<string, number[][]> = {}
   for (const a of areas) {
     values[a.id] = periods.map(() => 0)
+    if (ratio) denominators[a.id] = periods.map(() => 0)
     parts[a.id] = periods.map(() => Array<number>(width).fill(0))
   }
   const report = new Map([...new Set(periods.map((p) => p.year))].map((y) => [y, { year: y, counted: 0, noPrecinct: 0 }]))
@@ -59,7 +72,12 @@ export function aggregateCounts(layer: Metric, rows: readonly CountRow[]): { fil
     }
     const area = areaOf.get(dispatchPrecinct(row.precinct, row.zip))
     if (!area || !isPrecinct(Number(row.precinct))) throw new Error(`${layer.id}: precinct "${row.precinct}" is not an NYPD precinct`)
-    values[area][period] += n
+    if (ratio) {
+      values[area][period] += Number(row.total)
+      denominators[area][period] += n
+    } else {
+      values[area][period] += n
+    }
     parts[area][period][part] += n
     year.counted += n
   }
@@ -71,6 +89,7 @@ export function aggregateCounts(layer: Metric, rows: readonly CountRow[]): { fil
       from: periodKey(periods[0]),
       to: periodKey(periods[periods.length - 1]),
       values,
+      ...(ratio ? { denominators } : {}),
       parts,
     },
     report: [...report.values()],

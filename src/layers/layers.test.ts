@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { STORIES, YEARS } from '../domain/stories'
 import { LAYERS, getLayer, layerMethod, layerSources, layersOf } from '.'
+import fdnyCallTypes from './fdny-ems-call-types.json'
 
 describe('the layer registry', () => {
   // These checks name layers one at a time, so adding a layer file never means editing tests.
@@ -33,6 +34,10 @@ describe('the three layers', () => {
     ['ambulance-calls', 'medical', 'Ambulance calls', 'Medical emergencies ambulances responded to'],
   ])('%s has its story, title and subtitle from the spec', (id, story, label, note) => {
     expect(getLayer(id)).toMatchObject({ story, label, note })
+  })
+
+  it('counts ambulance responses', () => {
+    expect(getLayer('ambulance-calls').unit).toBe('responses')
   })
 
   it.each([
@@ -163,8 +168,87 @@ describe('build configs', () => {
     expect(new Set(values).size).toBe(values.length)
   })
 
-  it.each(built.map((l) => [l.id, l] as const))('%s only builds counts from the source it credits', (_, layer) => {
-    expect(layer.aggregation).toBe('sum')
+  it.each(built.map((l) => [l.id, l] as const))('%s builds from the source it credits', (_, layer) => {
     expect(layer.sources.map((s) => s.url).join(' ')).toContain(layer.build!.dataset)
+  })
+
+  it.each(built.map((l) => [l.id, l] as const))('%s sums a field exactly when it is a ratio', (_, layer) => {
+    expect(layer.build!.sumField !== undefined).toBe(layer.aggregation === 'ratio')
+  })
+})
+
+describe('the ambulance calls build', () => {
+  const build = getLayer('ambulance-calls').build!
+
+  it('counts EMS incidents from EMS Incident Dispatch Data', () => {
+    expect(build).toMatchObject({
+      kind: 'open-data-counts',
+      dataset: '76xm-jjuj',
+      dateField: 'incident_datetime',
+      precinctField: 'policeprecinct',
+      zipField: 'zipcode',
+      partField: 'final_call_type',
+    })
+  })
+
+  it('counts only incidents an ambulance responded to, including patient gone and no emergency found', () => {
+    expect(build.where).toBe("incident_disposition_code IN ('82', '83', '90', '91', '92', '93', '94', '95', '96')")
+  })
+
+  it('puts every call type in FDNY’s dictionary in exactly one part', () => {
+    const grouped = Object.values(build.parts).flat()
+    expect([...grouped].sort()).toEqual(Object.keys(fdnyCallTypes).sort())
+  })
+
+  it.each([
+    ['CARDBR', 'Breathing or cardiac'],
+    ['ARREST', 'Breathing or cardiac'],
+    ['SHOT', 'Injury'],
+    ['EDPC', 'Psychiatric'],
+    ['DRUG', 'Drugs or alcohol'],
+    ['UNC', 'Unconscious or altered'],
+    ['CVAC', 'Illness'],
+    ['UNKNOW', 'Unknown or other'],
+    ['T-ARST', 'Breathing or cardiac'],
+    ['SICKFC', 'Illness'],
+  ])('files %s under %s', (code, part) => {
+    expect(build.parts[part]).toContain(code)
+  })
+})
+
+describe('ambulance response time', () => {
+  const layer = getLayer('ambulance-response-time')
+
+  it('is the Medical story’s second layer', () => {
+    expect(layersOf('medical').map((l) => l.id)).toEqual(['ambulance-calls', 'ambulance-response-time'])
+    expect(layer).toMatchObject({
+      label: 'Ambulance response time',
+      note: 'Average minutes from call to first ambulance on scene',
+      measure: 'Average minutes from a call entering FDNY’s dispatch system to the first ambulance arriving',
+      unit: 'minutes',
+      format: 'minutes',
+      aggregation: 'ratio',
+      scale: 1 / 60,
+    })
+  })
+
+  it('averages valid response times of incidents an ambulance responded to', () => {
+    expect(layer.build).toMatchObject({
+      dataset: '76xm-jjuj',
+      where: "valid_incident_rspns_time_indc = 'Y' AND incident_disposition_code IN ('82', '83', '90', '91', '92', '93', '94', '95', '96')",
+      sumField: 'incident_response_seconds_qy',
+    })
+  })
+
+  it('breaks responses down by how long they took', () => {
+    expect(layer.breakdown).toEqual({
+      title: 'How long responses took',
+      parts: ['Under 5 minutes', '5 to 10 minutes', '10 to 15 minutes', '15 to 20 minutes', '20 minutes or more'],
+    })
+    expect(layer.build!.partField).toBe(
+      "case(incident_response_seconds_qy < 300, 'Under 5 minutes', incident_response_seconds_qy < 600, '5 to 10 minutes', " +
+        "incident_response_seconds_qy < 900, '10 to 15 minutes', incident_response_seconds_qy < 1200, '15 to 20 minutes', " +
+        "true, '20 minutes or more')",
+    )
   })
 })

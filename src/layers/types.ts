@@ -10,8 +10,10 @@ export type Source = {
 }
 
 /**
- * How a count layer is built from NYC Open Data: records matching `where`,
- * counted by precinct, month and breakdown part (scripts/build-layer.mjs).
+ * How a layer is built from NYC Open Data: records matching `where`, counted by
+ * precinct, month and breakdown part (scripts/build-layer.mjs). With `sumField`
+ * the layer is a ratio: the field's sum over the number of records, e.g. an
+ * average response time.
  */
 export type OpenDataCountsBuild = {
   kind: 'open-data-counts'
@@ -25,8 +27,10 @@ export type OpenDataCountsBuild = {
   precinctField: string
   /** Field holding the ZIP code, used to tell precincts 105 and 116 apart (dispatchPrecinct). */
   zipField: string
-  /** The field the breakdown groups. */
+  /** The field (or SoQL expression) the breakdown groups. */
   partField: string
+  /** Ratio layers only: the field summed as the numerator; the record count is the denominator. */
+  sumField?: string
   /** Breakdown part -> the raw values of partField it covers, in breakdown order. Every value seen must be listed. */
   parts: Readonly<Record<string, readonly string[]>>
 }

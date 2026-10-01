@@ -7,3 +7,8 @@ export function layerFileText(layerId: string): string {
   if (text === undefined) throw new Error(`No file public/data/layers/${layerId}.json; run npm run data:layer -- ${layerId}`)
   return text
 }
+
+/** Whether a layer's file has been built. */
+export function hasLayerFile(layerId: string): boolean {
+  return `../../public/data/layers/${layerId}.json` in files
+}

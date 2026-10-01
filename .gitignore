@@ -27,3 +27,5 @@ coverage
 # Local agent session state
 .remember
 docs
+# API responses cached by npm run data:layer
+.cache/

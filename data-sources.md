@@ -43,8 +43,9 @@ breakdown part. Then:
 npm run data:layer -- <layer-id>
 ```
 
-queries the API one year at a time (counts grouped by precinct, month and
-part, computed by the API), writes `public/data/layers/<layer-id>.json`, and
+queries the API one month at a time (counts grouped by precinct, ZIP code,
+month and part, computed by the API; each month's response is cached in
+`.cache/`, so a rerun only fetches what's missing, and `--refresh` refetches), writes `public/data/layers/<layer-id>.json`, and
 prints what it counted per year. It stops, naming the value, if a record has a
 part value no part lists or a precinct NYPD doesn't have, so nothing is dropped
 silently. Records with no precinct are left out and reported. The app loads the
@@ -192,19 +193,42 @@ separately by precinct and month.
 
 ## 03 Medical — Ambulance calls
 
-Medical emergencies that FDNY EMS was dispatched to, by precinct, per month.
+Medical emergencies ambulances responded to, by precinct, per month.
 
 | Source | Publisher | Link | Used |
 |---|---|---|---|
-| EMS Incident Dispatch Data | FDNY, via NYC Open Data | https://data.cityofnewyork.us/d/76xm-jjuj | `incident_datetime`, `policeprecinct`, `final_call_type` |
-| EMS call type descriptions | FDNY (attachment to the dataset: `EMS_incident_dispatch_data_description.xlsx`, sheet "Call Type Descriptions") | same page | Call type code meanings |
+| EMS Incident Dispatch Data | FDNY, via NYC Open Data | https://data.cityofnewyork.us/d/76xm-jjuj | `incident_datetime`, `policeprecinct`, `zipcode`, `final_call_type`, `incident_disposition_code` |
+| EMS call type descriptions | FDNY (attachment to the dataset: `EMS_incident_dispatch_data_description.xlsx`, sheets "Call Type Descriptions" and "Incident Dispositions") | same page | Call type and disposition meanings; the call types are copied to `src/layers/fdny-ems-call-types.json` |
 | NYPD Police Precincts | see above | | Boundaries |
 
-**Method:** count per precinct per calendar month, aggregated server-side as
-for fires. A year of data takes about 2.5 minutes to aggregate, so the build
-script queries one year at a time.
+**Filter: incidents an ambulance responded to.** The disposition says how each
+incident ended:
 
-**Coverage checked**
+| Code | Meaning | Counted |
+|---|---|---|
+| 82 | Transporting patient | Yes |
+| 83 | Patient pronounced dead | Yes |
+| 90 | Unfounded (no emergency found on arrival) | Yes |
+| 91 | Condition corrected | Yes |
+| 92 | Treated, not transported | Yes |
+| 93 | Refused medical aid | Yes |
+| 94 | Treated and transported | Yes |
+| 95 | Triaged at scene, no transport | Yes |
+| 96 | Patient gone on arrival | Yes |
+| 87, CANCEL | Cancelled | No |
+| DUP | Duplicate incident | No |
+| NOTSNT | Unit not sent | No |
+| ZZZZZZ | No disposition | No |
+
+The disposition is used rather than the on-scene time because about 20,000
+incidents a year end in a transport yet have no on-scene time recorded.
+
+**Method:** count per precinct per calendar month, aggregated server-side as
+for fires, with 105 and 116 told apart by ZIP code. The build queries one
+month at a time: a whole year takes the API longer than a request may wait. Built with
+`npm run data:layer -- ambulance-calls`.
+
+**Coverage checked** (every incident, before the disposition filter)
 
 | Year | Calls | No precinct |
 |---|---|---|
@@ -220,11 +244,64 @@ script queries one year at a time.
 About 1% of calls have no precinct and are left out (2.7% for 2026 so far).
 Precinct 22 (Central Park) is the lowest, at about 580 calls a year.
 
+**Built** 2026-09-30 (incidents an ambulance responded to):
+
+| Year | Counted | No precinct |
+|---|---|---|
+| 2019 | 1,474,211 | 13,992 |
+| 2020 | 1,362,526 | 12,080 |
+| 2021 | 1,443,598 | 14,416 |
+| 2022 | 1,526,227 | 14,807 |
+| 2023 | 1,546,535 | 15,124 |
+| 2024 | 1,546,138 | 15,338 |
+| 2025 | 1,514,013 | 14,500 |
+| 2026 (Jan–Jun) | 709,753 | 19,077 |
+
+Checked for 2025: counted plus no precinct (1,528,513) is every incident
+(1,612,273) less the cancelled, duplicate, unsent and undisposed ones (83,760).
+
 **Call type breakdown** groups `final_call_type`. 185 codes appear 2019–2026;
 the dictionary describes all 185. The grouping (Illness; Injury; Breathing or
 cardiac; Psychiatric; Drugs or alcohol; Unconscious or altered; Unknown or
-other) is defined code by code in the build script, with a test that every code
-in the dictionary is assigned to exactly one group.
+other) is defined code by code in `src/layers/ambulance-calls.layer.ts`, with a
+test that every code in the dictionary is in exactly one group. Fever, rash and
+travel variants, and `T-` codes (text and TTY calls), go with their base code.
+Standbys, mass-casualty incidents (fires, collapses, active shooters), special
+events, death confirmations and transfers count as Unknown or other.
+
+## 03 Medical — Ambulance response time
+
+Average minutes from a call entering FDNY's dispatch system to the first
+ambulance arriving, by precinct, per month.
+
+| Source | Publisher | Link | Used |
+|---|---|---|---|
+| EMS Incident Dispatch Data | FDNY, via NYC Open Data | https://data.cityofnewyork.us/d/76xm-jjuj | `incident_response_seconds_qy`, `valid_incident_rspns_time_indc`, plus the fields used for ambulance calls |
+
+`incident_response_seconds_qy` is, in FDNY's words, the time between
+`incident_datetime` ("the incident was created in the dispatch system") and
+`first_on_scene_datetime` ("the first unit signals that it has arrived").
+
+**Filter:** the ambulance calls filter (dispositions 82, 83, 90–96) and
+`valid_incident_rspns_time_indc = 'Y'`, FDNY's flag that the times making up
+the response time are valid (about 2% of responses are not).
+
+**Method:** per precinct and month, the API returns the number of responses and
+the sum of their response times; the layer is a ratio, total seconds ÷
+responses, shown in minutes. A borough, the city or several months combine the
+same way (total ÷ total), never by averaging averages. Built with
+`npm run data:layer -- ambulance-response-time`.
+
+**Breakdown:** responses by how long they took (under 5, 5–10, 10–15, 15–20,
+20 minutes or more), bucketed by the API with a SoQL `case()`.
+
+**Caveats**
+
+- All priorities are included. FDNY's own reports separate life-threatening
+  calls, which are answered faster; places with more low-priority calls average
+  higher here.
+- An average is pulled up by a few very long waits (March 2025: up to 8.8
+  hours, against an average of 12.7 minutes). The breakdown shows the spread.
 
 ## Years
 

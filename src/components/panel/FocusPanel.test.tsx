@@ -7,7 +7,6 @@ import { renderWithExplorer } from '../../test/renderWithExplorer'
 import { FocusPanel } from './FocusPanel'
 
 const fire = { storyId: 'fire' as const, metricId: 'structural-fires' }
-const ems = { storyId: 'medical' as const, metricId: 'ambulance-calls' }
 const section = (name: string) => screen.getByRole('region', { name })
 
 describe('FocusPanel', () => {
@@ -73,13 +72,14 @@ describe('data sources', () => {
     expect(details.open).toBe(true)
   })
 
+  // Population density stays sample data until its build lands.
   it('says it holds sample values even while closed', () => {
-    renderWithExplorer(<FocusPanel />, ems)
+    renderWithExplorer(<FocusPanel />)
     expect(section('Data sources').querySelector('summary')).toHaveTextContent('Data sources · sample values')
   })
 
   it('says plainly when the values are samples', () => {
-    renderWithExplorer(<FocusPanel />, ems)
+    renderWithExplorer(<FocusPanel />)
     expect(section('Data sources')).toHaveTextContent('These values are samples')
   })
 

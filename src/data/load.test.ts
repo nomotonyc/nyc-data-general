@@ -29,8 +29,11 @@ describe('DatasetStore', () => {
     const store = new DatasetStore(fakeFetch().fetcher)
     await store.load()
     expect(store.get('structural-fires').isSample).toBe(false)
-    expect(store.get('ambulance-calls').isSample).toBe(true)
-    expect(store.get('ambulance-calls')).toBe(store.get('ambulance-calls'))
+    const sampleLayer = LAYERS.find((l) => !l.build)
+    if (sampleLayer) {
+      expect(store.get(sampleLayer.id).isSample).toBe(true)
+      expect(store.get(sampleLayer.id)).toBe(store.get(sampleLayer.id))
+    }
   })
 
   it('refuses a built layer before it has loaded', () => {

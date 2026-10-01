@@ -13,7 +13,7 @@ export default {
   breakdown: { title: 'Age mix', parts: ['Under 18', '18–34', '35–64', '65 and over'] },
   sources: [
     {
-      name: 'American Community Survey 5-year estimates (tables B01003, B01001)',
+      name: 'American Community Survey 5-year estimates, table B01001 (sex by age)',
       publisher: 'U.S. Census Bureau',
       url: 'https://www2.census.gov/programs-surveys/acs/summary_file/',
       used: 'Population and age by census tract, 2021–2024 releases',
@@ -21,7 +21,7 @@ export default {
     {
       name: '2020 Census Redistricting Data (P.L. 94-171)',
       publisher: 'U.S. Census Bureau',
-      url: 'https://www2.census.gov/programs-surveys/decennial/2020/data/01-Redistricting_File--PL_94-171/New_York/',
+      url: 'https://www2.census.gov/programs-surveys/decennial/2020/data/01-Redistricting_File--PL_94-171/New_York/ny2020.pl.zip',
       used: 'Census blocks: population weights, land area and location',
     },
   ],
@@ -31,5 +31,10 @@ export default {
     'Density is population divided by land area; water is excluded. Boroughs, the city and ranges of years use total population over total land, not an average of densities.',
     'ACS figures are 5-year estimates: “2024” averages 2020–2024 responses. Only 2021–2024 are available; other years show the nearest one.',
   ],
+  build: {
+    kind: 'census-density',
+    blocks: 'https://www2.census.gov/programs-surveys/decennial/2020/data/01-Redistricting_File--PL_94-171/New_York/ny2020.pl.zip',
+    acs: 'https://www2.census.gov/programs-surveys/acs/summary_file/{year}/table-based-SF/data/5YRData/acsdt5y{year}-b01001.dat',
+  },
   sample: { lo: 5000, hi: 120000 },
 } satisfies Metric

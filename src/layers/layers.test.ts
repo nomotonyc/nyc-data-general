@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { STORIES, YEARS } from '../domain/stories'
-import { LAYERS, getLayer, layerMethod, layerSources, layersOf } from '.'
+import { LAYERS, getLayer, layerMethod, layerSources, layersOf, type OpenDataCountsBuild, type OpenDataPointsBuild } from '.'
 import fdnyCallTypes from './fdny-ems-call-types.json'
 
 describe('the layer registry', () => {
@@ -138,7 +138,8 @@ describe('layerMethod', () => {
 })
 
 describe('build configs', () => {
-  const built = LAYERS.filter((l) => l.build)
+  // Layers built from Open Data records, whose build lists the raw values in each part.
+  const built = LAYERS.flatMap((l) => (l.build && l.build.kind !== 'census-density' ? [{ ...l, build: l.build }] : []))
 
   it('builds structural fires from Fire Incident Dispatch Data', () => {
     expect(getLayer('structural-fires').build).toMatchObject({
@@ -153,7 +154,7 @@ describe('build configs', () => {
   })
 
   it('files each fire classification under the building type the audit gives it', () => {
-    const parts = getLayer('structural-fires').build!.parts
+    const parts = (getLayer('structural-fires').build as OpenDataCountsBuild).parts
     expect(parts['Hotel, shelter or SRO']).toEqual(["Multiple Dwelling 'B' Fire"])
     expect(parts['House']).toEqual(['Private Dwelling Fire'])
     expect(Object.values(parts).flat()).toHaveLength(17)
@@ -178,7 +179,7 @@ describe('build configs', () => {
 })
 
 describe('the ambulance calls build', () => {
-  const build = getLayer('ambulance-calls').build!
+  const build = getLayer('ambulance-calls').build as OpenDataCountsBuild
 
   it('counts EMS incidents from EMS Incident Dispatch Data', () => {
     expect(build).toMatchObject({
@@ -252,7 +253,7 @@ describe('ambulance response time', () => {
       title: 'How long responses took',
       parts: ['Under 5 minutes', '5 to 10 minutes', '10 to 15 minutes', '15 to 20 minutes', '20 minutes or more'],
     })
-    expect(layer.build!.partField).toBe(
+    expect((layer.build as OpenDataCountsBuild).partField).toBe(
       "case(incident_response_seconds_qy < 300, 'Under 5 minutes', incident_response_seconds_qy < 600, '5 to 10 minutes', " +
         "incident_response_seconds_qy < 900, '10 to 15 minutes', incident_response_seconds_qy < 1200, '15 to 20 minutes', " +
         "true, '20 minutes or more')",
@@ -262,7 +263,7 @@ describe('ambulance response time', () => {
 
 describe('fire apparatus accidents', () => {
   const layer = getLayer('fire-apparatus-accidents')
-  const build = layer.build!
+  const build = layer.build as OpenDataPointsBuild
 
   it('is the Fire story’s second layer', () => {
     expect(layersOf('fire').map((l) => l.id)).toEqual(['structural-fires', 'fire-apparatus-accidents'])
@@ -290,5 +291,24 @@ describe('fire apparatus accidents', () => {
 
   it('breaks crashes down by their worst injury', () => {
     expect(layer.breakdown).toEqual({ title: 'Injuries', parts: ['No one hurt', 'Someone injured', 'Someone killed'] })
+  })
+})
+
+describe('the population density build', () => {
+  const layer = getLayer('population-density')
+
+  it('uses 2020 census blocks and ACS 5-year age tables', () => {
+    expect(layer.build).toEqual({
+      kind: 'census-density',
+      blocks: 'https://www2.census.gov/programs-surveys/decennial/2020/data/01-Redistricting_File--PL_94-171/New_York/ny2020.pl.zip',
+      acs: 'https://www2.census.gov/programs-surveys/acs/summary_file/{year}/table-based-SF/data/5YRData/acsdt5y{year}-b01001.dat',
+    })
+  })
+
+  it('credits the files it is built from', () => {
+    const urls = layer.sources.map((s) => s.url).join(' ')
+    expect(urls).toContain('ny2020.pl.zip')
+    expect(urls).toContain('acs/summary_file')
+    expect(layer.sources.map((s) => s.name).join(' ')).toContain('B01001')
   })
 })

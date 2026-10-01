@@ -108,8 +108,7 @@ Residents per square mile of land, by precinct, per year.
 
 | Source | Publisher | Link | Used |
 |---|---|---|---|
-| American Community Survey 5-year estimates, table B01003 (total population), by census tract | U.S. Census Bureau | https://www2.census.gov/programs-surveys/acs/summary_file/ (table-based summary file, `acsdt5y{year}-b01003.dat`) | Tract population, 2021–2024 releases |
-| American Community Survey 5-year estimates, table B01001 (sex by age), by census tract | U.S. Census Bureau | same, `acsdt5y{year}-b01001.dat` | Age breakdown |
+| American Community Survey 5-year estimates, table B01001 (sex by age), by census tract | U.S. Census Bureau | https://www2.census.gov/programs-surveys/acs/summary_file/ (table-based summary file, `acsdt5y{year}-b01001.dat`) | Total population (`B01001_E001`, the same as table B01003) and the age breakdown, 2021–2024 releases |
 | 2020 Census Redistricting Data (P.L. 94-171), census blocks | U.S. Census Bureau | https://www2.census.gov/programs-surveys/decennial/2020/data/01-Redistricting_File--PL_94-171/New_York/ny2020.pl.zip | Block population (`POP100`), land area (`AREALAND`), interior point (`INTPTLAT`, `INTPTLON`) |
 | NYPD Police Precincts | see above | | Boundaries |
 
@@ -131,6 +130,23 @@ No API key is needed; all are bulk files.
 
 Checked per release: 2021 places 8,734,225 of 8,736,047; 2024 places 8,482,104
 of 8,483,844 (the remainder are tracts with no 2020 block population).
+
+**Built** with `npm run data:layer -- population-density` (layer kind
+`census-density`, logic in `src/data/build/census.ts`). It downloads the files
+above once into `.cache/census/` (the ACS files are about 200 MB each; only the
+city's tracts are kept). 2026-09-30:
+
+| Year | ACS residents | Placed in precincts | In tracts with no 2020 residents |
+|---|---|---|---|
+| 2021 | 8,736,047 | 8,734,228 | 0 |
+| 2022 | 8,622,467 | 8,620,770 | 0 |
+| 2023 | 8,516,202 | 8,514,611 | 52 |
+| 2024 | 8,483,844 | 8,482,105 | 136 |
+
+These reproduce the audit (2024: 8,482,104 placed). The small gap is the
+1,760 residents of blocks on the shoreline outside every precinct. Age groups
+from B01001: under 18 (cells 003–006, 027–030), 18–34 (007–012, 031–036), 35–64
+(013–019, 037–043), 65 and over (020–025, 044–049).
 
 **Caveats**
 

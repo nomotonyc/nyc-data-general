@@ -39,7 +39,7 @@ export function countQuery(build: OpenDataCountsBuild, period: { year: number; m
  */
 export function aggregateCounts(layer: Metric, rows: readonly CountRow[]): { file: LayerFile; report: YearReport[] } {
   const build = layer.build
-  if (!build) throw new Error(`Layer ${layer.id} has no build config`)
+  if (!build || build.kind === 'census-density') throw new Error(`Layer ${layer.id} is not built from Open Data records`)
 
   const periods = layerPeriods(layer)
   const periodIndex = new Map(periods.map((p, i) => [periodKey(p), i]))

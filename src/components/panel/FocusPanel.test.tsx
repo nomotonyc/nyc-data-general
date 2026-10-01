@@ -1,6 +1,8 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { datasets, getDataset } from '../../data/load'
+import { generateSampleDataset } from '../../data/sample'
 import { METHOD_URL } from '../../domain/stories'
 import { getLayer, layerMethod, layerSources } from '../../layers'
 import { renderWithExplorer } from '../../test/renderWithExplorer'
@@ -72,15 +74,21 @@ describe('data sources', () => {
     expect(details.open).toBe(true)
   })
 
-  // Population density stays sample data until its build lands.
-  it('says it holds sample values even while closed', () => {
-    renderWithExplorer(<FocusPanel />)
-    expect(section('Data sources').querySelector('summary')).toHaveTextContent('Data sources · sample values')
-  })
+  describe('for a layer still on sample values', () => {
+    // Every layer has real data now; a new layer without a build starts on samples.
+    const real = getDataset('population-density')
+    beforeEach(() => datasets.add(generateSampleDataset(getLayer('population-density'))))
+    afterEach(() => datasets.add(real))
 
-  it('says plainly when the values are samples', () => {
-    renderWithExplorer(<FocusPanel />)
-    expect(section('Data sources')).toHaveTextContent('These values are samples')
+    it('says it holds sample values even while closed', () => {
+      renderWithExplorer(<FocusPanel />)
+      expect(section('Data sources').querySelector('summary')).toHaveTextContent('Data sources · sample values')
+    })
+
+    it('says plainly when the values are samples', () => {
+      renderWithExplorer(<FocusPanel />)
+      expect(section('Data sources')).toHaveTextContent('These values are samples')
+    })
   })
 
   it('dates real data by when it was built', () => {

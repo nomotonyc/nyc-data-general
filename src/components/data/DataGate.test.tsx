@@ -25,7 +25,7 @@ describe('DataGate', () => {
     let fail = true
     const store = new DatasetStore(async (url) => (fail ? new Response('', { status: 503 }) : file(url)))
     render(<DataGate store={store}>app</DataGate>)
-    expect(await screen.findByRole('alert')).toHaveTextContent('Structural fires data (503)')
+    expect(await screen.findByRole('alert')).toHaveTextContent(/Couldn’t load [A-Za-z -]+ data \(503\)/)
     fail = false
     await userEvent.click(screen.getByRole('button', { name: 'Try again' }))
     expect(await screen.findByText('app')).toBeInTheDocument()

@@ -5,7 +5,7 @@ import { Breakdown } from './Breakdown'
 import { Trend } from './Trend'
 
 const fire = { storyId: 'fire' as const, metricId: 'structural-fires' }
-const ems = { storyId: 'medical' as const, metricId: 'ems-calls' }
+const ems = { storyId: 'medical' as const, metricId: 'ambulance-calls' }
 
 describe('Trend', () => {
   it('names the place, the period and the change', () => {

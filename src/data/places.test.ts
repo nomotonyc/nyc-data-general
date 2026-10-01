@@ -12,14 +12,14 @@ const people = getLayer('population-density')
 const y2025 = { from: 2025, to: 2025 } as const
 
 describe('areaIdsIn', () => {
-  it('lists a borough’s areas, merged or not', () => {
-    expect(areaIdsIn(fire, 'Queens')).toHaveLength(16)
-    expect(areaIdsIn(fire, 'Queens')).toContain('105+116')
+  it('lists a borough’s precincts', () => {
+    expect(areaIdsIn(fire, 'Queens')).toHaveLength(17)
+    expect(areaIdsIn(fire, 'Queens')).toEqual(expect.arrayContaining(['105', '116']))
     expect(areaIdsIn(density, 'Queens')).toHaveLength(17)
   })
 
   it('lists every area for the whole city', () => {
-    expect(areaIdsIn(fire, null)).toHaveLength(77)
+    expect(areaIdsIn(fire, null)).toHaveLength(78)
   })
 })
 

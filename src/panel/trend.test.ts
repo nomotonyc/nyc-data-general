@@ -35,11 +35,11 @@ describe('trend', () => {
 
   it('draws a pinned precinct over its dimmed borough and the city', () => {
     const t = trend({ ...fire, borough: 'Queens', pinnedPrecinct: 116 }, ds, palette)
-    expect(t.title).toBe('Precincts 105 & 116')
+    expect(t.title).toBe('Precinct 116')
     expect(t.lines.map((l) => [l.name, l.colour])).toEqual([
       ['New York City', palette.city],
       ['Queens', palette.ramp[1]],
-      ['Precincts 105 & 116', palette.accent],
+      ['Precinct 116', palette.accent],
     ])
   })
 

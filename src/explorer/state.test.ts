@@ -52,7 +52,7 @@ describe('selectMetric', () => {
   })
 
   it('ignores a layer from another story', () => {
-    expect(reduce(initial, { type: 'selectMetric', metricId: 'ems-calls' })).toBe(initial)
+    expect(reduce(initial, { type: 'selectMetric', metricId: 'ambulance-calls' })).toBe(initial)
   })
 })
 
@@ -156,6 +156,6 @@ describe('trend dialog', () => {
 describe('activeMetric', () => {
   it('returns the selected layer of the current story', () => {
     expect(activeMetric(initial).label).toBe('Population density')
-    expect(activeMetric(reduce(initial, { type: 'selectStory', storyId: 'medical' })).label).toBe('EMS calls')
+    expect(activeMetric(reduce(initial, { type: 'selectStory', storyId: 'medical' })).label).toBe('Ambulance calls')
   })
 })

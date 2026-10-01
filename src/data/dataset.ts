@@ -14,9 +14,11 @@ export type LayerDataset = {
   layerId: string
   /** True while the story is served by generated values. */
   isSample: boolean
+  /** When real data was built (ISO timestamp); null for sample data. */
+  asOf: string | null
   /** Every period covered, oldest first. */
   periods: readonly Period[]
-  /** The areas values are reported for (see PRECINCT_AREAS, DISPATCH_AREAS). */
+  /** The areas values are reported for: every precinct (PRECINCT_AREAS). */
   areas: readonly Area[]
   /** metricId -> areaId -> one value per period. For ratio layers, the numerator. */
   values: Readonly<Record<string, ByArea>>

@@ -40,10 +40,16 @@ export function formatShort(format: ValueFormat, v: number): string {
 }
 
 /** "49 fires", "7.4 per 10k residents"; percent, minutes and currency already say what they are. */
-export function formatWithUnit(layer: { unit: string; format?: ValueFormat }, v: number): string {
+/** The unit to write after a value: none for formats that already say it (9.3 min, 24.2%, $77,800). */
+export function unitAfter(layer: { unit: string; format?: ValueFormat }): string {
   const format = layer.format ?? 'count'
-  const value = formatValue(format, v)
-  return format === 'count' || format === 'decimal' ? `${value} ${layer.unit}` : value
+  return format === 'count' || format === 'decimal' ? layer.unit : ''
+}
+
+export function formatWithUnit(layer: { unit: string; format?: ValueFormat }, v: number): string {
+  const value = formatValue(layer.format ?? 'count', v)
+  const unit = unitAfter(layer)
+  return unit ? `${value} ${unit}` : value
 }
 
 export function ordinal(n: number): string {

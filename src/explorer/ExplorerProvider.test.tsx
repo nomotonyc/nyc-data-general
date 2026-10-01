@@ -27,7 +27,7 @@ describe('ExplorerProvider', () => {
   })
 
   it('accepts a starting state', () => {
-    render(<ExplorerProvider initialState={{ ...initialExplorerState, storyId: 'medical', metricId: 'ems-calls' }}><Probe /></ExplorerProvider>)
+    render(<ExplorerProvider initialState={{ ...initialExplorerState, storyId: 'medical', metricId: 'ambulance-calls' }}><Probe /></ExplorerProvider>)
     expect(screen.getByText('story medical')).toBeInTheDocument()
   })
 

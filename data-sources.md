@@ -18,18 +18,38 @@ and the Where list. Nothing else needs editing. The file holds:
 | `id` | Unique, lower-case and hyphenated; also the file name |
 | `story`, `order` | Which story's picker it appears in, and where |
 | `label`, `note` | The title, and the one-line subtitle under it |
+| `measure` | Exactly what the number is, in one sentence, shown under the headline value with its years |
 | `unit` | Shown after values: "fires", "people per sq mi" |
 | `aggregation` | `sum` for counts; `ratio` for rates like density (numerator ÷ denominator) |
-| `data` | Monthly or yearly, whether 105 & 116 are merged (`dispatch`) or separate (`precincts`), first and last year |
+| `data` | Monthly or yearly, first and last year |
 | `breakdown` | The panel's breakdown title and parts |
 | `sources` | This layer's own data sources (boundary credits are added for every layer) |
 | `method` | Caveats specific to this layer, in plain sentences |
+| `build` | How real data is made (see below). Without it the layer shows sample values, and says so |
 | `sample` | The value range and seasonality to fake until real data lands |
 
 Added automatically from those fields: the precinct and borough boundary
-credits, the 105 & 116 caveat for `dispatch` layers, the partial-year caveat
+credits, the 105 & 116 caveat for layers built from dispatch records, the partial-year caveat
 for layers reaching the final year, and the legend's note when chosen years
 fall outside `data`.
+
+### Building a layer's data
+
+For counts from NYC Open Data, `build` names the dataset, the SoQL filter, the
+date and precinct fields, and which raw values of a field make up each
+breakdown part. Then:
+
+```
+npm run data:layer -- <layer-id>
+```
+
+queries the API one month at a time (counts grouped by precinct, ZIP code,
+month and part, computed by the API; each month's response is cached in
+`.cache/`, so a rerun only fetches what's missing, and `--refresh` refetches), writes `public/data/layers/<layer-id>.json`, and
+prints what it counted per year. It stops, naming the value, if a record has a
+part value no part lists or a precinct NYPD doesn't have, so nothing is dropped
+silently. Records with no precinct are left out and reported. The app loads the
+file at startup and checks it covers every area and month.
 
 The tests check every layer file is complete (a known story, sources, caveats,
 breakdown, sample range, valid years) and name the file that is not. Record the
@@ -48,7 +68,13 @@ source audit for a new layer in this document too.
 Simplified to about 2 m and written to `public/data/nyc-precincts.geojson` (with label points in `nyc-precinct-labels.geojson`) by `npm run data:precincts`.
 
 Borough outlines come from the NYC Department of City Planning
-(https://www.nyc.gov/site/planning/), served from `public/data`. The map shows
+(https://www.nyc.gov/site/planning/), with each
+island and sliver moved to the borough whose precincts cover it
+(`scripts/align-boroughs.mjs`, run by `npm run data:precincts`), so a borough on
+the map is the area whose numbers it adds up: Rikers and Roosevelt Islands are
+drawn with Queens (precinct 114), Marble Hill with the Bronx (precinct 50),
+Jamaica Bay's islands with Queens (precinct 100), and Brooklyn Bridge Park's
+piers with Brooklyn. The outlines are served from `public/data`. The map shows
 no attribution control (its corner holds the legend), so every layer lists this
 source in the app instead.
 
@@ -66,10 +92,15 @@ tagged 116 is 2024-12-19. The two dispatch datasets adopted it unevenly:
 | 2024 | 773 | 16 | 28,023 | 653 |
 | 2025 | 373 | 447 | 27,778 | 759 |
 
-EMS still files almost all southeast Queens calls under 105. To keep the time
-series honest, **the fire and EMS layers treat 105 and 116 as one area
-("Precincts 105 & 116")** for every year. Population density can separate them
-(it is built from census blocks) and does.
+EMS still files almost all southeast Queens calls under 105. Both datasets
+record a ZIP code, and the two precincts follow ZIP lines: in 2025+ fire
+records, ZIPs 11413, 11422, 11430, 11434 and 11436 are 116 and the rest are
+105 (11411 splits 99% to 105). **The fire and EMS builds assign every record
+tagged 105 or 116 by its ZIP code** (`dispatchPrecinct` in
+`src/domain/geography.ts`); records without a ZIP keep the precinct recorded.
+Checked against FDNY's own tagging: 99.9% of 2025+ fire records agree, and the
+ZIP split reproduces the 2025 fire counts above exactly (105: 373, 116: 447).
+So every layer shows all 78 precincts.
 
 ## 01 Demographic — Population density
 
@@ -77,8 +108,7 @@ Residents per square mile of land, by precinct, per year.
 
 | Source | Publisher | Link | Used |
 |---|---|---|---|
-| American Community Survey 5-year estimates, table B01003 (total population), by census tract | U.S. Census Bureau | https://www2.census.gov/programs-surveys/acs/summary_file/ (table-based summary file, `acsdt5y{year}-b01003.dat`) | Tract population, 2021–2024 releases |
-| American Community Survey 5-year estimates, table B01001 (sex by age), by census tract | U.S. Census Bureau | same, `acsdt5y{year}-b01001.dat` | Age breakdown |
+| American Community Survey 5-year estimates, table B01001 (sex by age), by census tract | U.S. Census Bureau | https://www2.census.gov/programs-surveys/acs/summary_file/ (table-based summary file, `acsdt5y{year}-b01001.dat`) | Total population (`B01001_E001`, the same as table B01003) and the age breakdown, 2021–2024 releases |
 | 2020 Census Redistricting Data (P.L. 94-171), census blocks | U.S. Census Bureau | https://www2.census.gov/programs-surveys/decennial/2020/data/01-Redistricting_File--PL_94-171/New_York/ny2020.pl.zip | Block population (`POP100`), land area (`AREALAND`), interior point (`INTPTLAT`, `INTPTLON`) |
 | NYPD Police Precincts | see above | | Boundaries |
 
@@ -100,6 +130,23 @@ No API key is needed; all are bulk files.
 
 Checked per release: 2021 places 8,734,225 of 8,736,047; 2024 places 8,482,104
 of 8,483,844 (the remainder are tracts with no 2020 block population).
+
+**Built** with `npm run data:layer -- population-density` (layer kind
+`census-density`, logic in `src/data/build/census.ts`). It downloads the files
+above once into `.cache/census/` (the ACS files are about 200 MB each; only the
+city's tracts are kept). 2026-09-30:
+
+| Year | ACS residents | Placed in precincts | In tracts with no 2020 residents |
+|---|---|---|---|
+| 2021 | 8,736,047 | 8,734,228 | 0 |
+| 2022 | 8,622,467 | 8,620,770 | 0 |
+| 2023 | 8,516,202 | 8,514,611 | 52 |
+| 2024 | 8,483,844 | 8,482,105 | 136 |
+
+These reproduce the audit (2024: 8,482,104 placed). The small gap is the
+1,760 residents of blocks on the shoreline outside every precinct. Age groups
+from B01001: under 18 (cells 003–006, 027–030), 18–34 (007–012, 031–036), 35–64
+(013–019, 037–043), 65 and over (020–025, 044–049).
 
 **Caveats**
 
@@ -126,6 +173,8 @@ Fires in buildings that FDNY was dispatched to, by precinct, per month.
 
 **Method:** count per precinct per calendar month of `incident_datetime`,
 aggregated server-side with SoQL (`$group=policeprecinct,date_trunc_ym(incident_datetime)`).
+Built with `npm run data:layer -- structural-fires`, last on 2026-09-30; its
+counts plus the records with no precinct reproduce the totals below exactly.
 
 **Coverage checked**
 
@@ -164,21 +213,92 @@ fires). It shares no ID with dispatch data; matching on precinct and time found
 is unreliable. It is the source for a future "fire causes" layer, aggregated
 separately by precinct and month.
 
-## 03 Medical — EMS calls
+## 02 Fire — Fire apparatus accidents
 
-Medical emergencies that FDNY EMS was dispatched to, by precinct, per month.
+Police-reported crashes involving an FDNY fire truck, engine or ladder, by
+precinct, per month.
 
 | Source | Publisher | Link | Used |
 |---|---|---|---|
-| EMS Incident Dispatch Data | FDNY, via NYC Open Data | https://data.cityofnewyork.us/d/76xm-jjuj | `incident_datetime`, `policeprecinct`, `final_call_type` |
-| EMS call type descriptions | FDNY (attachment to the dataset: `EMS_incident_dispatch_data_description.xlsx`, sheet "Call Type Descriptions") | same page | Call type code meanings |
+| Motor Vehicle Collisions – Crashes | NYPD, via NYC Open Data | https://data.cityofnewyork.us/d/h9gi-nx95 | `crash_date`, `latitude`, `longitude`, `vehicle_type_code1`–`vehicle_type_code_3`, `number_of_persons_injured`, `number_of_persons_killed` |
+
+**Which crashes.** The vehicle types are typed by officers and cut to 10
+characters, so a fire truck appears as FIRE TRUCK, FIRETRUCK, FDNY FIRET, FIRE
+ENGIN, LADDER TRU, Fire Truvk and so on. The layer file lists the 46 spellings
+seen 2019–2026 (matched upper-cased) in vehicle type codes 1 to 3. Left out:
+
+| Values | Crashes 2019–2026 | Why |
+|---|---|---|
+| Tanker | 1,072 | Fuel tankers |
+| FDNY AMBUL, FDNY EMS, FD AMBULAN | ~150 | Ambulances are not fire apparatus |
+| FDNY, FDNY VEHIC, FDNY CHIEF, FDNY PICKU, FDNY VAN, FIRE DEPT | ~150 | Could be any FDNY vehicle |
+| FRIEGHTLIN, PUMP | few | A truck make; concrete pumps |
+
+**Where.** The dataset has no precinct, so the build places each crash in the
+precinct its coordinates fall in, using the map's precinct shapes
+(`src/data/build/openDataPoints.ts`). Crashes without coordinates are left out
+and reported (4–14 a year).
+
+**Built** 2026-09-30:
+
+| Year | Counted | No location |
+|---|---|---|
+| 2019 | 154 | 4 |
+| 2020 | 163 | 12 |
+| 2021 | 194 | 6 |
+| 2022 | 163 | 14 |
+| 2023 | 156 | 11 |
+| 2024 | 136 | 13 |
+| 2025 | 180 | 5 |
+| 2026 (Jan–Jun) | 136 | 8 |
+
+**Breakdown:** the crash's worst outcome: no one hurt, someone injured, someone
+killed.
+
+**Caveats:** only crashes police reported are in the dataset (anyone hurt or
+killed, or $1,000+ damage). Numbers per precinct are small, a few a year.
+NYPD publishes crashes with a delay: at the 2026-09-30 build the dataset ran to
+11 June 2026, so June 2026 is incomplete (2,322 crashes of all kinds, against
+about 7,000 in a typical month).
+
+## 03 Medical — Ambulance calls
+
+Medical emergencies ambulances responded to, by precinct, per month.
+
+| Source | Publisher | Link | Used |
+|---|---|---|---|
+| EMS Incident Dispatch Data | FDNY, via NYC Open Data | https://data.cityofnewyork.us/d/76xm-jjuj | `incident_datetime`, `policeprecinct`, `zipcode`, `final_call_type`, `incident_disposition_code` |
+| EMS call type descriptions | FDNY (attachment to the dataset: `EMS_incident_dispatch_data_description.xlsx`, sheets "Call Type Descriptions" and "Incident Dispositions") | same page | Call type and disposition meanings; the call types are copied to `src/layers/fdny-ems-call-types.json` |
 | NYPD Police Precincts | see above | | Boundaries |
 
-**Method:** count per precinct per calendar month, aggregated server-side as
-for fires. A year of data takes about 2.5 minutes to aggregate, so the build
-script queries one year at a time.
+**Filter: incidents an ambulance responded to.** The disposition says how each
+incident ended:
 
-**Coverage checked**
+| Code | Meaning | Counted |
+|---|---|---|
+| 82 | Transporting patient | Yes |
+| 83 | Patient pronounced dead | Yes |
+| 90 | Unfounded (no emergency found on arrival) | Yes |
+| 91 | Condition corrected | Yes |
+| 92 | Treated, not transported | Yes |
+| 93 | Refused medical aid | Yes |
+| 94 | Treated and transported | Yes |
+| 95 | Triaged at scene, no transport | Yes |
+| 96 | Patient gone on arrival | Yes |
+| 87, CANCEL | Cancelled | No |
+| DUP | Duplicate incident | No |
+| NOTSNT | Unit not sent | No |
+| ZZZZZZ | No disposition | No |
+
+The disposition is used rather than the on-scene time because about 20,000
+incidents a year end in a transport yet have no on-scene time recorded.
+
+**Method:** count per precinct per calendar month, aggregated server-side as
+for fires, with 105 and 116 told apart by ZIP code. The build queries one
+month at a time: a whole year takes the API longer than a request may wait. Built with
+`npm run data:layer -- ambulance-calls`.
+
+**Coverage checked** (every incident, before the disposition filter)
 
 | Year | Calls | No precinct |
 |---|---|---|
@@ -194,11 +314,82 @@ script queries one year at a time.
 About 1% of calls have no precinct and are left out (2.7% for 2026 so far).
 Precinct 22 (Central Park) is the lowest, at about 580 calls a year.
 
+**Built** 2026-09-30 (incidents an ambulance responded to):
+
+| Year | Counted | No precinct |
+|---|---|---|
+| 2019 | 1,474,211 | 13,992 |
+| 2020 | 1,362,526 | 12,080 |
+| 2021 | 1,443,598 | 14,416 |
+| 2022 | 1,526,227 | 14,807 |
+| 2023 | 1,546,535 | 15,124 |
+| 2024 | 1,546,138 | 15,338 |
+| 2025 | 1,514,013 | 14,500 |
+| 2026 (Jan–Jun) | 709,753 | 19,077 |
+
+Checked for 2025: counted plus no precinct (1,528,513) is every incident
+(1,612,273) less the cancelled, duplicate, unsent and undisposed ones (83,760).
+
 **Call type breakdown** groups `final_call_type`. 185 codes appear 2019–2026;
 the dictionary describes all 185. The grouping (Illness; Injury; Breathing or
 cardiac; Psychiatric; Drugs or alcohol; Unconscious or altered; Unknown or
-other) is defined code by code in the build script, with a test that every code
-in the dictionary is assigned to exactly one group.
+other) is defined code by code in `src/layers/ambulance-calls.layer.ts`, with a
+test that every code in the dictionary is in exactly one group. Fever, rash and
+travel variants, and `T-` codes (text and TTY calls), go with their base code.
+Standbys, mass-casualty incidents (fires, collapses, active shooters), special
+events, death confirmations and transfers count as Unknown or other.
+
+## 03 Medical — Life-threatening response time
+
+Average minutes for an ambulance to reach a life-threatening emergency, by
+precinct, per month.
+
+| Source | Publisher | Link | Used |
+|---|---|---|---|
+| EMS Incident Dispatch Data | FDNY, via NYC Open Data | https://data.cityofnewyork.us/d/76xm-jjuj | `incident_response_seconds_qy`, `valid_incident_rspns_time_indc`, `initial_severity_level_code`, plus the fields used for ambulance calls |
+| Reviving EMS | Citizens Budget Commission | https://cbcny.org/research/reviving-ems | FDNY segments 1–3 are life-threatening, 4–8 are not |
+
+`incident_response_seconds_qy` is, in FDNY's words, the time between
+`incident_datetime` ("the incident was created in the dispatch system") and
+`first_on_scene_datetime` ("the first unit signals that it has arrived").
+
+**Filter:** life-threatening calls (`initial_severity_level_code` 1, 2 or 3,
+the segment the call was dispatched with), an ambulance responded (dispositions 82, 83, 90–96), and
+FDNY marks the response time valid (`valid_incident_rspns_time_indc = 'Y'`).
+
+**Why life-threatening only.** Response time depends mostly on priority. 2025,
+all valid responses:
+
+| Segments | Share | Average | Over 2 hours |
+|---|---|---|---|
+| 1–3 (life-threatening) | 40% | 9.4 min | 745 |
+| 4–7 | 60% | 16.5–27.9 min | 15,084 |
+| 8 | 0.2% | 78 min | 559 |
+
+Lower-priority calls wait in a queue, and their multi-hour waits dominate an
+all-priority average (16.1 min for 2025, rising to 21–25 min by mid-2026), which
+would read as "ambulances take 20 minutes" when it measures the queue. FDNY and
+the Mayor's Management Report track life-threatening calls separately for the
+same reason.
+
+**Initial rather than final severity.** About 8% of calls change segment after
+dispatch. Using the final segment would add calls upgraded only after a
+lower-priority ambulance was sent, which measures the queue rather than the
+response to calls known to be life-threatening (2025: 9.42 min by final
+segment, 8.19 min by initial).
+
+**Compared with the Mayor's Management Report:** its figure (13:09 for fiscal
+2026) is end-to-end, from the 911 call being answered; this one starts when the
+incident enters FDNY's EMS dispatch system, so it runs a few minutes shorter.
+
+**Method:** per precinct and month, the API returns the number of responses and
+the sum of their response times; the layer is a ratio, total seconds ÷
+responses, shown in minutes. A borough, the city or several months combine the
+same way (total ÷ total), never by averaging averages. Built with
+`npm run data:layer -- ambulance-response-time`.
+
+**Breakdown:** responses by how long they took (under 5, 5–10, 10–15, 15–20,
+20 minutes or more), bucketed by the API with a SoQL `case()`.
 
 ## Years
 

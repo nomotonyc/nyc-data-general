@@ -11,7 +11,6 @@ export function Breadcrumb() {
 
   const crumbs: Crumb[] = [{ label: 'New York City', go: () => dispatch({ type: 'focusBorough', borough: null }) }]
   if (borough) crumbs.push({ label: borough, go: () => dispatch({ type: 'unpinPrecinct' }) })
-  // The data's area, so a merged area reads "Precincts 105 & 116".
   if (pinnedPrecinct !== null) crumbs.push({ label: areaOfPrecinct(ds.areas, pinnedPrecinct).label, go: () => {} })
 
   return (

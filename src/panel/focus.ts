@@ -1,8 +1,9 @@
 import type { LayerDataset } from '../data/dataset'
 import { areaIdsIn } from '../data/places'
 import { areaValue, effectiveRange, rankOf } from '../data/selectors'
-import { compareSigned, formatValue, ordinal } from '../domain/format'
+import { compareSigned, formatValue, ordinal, unitAfter } from '../domain/format'
 import { BOROUGHS, PRECINCTS, areaOfPrecinct, boroughInSentence, precinctsIn, type Borough } from '../domain/geography'
+import { yearLabel } from '../domain/stories'
 import { activeMetric, type ExplorerState } from '../explorer/state'
 
 type Input = Pick<ExplorerState, 'storyId' | 'metricId' | 'borough' | 'pinnedPrecinct' | 'yearFrom' | 'yearTo'>
@@ -17,7 +18,7 @@ function reader(state: Input, ds: LayerDataset) {
   const show = (v: number) => formatValue(metric.format ?? 'count', v)
   /** A peer group's average: the mean area for counts; the group as a whole for ratios. */
   const average = (ids: readonly string[], values: readonly number[]) => (metric.aggregation === 'sum' ? mean(values) : value(ids))
-  return { metric, value, show, average }
+  return { metric, value, show, average, range }
 }
 
 export type FocusSummary = {
@@ -26,6 +27,8 @@ export type FocusSummary = {
   context: string
   value: string
   unit: string
+  /** What the value counts, and the years it covers. */
+  measure: string
   /** "+12% vs. the average borough", or the highest borough for the city. */
   comparison: string
   tone: 'accent' | 'neutral'
@@ -33,7 +36,9 @@ export type FocusSummary = {
 
 /** The panel's headline for the city, a focused borough, or a pinned precinct. */
 export function focusSummary(state: Input, ds: LayerDataset): FocusSummary {
-  const { metric, value, show, average } = reader(state, ds)
+  const { metric, value, show, average, range } = reader(state, ds)
+  const years = range.from === range.to ? yearLabel(range.from) : `${range.from}–${yearLabel(range.to)}`
+  const measure = `${metric.measure} · ${years}`
   const cityIds = areaIdsIn(ds, null)
   const boroughValues = BOROUGHS.map((b) => value(areaIdsIn(ds, b)))
   const tone = (comparison: string) => (comparison.startsWith('+') ? 'accent' : 'neutral')
@@ -48,7 +53,8 @@ export function focusSummary(state: Input, ds: LayerDataset): FocusSummary {
       name: area.label,
       context: `${area.borough} · ${ordinal(rankOf(own, boroughValuesOfAreas))} of ${boroughValuesOfAreas.length} in ${boroughInSentence(area.borough)} · ${ordinal(rankOf(own, cityValues))} of ${cityValues.length} citywide`,
       value: show(own),
-      unit: metric.unit,
+      unit: unitAfter(metric),
+    measure,
       comparison,
       tone: tone(comparison),
     }
@@ -61,7 +67,8 @@ export function focusSummary(state: Input, ds: LayerDataset): FocusSummary {
       name: state.borough,
       context: `${rankOf(own, boroughValues) === 1 ? 'Highest' : `${ordinal(rankOf(own, boroughValues))} highest`} of 5 boroughs · ${precinctsIn(state.borough).length} precincts`,
       value: show(own),
-      unit: metric.unit,
+      unit: unitAfter(metric),
+    measure,
       comparison,
       tone: tone(comparison),
     }
@@ -72,7 +79,8 @@ export function focusSummary(state: Input, ds: LayerDataset): FocusSummary {
     name: 'New York City',
     context: `All five boroughs · ${PRECINCTS.length} precincts`,
     value: show(value(cityIds)),
-    unit: metric.unit,
+    unit: unitAfter(metric),
+    measure,
     comparison: `Highest: ${highest}`,
     tone: 'neutral',
   }

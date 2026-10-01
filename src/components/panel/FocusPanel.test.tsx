@@ -1,6 +1,8 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { datasets, getDataset } from '../../data/load'
+import { generateSampleDataset } from '../../data/sample'
 import { METHOD_URL } from '../../domain/stories'
 import { getLayer, layerMethod, layerSources } from '../../layers'
 import { renderWithExplorer } from '../../test/renderWithExplorer'
@@ -16,6 +18,11 @@ describe('FocusPanel', () => {
     expect(within(focus).getByRole('heading', { name: 'New York City' })).toBeInTheDocument()
     expect(focus).toHaveTextContent('All five boroughs · 78 precincts')
     expect(focus).toHaveTextContent('fires')
+  })
+
+  it('says under the number what it counts', () => {
+    renderWithExplorer(<FocusPanel />, fire)
+    expect(section('In focus')).toHaveTextContent('Incidents FDNY was dispatched to and classified as structural fires · 2025')
   })
 
   it('headlines a pinned precinct with both ranks', () => {
@@ -67,14 +74,32 @@ describe('data sources', () => {
     expect(details.open).toBe(true)
   })
 
-  it('says it holds sample values even while closed', () => {
-    renderWithExplorer(<FocusPanel />, fire)
-    expect(section('Data sources').querySelector('summary')).toHaveTextContent('Data sources · sample values')
+  describe('for a layer still on sample values', () => {
+    // Every layer has real data now; a new layer without a build starts on samples.
+    const real = getDataset('population-density')
+    beforeEach(() => datasets.add(generateSampleDataset(getLayer('population-density'))))
+    afterEach(() => datasets.add(real))
+
+    it('says it holds sample values even while closed', () => {
+      renderWithExplorer(<FocusPanel />)
+      expect(section('Data sources').querySelector('summary')).toHaveTextContent('Data sources · sample values')
+    })
+
+    it('says plainly when the values are samples', () => {
+      renderWithExplorer(<FocusPanel />)
+      expect(section('Data sources')).toHaveTextContent('These values are samples')
+    })
   })
 
-  it('says plainly when the values are samples', () => {
+  it('dates real data by when it was built', () => {
     renderWithExplorer(<FocusPanel />, fire)
-    expect(section('Data sources')).toHaveTextContent('These values are samples')
+    expect(section('Data sources')).toHaveTextContent(/Data as of \d{1,2} [A-Z][a-z]+ 20\d\d/)
+  })
+
+  it('says nothing about samples once a layer has real data', () => {
+    renderWithExplorer(<FocusPanel />, fire)
+    expect(section('Data sources').querySelector('summary')).toHaveTextContent(/^Data sources$/)
+    expect(section('Data sources')).not.toHaveTextContent('samples')
   })
 
   it('follows the story', () => {

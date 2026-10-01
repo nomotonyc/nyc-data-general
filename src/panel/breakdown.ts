@@ -25,7 +25,7 @@ export function breakdown(state: Input, ds: LayerDataset, palette: { ramp: reado
     parts: layer.breakdown.parts.map((label, i) => ({
       label,
       width: shares[i] * 100,
-      share: `${Math.round(shares[i] * 100)}%`,
+      share: shares[i] > 0 && shares[i] < 0.005 ? '<1%' : `${Math.round(shares[i] * 100)}%`,
       colour: colours[i % colours.length],
     })),
   }

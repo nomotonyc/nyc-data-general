@@ -38,8 +38,8 @@ describe('PlaceList', () => {
   })
 
   it('shortens large values so the names keep their room, with the full value on hover', () => {
-    renderWithExplorer(<PlaceList />, { storyId: 'medical', metricId: 'ems-calls' })
-    const v = placeValues(getDataset('ems-calls'), getLayer('ems-calls'), { from: 2025, to: 2025 })
+    renderWithExplorer(<PlaceList />, { storyId: 'medical', metricId: 'ambulance-calls' })
+    const v = placeValues(getDataset('ambulance-calls'), getLayer('ambulance-calls'), { from: 2025, to: 2025 })
     const value = place(/^All of New York City/).querySelector('.rail__value')!
     expect(value).toHaveTextContent(/^[\d.]+[KM]$/)
     expect(value).toHaveAttribute('title', formatCount(v.city))

@@ -27,6 +27,17 @@ describe('focusSummary', () => {
     expect(s.tone).toBe('neutral')
   })
 
+  it('says exactly what the number counts, and for which years', () => {
+    expect(focusSummary(fire, ds).measure).toBe('Incidents FDNY was dispatched to and classified as structural fires · 2025')
+    expect(focusSummary({ ...fire, yearFrom: 2022, yearTo: 2026 }, ds).measure).toMatch(/ · 2022–2026 \(Jan–Jun\)$/)
+  })
+
+  it('names the year density actually uses', () => {
+    expect(focusSummary(initialExplorerState, getDataset('population-density')).measure).toBe(
+      'Residents per square mile of land, from Census Bureau estimates · 2024',
+    )
+  })
+
   it('ranks a focused borough and compares it with the average borough', () => {
     const s = focusSummary({ ...fire, borough: 'Queens' }, ds)
     expect(s.name).toBe('Queens')
@@ -42,12 +53,12 @@ describe('focusSummary', () => {
   it('ranks a pinned precinct in its borough and citywide', () => {
     const s = focusSummary({ ...fire, borough: 'Bronx', pinnedPrecinct: 44 }, ds)
     expect(s.name).toBe('Precinct 44')
-    expect(s.context).toMatch(/^Bronx · \d+(st|nd|rd|th) of 12 in the Bronx · \d+(st|nd|rd|th) of 77 citywide$/)
+    expect(s.context).toMatch(/^Bronx · \d+(st|nd|rd|th) of 12 in the Bronx · \d+(st|nd|rd|th) of 78 citywide$/)
     expect(s.comparison).toMatch(/^([+−]\d+% vs\. |Level with )the citywide precinct average$/)
   })
 
-  it('names 105 and 116 together where the data merges them', () => {
-    expect(focusSummary({ ...fire, borough: 'Queens', pinnedPrecinct: 116 }, ds).name).toBe('Precincts 105 & 116')
+  it('names precinct 116 on its own', () => {
+    expect(focusSummary({ ...fire, borough: 'Queens', pinnedPrecinct: 116 }, ds).name).toBe('Precinct 116')
   })
 
   it('marks above-average places in the story colour and below-average ones neutral', () => {
@@ -56,6 +67,13 @@ describe('focusSummary', () => {
     const below = summaries.find((s) => s.comparison.startsWith('−'))!
     expect(above.tone).toBe('accent')
     expect(below.tone).toBe('neutral')
+  })
+
+  it('leaves out the unit when the value already says it', () => {
+    const minutes = focusSummary({ ...fire, storyId: 'medical', metricId: 'ambulance-response-time' }, getDataset('ambulance-response-time'))
+    expect(minutes.value).toMatch(/ min$/)
+    expect(minutes.unit).toBe('')
+    expect(focusSummary(fire, ds).unit).toBe('fires')
   })
 
   it('uses the nearest available year for density', () => {

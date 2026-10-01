@@ -1,7 +1,7 @@
 import { FINAL_YEAR, FINAL_YEAR_LAST_MONTH, STORIES, type StoryId } from '../domain/stories'
 import type { Metric, Source } from './types'
 
-export type { Metric, Source } from './types'
+export type { CensusDensityBuild, Metric, OpenDataCountsBuild, OpenDataPointsBuild, Source } from './types'
 
 // Every *.layer.ts file in this folder is a layer. Adding one needs no other change.
 const files = import.meta.glob<{ default: Metric }>('./*.layer.ts', { eager: true })
@@ -48,8 +48,8 @@ const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'Ju
 /** The layer's own caveats, then the standard ones its data settings call for. */
 export function layerMethod(layer: Metric): string[] {
   const method = [...layer.method]
-  if (layer.data.areas === 'dispatch') {
-    method.push('Precincts 105 and 116 are shown together: the dispatch data does not separate them consistently since NYPD split them in 2024.')
+  if (layer.build?.kind === 'open-data-counts') {
+    method.push('Precincts 105 and 116 are told apart by ZIP code: NYPD created 116 from 105 in late 2024, and older records still say 105.')
   }
   if (layer.data.lastYear === FINAL_YEAR) {
     method.push(`${FINAL_YEAR} covers January to ${MONTH_NAMES[FINAL_YEAR_LAST_MONTH]}.`)

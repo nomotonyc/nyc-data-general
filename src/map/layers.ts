@@ -1,5 +1,6 @@
 import type { ExpressionSpecification } from '@maplibre/maplibre-gl-style-spec'
-import type { LayerSpecification, SourceSpecification } from 'maplibre-gl'
+import type { GeoJSONSourceSpecification, LayerSpecification, SourceSpecification } from 'maplibre-gl'
+import { FIREHOUSE_COLLECTION } from '../data/firehouses'
 import { BOROUGHS, GEOGRAPHIES } from '../domain/geography'
 import type { Theme } from '../theme/tokens'
 import {
@@ -20,6 +21,8 @@ export function mapSources(): Record<string, SourceSpecification> {
   const sources: Record<string, SourceSpecification> = {
     [SOURCES.boroughs]: { type: 'geojson', data: BOROUGHS_URL, attribution: ATTRIBUTION, promoteId: 'borough' },
     [SOURCES.boroughLabels]: { type: 'geojson', data: BOROUGH_LABELS_URL },
+    // Bundled with the app (the panel counts it too), so no fetch.
+    [SOURCES.firehouses]: { type: 'geojson', data: FIREHOUSE_COLLECTION as GeoJSONSourceSpecification['data'], promoteId: 'id' },
   }
   for (const g of GEOGRAPHIES) {
     const { source, labelSource, url, labelsUrl, property } = GEOGRAPHY_MAP[g]
@@ -73,6 +76,54 @@ export function mapLayers(theme: Theme): LayerSpecification[] {
     paint: { 'line-color': theme.color.boroughLine, 'line-width': 2, 'line-opacity': 1, 'line-opacity-transition': fade },
   }))
 
+  // Firehouse markers, one step per rank of the highest command housed (see COMMAND_RANKS):
+  // a firehouse is a small white dot; a battalion's headquarters larger, with a heavy ring;
+  // a division's filled in ink; a borough command's filled and ringed again (firehouseRing).
+  // All grow a little as the map zooms into a borough.
+  const rank: ExpressionSpecification = ['coalesce', ['get', 'command'], 'none']
+  const byRank = (none: number, battalion: number, division: number, borough: number): ExpressionSpecification =>
+    ['match', rank, 'battalion', battalion, 'division', division, 'borough', borough, none]
+  const filled = (yes: string, no: string): ExpressionSpecification => ['match', rank, ['division', 'borough'], yes, no]
+  const zoomed = (at10: ExpressionSpecification, at12: ExpressionSpecification, at14: ExpressionSpecification): ExpressionSpecification =>
+    ['interpolate', ['linear'], ['zoom'], 10, at10, 12, at12, 14, at14]
+  const markerRadius = zoomed(byRank(3, 4.5, 4.5, 4.5), byRank(4.5, 6, 6, 6), byRank(6, 8, 8, 8))
+  const markerRing = zoomed(byRank(1.2, 2.2, 1.4, 1.4), byRank(1.5, 2.6, 1.6, 1.6), byRank(1.8, 3, 1.8, 1.8))
+  const marker = {
+    'circle-color': filled(theme.color.firehouseRing, theme.color.firehouse),
+    'circle-stroke-color': filled(theme.color.firehouse, theme.color.firehouseRing),
+  }
+  const firehouses = BOROUGHS.map((b): LayerSpecification => ({
+    id: boroughLayers(b).firehouse,
+    type: 'circle',
+    source: SOURCES.firehouses,
+    filter: inBorough(b),
+    paint: {
+      ...marker,
+      'circle-radius': markerRadius,
+      'circle-stroke-width': markerRing,
+      'circle-opacity': 0,
+      'circle-stroke-opacity': 0,
+      'circle-opacity-transition': fade,
+      'circle-stroke-opacity-transition': fade,
+    },
+  }))
+  // The borough commands' outer ring: a circle with no fill (opacity 0 always) and an ink stroke.
+  const commandRings = BOROUGHS.map((b): LayerSpecification => ({
+    id: boroughLayers(b).firehouseRing,
+    type: 'circle',
+    source: SOURCES.firehouses,
+    filter: ['all', inBorough(b), ['==', ['get', 'command'], 'borough']],
+    paint: {
+      'circle-color': theme.color.firehouse,
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 7.5, 12, 9.5, 14, 12],
+      'circle-stroke-color': theme.color.firehouseRing,
+      'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 10, 1.4, 14, 1.8],
+      'circle-opacity': 0,
+      'circle-stroke-opacity': 0,
+      'circle-stroke-opacity-transition': fade,
+    },
+  }))
+
   return [
     ...boroughFills,
     ...areaFills,
@@ -101,6 +152,20 @@ export function mapLayers(theme: Theme): LayerSpecification[] {
         },
       ]
     }),
+    ...commandRings,
+    ...firehouses,
+    {
+      // The firehouse under the pointer, drawn larger with a heavier ring; paintHover sets the filter.
+      id: LAYERS.firehouseHover,
+      type: 'circle',
+      source: SOURCES.firehouses,
+      filter: ['in', ['get', 'id'], ['literal', []]],
+      paint: {
+        ...marker,
+        'circle-radius': zoomed(byRank(5, 6.5, 6.5, 6.5), byRank(6.5, 8, 8, 8), byRank(8, 10, 10, 10)),
+        'circle-stroke-width': byRank(2.5, 3.5, 2.5, 2.5),
+      },
+    },
     {
       id: LAYERS.boroughLabel,
       type: 'symbol',

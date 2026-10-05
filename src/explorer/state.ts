@@ -17,6 +17,8 @@ export type ExplorerState = {
   detail: Detail
   showOutlines: boolean
   showLabels: boolean
+  /** FDNY firehouse markers, in every story. */
+  showFirehouses: boolean
   /** Inclusive; yearTo >= yearFrom. */
   yearFrom: Year
   yearTo: Year
@@ -26,15 +28,19 @@ export type ExplorerState = {
 /** The last complete year; the final year in YEARS is partial. */
 const LATEST_FULL_YEAR = YEARS[YEARS.length - 2]
 
+const firstLayer = layersOf(STORIES[0].id)[0]
+
 export const initialExplorerState: ExplorerState = {
   storyId: STORIES[0].id,
-  metricId: layersOf(STORIES[0].id)[0].id,
+  metricId: firstLayer.id,
   borough: null,
-  geography: 'precincts',
+  // Battalions first, as FDNY organises; precincts if the first layer has no battalion data.
+  geography: layerGeographies(firstLayer).includes('battalions') ? 'battalions' : 'precincts',
   pinnedArea: null,
   detail: 'borough',
   showOutlines: true,
   showLabels: true,
+  showFirehouses: false,
   yearFrom: LATEST_FULL_YEAR,
   yearTo: LATEST_FULL_YEAR,
   trendOpen: false,
@@ -50,6 +56,7 @@ export type ExplorerAction =
   | { type: 'setDetail'; detail: Detail }
   | { type: 'toggleOutlines' }
   | { type: 'toggleLabels' }
+  | { type: 'toggleFirehouses' }
   | { type: 'setYearFrom'; year: number }
   | { type: 'setYearTo'; year: number }
   | { type: 'openTrend' }
@@ -84,6 +91,8 @@ export function explorerReducer(state: ExplorerState, action: ExplorerAction): E
       return { ...state, showOutlines: !state.showOutlines }
     case 'toggleLabels':
       return { ...state, showLabels: !state.showLabels }
+    case 'toggleFirehouses':
+      return { ...state, showFirehouses: !state.showFirehouses }
     case 'setYearFrom':
       if (!isYear(action.year)) return state
       return { ...state, yearFrom: action.year, yearTo: action.year > state.yearTo ? action.year : state.yearTo }

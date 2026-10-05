@@ -8,7 +8,7 @@ import { initialExplorerState, type ExplorerState } from '../explorer/state'
 import { hoverDetails, tooltipPosition } from './hover'
 import { hoverTarget } from './interaction'
 
-const fire: ExplorerState = { ...initialExplorerState, storyId: 'fire', metricId: 'structural-fires' }
+const fire: ExplorerState = { ...initialExplorerState, storyId: 'fire', metricId: 'structural-fires', geography: 'precincts' }
 const ds = getDataset('structural-fires')
 const fires = getLayer('structural-fires')
 const y2025 = { from: 2025, to: 2025 } as const

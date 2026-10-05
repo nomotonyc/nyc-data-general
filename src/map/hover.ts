@@ -6,7 +6,7 @@ import { BOROUGHS, areaById, areaNoun, boroughInSentence } from '../domain/geogr
 import { yearLabel } from '../domain/stories'
 import type { Metric } from '../layers'
 import { activeMetric, type ExplorerState } from '../explorer/state'
-import type { Target } from './interaction'
+import type { PlaceTarget } from './interaction'
 
 export type HoverDetails = {
   title: string
@@ -36,7 +36,7 @@ function average(ds: LayerDataset, metric: Metric, areaIds: readonly string[], v
 export function hoverDetails(
   state: Pick<ExplorerState, 'storyId' | 'metricId' | 'yearFrom' | 'yearTo' | 'pinnedArea'>,
   ds: LayerDataset,
-  target: Target,
+  target: PlaceTarget,
 ): HoverDetails {
   const metric = activeMetric(state)
   const format = metric.format ?? 'count'

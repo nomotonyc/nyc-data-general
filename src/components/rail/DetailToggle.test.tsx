@@ -11,13 +11,13 @@ describe('DetailToggle', () => {
   })
 
   it('switches to precincts', async () => {
-    renderWithExplorer(<DetailToggle />)
+    renderWithExplorer(<DetailToggle />, { geography: 'precincts' })
     await userEvent.click(screen.getByRole('button', { name: 'Precincts' }))
     expect(screen.getByRole('button', { name: 'Precincts' })).toHaveAttribute('aria-pressed', 'true')
   })
 
   it('locks to precincts and says why when a borough is focused', () => {
-    renderWithExplorer(<DetailToggle />, { borough: 'Bronx' })
+    renderWithExplorer(<DetailToggle />, { geography: 'precincts', borough: 'Bronx' })
     expect(screen.getByRole('button', { name: 'Precincts' })).toHaveAttribute('aria-pressed', 'true')
     expect(screen.getByRole('button', { name: 'Boroughs' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Precincts' })).toBeDisabled()

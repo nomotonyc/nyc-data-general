@@ -36,6 +36,9 @@ export const lightTheme = {
     tooltipRaised: '#222e3b',
     /** The average strip's track on the hover card. */
     tooltipTrack: '#3a4958',
+    /** Firehouse markers: a white dot ringed in ink, so one of the two stands out on every map colour. */
+    firehouse: '#ffffff',
+    firehouseRing: '#16202b',
     /** The dimmed New York City line behind a focused place's trend. */
     trendCity: '#a7afb8',
   },

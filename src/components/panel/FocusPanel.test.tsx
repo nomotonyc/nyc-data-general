@@ -6,6 +6,8 @@ import { generateSampleDataset } from '../../data/sample'
 import { METHOD_URL } from '../../domain/stories'
 import { getLayer, layerMethod, layerSources } from '../../layers'
 import { renderWithExplorer } from '../../test/renderWithExplorer'
+import { FIREHOUSES, FIREHOUSE_METHOD } from '../../data/firehouses'
+import { firehousesIn } from '../../panel/firehouses'
 import { FocusPanel } from './FocusPanel'
 
 const fire = { storyId: 'fire' as const, metricId: 'structural-fires' }
@@ -13,11 +15,16 @@ const section = (name: string) => screen.getByRole('region', { name })
 
 describe('FocusPanel', () => {
   it('headlines the whole city at first', () => {
-    renderWithExplorer(<FocusPanel />, fire)
+    renderWithExplorer(<FocusPanel />, { ...fire, geography: 'precincts' })
     const focus = section('In focus')
     expect(within(focus).getByRole('heading', { name: 'New York City' })).toBeInTheDocument()
     expect(focus).toHaveTextContent('All five boroughs · 78 precincts')
     expect(focus).toHaveTextContent('fires')
+  })
+
+  it('opens on battalions', () => {
+    renderWithExplorer(<FocusPanel />, fire)
+    expect(section('In focus')).toHaveTextContent('All five boroughs · 49 battalions')
   })
 
   it('says under the number what it counts', () => {
@@ -26,7 +33,7 @@ describe('FocusPanel', () => {
   })
 
   it('headlines a pinned precinct with both ranks', () => {
-    renderWithExplorer(<FocusPanel />, { ...fire, borough: 'Bronx', pinnedArea: '44' })
+    renderWithExplorer(<FocusPanel />, { geography: 'precincts', ...fire, borough: 'Bronx', pinnedArea: '44' })
     expect(within(section('In focus')).getByRole('heading', { name: 'Precinct 44' })).toBeInTheDocument()
     expect(section('In focus')).toHaveTextContent(/in the Bronx · .* citywide/)
   })
@@ -40,7 +47,7 @@ describe('FocusPanel', () => {
   })
 
   it('pins a precinct from the highest list, zooming into its borough', async () => {
-    renderWithExplorer(<FocusPanel />, fire)
+    renderWithExplorer(<FocusPanel />, { ...fire, geography: 'precincts' })
     await userEvent.click(within(section('Highest precincts in the city')).getAllByRole('button')[0])
     const list = screen.getByRole('region', { name: /^Highest precincts in (Manhattan|Bronx|Brooklyn|Queens|Staten Island)$/ })
     expect(within(list).getAllByRole('button')[0]).toHaveAttribute('aria-pressed', 'true')
@@ -81,14 +88,39 @@ describe('data sources', () => {
     afterEach(() => datasets.add(real))
 
     it('says it holds sample values even while closed', () => {
-      renderWithExplorer(<FocusPanel />)
+      renderWithExplorer(<FocusPanel />, { geography: 'precincts' })
       expect(section('Data sources').querySelector('summary')).toHaveTextContent('Data sources · sample values')
     })
 
     it('says plainly when the values are samples', () => {
-      renderWithExplorer(<FocusPanel />)
+      renderWithExplorer(<FocusPanel />, { geography: 'precincts' })
       expect(section('Data sources')).toHaveTextContent('These values are samples')
     })
+  })
+
+  it('credits the firehouse listing, with when the city last updated it, while firehouses are shown', () => {
+    renderWithExplorer(<FocusPanel />, { ...fire, showFirehouses: true })
+    const link = within(section('Data sources')).getByRole('link', { name: 'FDNY Firehouse Listing' })
+    expect(link).toHaveAttribute('href', 'https://data.cityofnewyork.us/d/hc8x-tcnd')
+    expect(section('Data sources')).toHaveTextContent('Firehouse locations and units, as the city last updated them in April 2022')
+  })
+
+  it('explains the firehouses and credits the battalion boundaries they are placed in, while they are shown', () => {
+    renderWithExplorer(<FocusPanel />, { ...fire, showFirehouses: true })
+    const sources = section('Data sources')
+    for (const line of FIREHOUSE_METHOD) expect(sources).toHaveTextContent(line)
+    expect(within(sources).getByRole('link', { name: 'Fire Battalions' })).toHaveAttribute('href', 'https://data.cityofnewyork.us/d/xzng-ft6f')
+    expect(within(sources).getAllByRole('link', { name: 'Fire Battalions' })).toHaveLength(1)
+  })
+
+  it('says nothing about firehouses while none are on screen', () => {
+    renderWithExplorer(<FocusPanel />, fire)
+    expect(section('Data sources')).not.toHaveTextContent(FIREHOUSE_METHOD[0])
+  })
+
+  it('leaves the firehouse listing out while firehouses are hidden', () => {
+    renderWithExplorer(<FocusPanel />, fire)
+    expect(within(section('Data sources')).queryByRole('link', { name: 'FDNY Firehouse Listing' })).not.toBeInTheDocument()
   })
 
   it('dates real data by when it was built', () => {
@@ -143,5 +175,36 @@ describe('placement for estimated battalions', () => {
     const text = section('Data sources').textContent ?? ''
     expect(text).toMatch(/By battalion: \d+% placed by its alarm box’s published location \(exact\); \d+% placed by its alarm box’s street corner, geocoded \(exact\); .*\(estimated\)/)
     expect(text).not.toMatch(/ 0% placed/)
+  })
+})
+
+describe('firehouses in the panel', () => {
+  const pinnedBattalion = { ...fire, geography: 'battalions' as const, borough: 'Brooklyn' as const, pinnedArea: 'bn31' }
+
+  it('counts a focused borough’s firehouses and companies, by type, whether or not markers are on', () => {
+    renderWithExplorer(<FocusPanel />, { ...fire, borough: 'Brooklyn' })
+    const expected = firehousesIn(FIREHOUSES, { kind: 'borough', borough: 'Brooklyn' })
+    const here = section('Firehouses in Brooklyn')
+    expect(here).toHaveTextContent(expected.totals)
+    for (const k of expected.byKind) expect(within(here).getByText(k.label)).toBeInTheDocument()
+    expect(here.querySelectorAll('.panel__firehouse')).toHaveLength(0)
+  })
+
+  it('lists each firehouse in a pinned battalion’s area, with its units', () => {
+    renderWithExplorer(<FocusPanel />, pinnedBattalion)
+    const expected = firehousesIn(FIREHOUSES, { kind: 'battalion', number: 31 })
+    const here = section('Firehouses in Battalion 31’s area')
+    expect(here).toHaveTextContent(expected.totals)
+    expect([...here.querySelectorAll('.panel__firehouse-address')].map((a) => a.textContent)).toEqual(expected.list!.map((f) => f.address))
+  })
+
+  it('shows nothing for the whole city or a pinned precinct', () => {
+    renderWithExplorer(<FocusPanel />, { geography: 'precincts', ...fire, borough: 'Brooklyn', pinnedArea: '84' })
+    expect(screen.queryByRole('region', { name: /^Firehouses in/ })).not.toBeInTheDocument()
+  })
+
+  it('credits the listing in Data sources while the section shows', () => {
+    renderWithExplorer(<FocusPanel />, pinnedBattalion)
+    expect(within(section('Data sources')).getByRole('link', { name: 'FDNY Firehouse Listing' })).toBeInTheDocument()
   })
 })

@@ -39,7 +39,7 @@ const BOROUGH_BOUNDARIES: Source = {
   used: 'Borough outlines',
 }
 
-const BATTALION_BOUNDARIES: Source = {
+export const BATTALION_BOUNDARIES: Source = {
   name: 'Fire Battalions',
   publisher: 'FDNY, via NYC Open Data',
   url: 'https://data.cityofnewyork.us/d/xzng-ft6f',

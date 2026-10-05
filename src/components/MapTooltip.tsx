@@ -1,5 +1,5 @@
-import { useLayoutEffect, useRef } from 'react'
-import { tooltipPosition, type HoverDetails } from '../map/hover'
+import type { HoverDetails } from '../map/hover'
+import { useCardPosition } from './useCardPosition'
 import './MapTooltip.css'
 
 type Props = {
@@ -17,17 +17,7 @@ type Props = {
  */
 export function MapTooltip({ details, dotColor, pointer, area }: Props) {
   const { strip } = details
-  const ref = useRef<HTMLDivElement>(null)
-
-  // Placed from its real rendered size (cards differ in height), before the
-  // browser paints, so it never shows cut off or in the wrong spot.
-  useLayoutEffect(() => {
-    const card = ref.current
-    if (!card) return
-    const { left, top } = tooltipPosition(pointer, { width: card.offsetWidth, height: card.offsetHeight }, area)
-    card.style.left = `${left}px`
-    card.style.top = `${top}px`
-  })
+  const ref = useCardPosition(pointer, area)
 
   return (
     <div ref={ref} className="map-tooltip" aria-hidden="true">

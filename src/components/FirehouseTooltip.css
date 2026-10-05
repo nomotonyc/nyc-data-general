@@ -1,0 +1,40 @@
+/* The firehouse card: the place card's frame (MapTooltip.css), narrower, listing units as chips. */
+.firehouse-card {
+  width: 264px;
+}
+
+.firehouse-card__head,
+.firehouse-card__group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.firehouse-card__group {
+  gap: 6px;
+}
+
+.firehouse-card__label {
+  color: var(--color-tooltip-ink-muted);
+  font-size: 11px;
+}
+
+.firehouse-card__units {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* As the place card's rank boxes. */
+.firehouse-card__unit {
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--color-tooltip-raised);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Companies, the units that answer calls, in the story's colours (unitColours); commands stay plain. */
+.firehouse-card__unit--company {
+  font-weight: 600;
+}

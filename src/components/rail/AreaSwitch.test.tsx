@@ -10,7 +10,7 @@ const detail = () => screen.getByRole('group', { name: 'Detail' })
 
 describe('AreaSwitch', () => {
   it('switches a layer with battalion data to battalions, and the Detail toggle follows', async () => {
-    renderWithExplorer(<Rail />, { storyId: 'fire', metricId: 'fire-apparatus-accidents' })
+    renderWithExplorer(<Rail />, { geography: 'precincts', storyId: 'fire', metricId: 'fire-apparatus-accidents' })
     expect(within(areas()).getByRole('button', { name: 'Precincts' })).toHaveAttribute('aria-pressed', 'true')
     await userEvent.click(within(areas()).getByRole('button', { name: 'Battalions' }))
     expect(within(areas()).getByRole('button', { name: 'Battalions' })).toHaveAttribute('aria-pressed', 'true')

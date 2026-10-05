@@ -467,6 +467,56 @@ same way (total ÷ total), never by averaging averages. Built with
 **Breakdown:** responses by how long they took (under 5, 5–10, 10–15, 15–20,
 20 minutes or more), bucketed by the API with a SoQL `case()`.
 
+## Show on map — Firehouses
+
+| | |
+|---|---|
+| Source | [FDNY Firehouse Listing](https://data.cityofnewyork.us/d/hc8x-tcnd), NYC Open Data |
+| Last updated by the city | 8 April 2022 |
+| Built by | `npm run data:firehouses` → `src/data/firehouses.json` (bundled: the map draws it, the panel counts it) |
+
+Each of the 219 records is one building: its coordinates (from its address, with its
+building number), address, neighbourhood and borough. Its name lists the units based there,
+e.g. `Battalion 4/Engine 15/Ladder 18`, which the card splits into companies (engine,
+ladder, squad, rescue, marine) and commands (battalion, marine battalion, division,
+borough command). The map marks each firehouse by the highest command it houses: a plain firehouse (158), a battalion headquarters (48, larger with a heavy ring), a division headquarters (8, filled) or a borough command headquarters (5, filled and ringed again). The build stops on any unit name it doesn't recognise, so a renamed
+unit can't show wrongly. The listing's one misspelling, "Marine Battlion", is corrected.
+
+Totals in the listing: 197 engines, 143 ladders, 8 squads, 5 rescues, 3 marine companies,
+49 battalions, 9 divisions and 5 borough commands.
+
+**Locations checked.** Each record names its building (BIN). 217 of the 219 markers fall
+inside that building's footprint in the city's
+[Building Footprints](https://data.cityofnewyork.us/d/5zhs-2jue). The other two name
+buildings no longer in the footprints; NYC Geoclient places their street addresses 3 m
+(Engine 287/Ladder 136) and 171 m (Marine 9, a fireboat station on a pier) from the markers.
+Geocoding every address independently with Geoclient, the median distance to the listed
+point is 4 m.
+
+The battalion area each firehouse stands in is found from the original FDNY boundaries
+([Fire Battalions](https://data.cityofnewyork.us/d/xzng-ft6f)). As a check on the locations,
+each of the 49 battalion headquarters stands inside its own battalion's area.
+
+Commands come in three ranks above the companies: battalions (49), divisions (9) and
+borough commands (5). The listing also has one Marine Battalion, over the fireboats, which
+the map marks as a battalion headquarters. Higher commands are housed in ordinary firehouses, so one building
+can hold several (172 Tillary Street holds Battalion 31, Division 11 and the Brooklyn
+Borough Command), and 12 battalion areas contain a division or borough command's building
+as well as their own battalion's headquarters.
+
+**Counts in the panel.** With a borough focused, or a battalion pinned, the panel counts
+the firehouses standing there and their companies by type, and lists a battalion's
+firehouses. Buildings that only house a command (the Bronx and Queens borough commands)
+are listed but not counted as firehouses. These count where firehouses stand. That is close to, but not the same as, the
+companies FDNY assigns to a battalion, so the panel says "in Battalion N's area".
+
+What it doesn't tell you:
+
+- **Changes since April 2022.** Units that opened, closed or moved since are not reflected.
+- **Apparatus.** It names companies, not the vehicles they run (a tower ladder vs. an aerial
+  ladder, say), and doesn't list special units such as Hazmat 1 separately.
+- **Activity.** It has no call volumes or first-due areas per firehouse.
+
 ## Years
 
 The year selects cover 2019 to June 2026. 2026 is labelled "2026 (Jan–Jun)".

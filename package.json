@@ -12,6 +12,7 @@
     "test:watch": "vitest",
     "data:precincts": "node scripts/build-precincts.mjs && node scripts/align-boroughs.mjs",
     "data:battalions": "node scripts/build-battalions.mjs",
+    "data:firehouses": "node scripts/build-firehouses.mjs",
     "data:layer": "node scripts/build-layer.mjs"
   },
   "dependencies": {

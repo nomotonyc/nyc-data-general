@@ -21,7 +21,7 @@ describe('Trend', () => {
   })
 
   it('draws one line per place, with a key when there is more than one', () => {
-    const { container } = renderWithExplorer(<Trend />, { ...fire, borough: 'Queens', pinnedArea: '114' })
+    const { container } = renderWithExplorer(<Trend />, { geography: 'precincts', ...fire, borough: 'Queens', pinnedArea: '114' })
     expect(container.querySelectorAll('polyline')).toHaveLength(3)
     const key = within(screen.getByRole('list', { name: 'Lines' }))
     expect(key.getAllByRole('listitem').map((li) => li.textContent)).toEqual(['Precinct 114', 'Queens', 'New York City'])

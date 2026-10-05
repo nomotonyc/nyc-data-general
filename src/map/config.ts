@@ -49,6 +49,7 @@ export const SOURCES = {
   precinctLabels: 'precinct-labels',
   battalions: 'battalions',
   battalionLabels: 'battalion-labels',
+  firehouses: 'firehouses',
 } as const
 /** City-wide layers. Borough and precinct shapes have one layer set per borough (boroughLayers). */
 export const LAYERS = {
@@ -60,6 +61,7 @@ export const LAYERS = {
   battalionHover: 'battalion-hover',
   battalionHighlight: 'battalion-highlight',
   battalionLabel: 'battalion-label',
+  firehouseHover: 'firehouse-hover',
 } as const
 
 /** Per geography: its shape and label sources, the feature property holding the area number, and its city-wide layers. */
@@ -96,6 +98,8 @@ export function boroughLayers(borough: string) {
     battalionFill: `battalion-fill-${slug}`,
     battalionLine: `battalion-line-${slug}`,
     boroughLine: `borough-line-${slug}`,
+    firehouse: `firehouse-${slug}`,
+    firehouseRing: `firehouse-ring-${slug}`,
   }
 }
 

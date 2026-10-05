@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Map as MapLibreMap, type MapMouseEvent } from 'maplibre-gl'
+import { Map as MapLibreMap, type MapMouseEvent, type PointLike } from 'maplibre-gl'
 import './BaseMap.css'
 import { BOROUGHS, GEOGRAPHIES, areaById } from '../domain/geography'
 import { useDataset, useExplorerDispatch, useExplorerState } from '../explorer/context'
@@ -10,12 +10,14 @@ import { FADE_DURATION, FIXED_VIEW, FLY_DURATION, HOVER_DELAY, NYC_BOUNDS, areaL
 import { cameraEasing } from '../map/easing'
 import { hoverDetails } from '../map/hover'
 import { legendDetails } from '../map/legend'
-import { clickAction, hitKind, hoverTarget, liveTarget, type Hit, type Target } from '../map/interaction'
+import { clickAction, hitKind, hoverTarget, liveTarget, nearestFirst, type Hit, type Target } from '../map/interaction'
 import { mapLayers, mapSources } from '../map/layers'
 import { fillsAt, planFills } from '../map/fillTween'
 import { paintHover, paintMap } from '../map/paint'
 import { buildStyle } from '../map/style'
 import { useTheme } from '../theme/context'
+import { firehouseDetails } from '../map/firehouseHover'
+import { FirehouseTooltip } from './FirehouseTooltip'
 import { MapLegend } from './MapLegend'
 import { MapTooltip } from './MapTooltip'
 
@@ -23,9 +25,16 @@ const sameTarget = (a: Target | null, b: Target | null) =>
   a === b ||
   (a !== null &&
     b !== null &&
-    (a.kind === 'borough' ? b.kind === 'borough' && a.borough === b.borough : b.kind === 'area' && a.id === b.id))
+    (a.kind === 'borough'
+      ? b.kind === 'borough' && a.borough === b.borough
+      : a.kind === 'area'
+        ? b.kind === 'area' && a.id === b.id
+        : b.kind === 'firehouse' && a.id === b.id))
 
 const CLICKABLE = BOROUGHS.flatMap((b) => [boroughLayers(b).boroughFill, ...GEOGRAPHIES.map((g) => areaLayers(b, g).fill)])
+const FIREHOUSES = BOROUGHS.map((b) => boroughLayers(b).firehouse)
+/** How far beyond a marker's edge the pointer still counts as over it, in pixels: markers are small. */
+const MARKER_REACH = 6
 
 /** Respect a request for less motion: jump instead of flying. */
 function flyDuration() {
@@ -74,11 +83,21 @@ export default function BaseMap() {
     })
     map.once('load', () => setReady(true))
 
-    const hitsAt = (e: MapMouseEvent): Hit[] =>
-      map.queryRenderedFeatures(e.point, { layers: CLICKABLE }).flatMap((f) => {
+    const hitsAt = (e: MapMouseEvent): Hit[] => {
+      const places = map.queryRenderedFeatures(e.point, { layers: CLICKABLE })
+      const { x, y } = e.point
+      const reach: [PointLike, PointLike] = [
+        [x - MARKER_REACH, y - MARKER_REACH],
+        [x + MARKER_REACH, y + MARKER_REACH],
+      ]
+      const markers = stateRef.current.showFirehouses
+        ? nearestFirst(map.queryRenderedFeatures(reach, { layers: FIREHOUSES }), e.point, (lngLat) => map.project(lngLat))
+        : []
+      return [...markers, ...places].flatMap((f) => {
         const kind = hitKind(f.layer.id)
         return kind ? [{ kind, properties: f.properties }] : []
       })
+    }
     // The place under the pointer, as last seen by these handlers.
     let lastTarget: Target | null = null
     // Forget the hover: the pointer is over something new once the view moves.
@@ -129,7 +148,7 @@ export default function BaseMap() {
     }
   }, [dispatch])
 
-  const { storyId, metricId, borough, detail, yearFrom, yearTo, pinnedArea, geography, showOutlines, showLabels } = state
+  const { storyId, metricId, borough, detail, yearFrom, yearTo, pinnedArea, geography, showOutlines, showLabels, showFirehouses } = state
   const ramp = theme.story[storyId].ramp
   // Only what the colours depend on, so the map toggles don't recompute them.
   const plan = useMemo(
@@ -139,8 +158,10 @@ export default function BaseMap() {
   const pinned = useMemo(() => (pinnedArea === null ? [] : [areaById(ds.areas, pinnedArea).number]), [ds, pinnedArea])
 
   useEffect(() => {
-    if (ready && mapRef.current) paintMap(mapRef.current, plan, { outlines: showOutlines, labels: showLabels, pinned }, { fills: false })
-  }, [ready, plan, showOutlines, showLabels, pinned])
+    if (ready && mapRef.current) {
+      paintMap(mapRef.current, plan, { outlines: showOutlines, labels: showLabels, firehouses: showFirehouses, pinned }, { fills: false })
+    }
+  }, [ready, plan, showOutlines, showLabels, showFirehouses, pinned])
 
   // Colours ease to each new plan (a story, layer or year change) over the fade duration, as
   // everything else on the map does; MapLibre can't animate per-feature colours, so it's drawn
@@ -166,8 +187,9 @@ export default function BaseMap() {
     return () => cancelAnimationFrame(frame)
   }, [ready, plan])
 
-  // A hover from before a precincts/battalions switch names an area the new geography doesn't have.
-  const live = liveTarget(hovered, geography)
+  // A hover from before a precincts/battalions switch names an area the new geography doesn't have;
+  // one over a firehouse ends when firehouses are turned off.
+  const live = liveTarget(hovered, geography, showFirehouses)
 
   // Outline what the pointer is over straight away; the card follows after a pause.
   useEffect(() => {
@@ -187,7 +209,7 @@ export default function BaseMap() {
   }, [ready, borough])
 
   // Only once the pause is over for the place the pointer is still on.
-  const card = carded && live && sameTarget(carded, live) && hoverDetails(state, ds, carded)
+  const settled = carded && live && sameTarget(carded, live) ? carded : null
 
   return (
     <>
@@ -198,7 +220,10 @@ export default function BaseMap() {
           to: ds.periods[ds.periods.length - 1].year,
         }, ds.placement)}
       />
-      {card && <MapTooltip details={card} dotColor={ramp[1]} pointer={pointer} area={pointer} />}
+      {settled?.kind === 'firehouse' && <FirehouseTooltip details={firehouseDetails(settled.firehouse)} palette={theme.story[storyId]} pointer={pointer} area={pointer} />}
+      {settled && settled.kind !== 'firehouse' && (
+        <MapTooltip details={hoverDetails(state, ds, settled)} dotColor={ramp[1]} pointer={pointer} area={pointer} />
+      )}
       {borough && (
         <button type="button" className="map__back" onClick={() => dispatch({ type: 'focusBorough', borough: null })}>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">

@@ -9,6 +9,7 @@ export type PaintableMap = Pick<MapLibreMap, 'setFeatureState' | 'setLayoutPrope
 export type Show = {
   outlines: boolean
   labels: boolean
+  firehouses: boolean
   /** The pinned area's number in the plan's geography, or none. */
   pinned: readonly number[]
 }
@@ -43,6 +44,11 @@ export function paintMap(map: PaintableMap, plan: Choropleth, show: Show, option
     map.setPaintProperty(layers.boroughFill, 'fill-opacity-transition', transition)
     map.setPaintProperty(layers.boroughFill, 'fill-opacity', shown && !covered ? 1 : 0)
     map.setPaintProperty(layers.boroughLine, 'line-opacity', shown ? 1 : 0)
+    const markers = show.firehouses && shown ? 1 : 0
+    map.setPaintProperty(layers.firehouse, 'circle-opacity', markers)
+    map.setPaintProperty(layers.firehouse, 'circle-stroke-opacity', markers)
+    // The outer ring has no fill; only its stroke shows.
+    map.setPaintProperty(layers.firehouseRing, 'circle-stroke-opacity', markers)
     for (const g of GEOGRAPHIES) {
       const current = g === plan.geography
       const areasColoured = current && shown && plan.level === 'area'
@@ -87,4 +93,5 @@ export function paintHover(map: Pick<PaintableMap, 'setFilter'>, target: Target 
     const numbers = area ? [area.number] : []
     map.setFilter(GEOGRAPHY_MAP[g].hover, ['in', ['get', GEOGRAPHY_MAP[g].property], ['literal', numbers]])
   }
+  map.setFilter(LAYERS.firehouseHover, ['in', ['get', 'id'], ['literal', target?.kind === 'firehouse' ? [target.id] : []]])
 }

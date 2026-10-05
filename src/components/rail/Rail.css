@@ -171,3 +171,38 @@
 .rail__swatch {
   transition: background-color 450ms ease-in-out;
 }
+
+/* The firehouse markers' key, under their checkbox, lined up with its text. */
+.rail__key {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: -6px 0 4px;
+  padding: 0 8px 0 34px;
+  list-style: none;
+  color: var(--color-ink-muted);
+  font-size: 12px;
+}
+
+.rail__key li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Drawn as on the map: white ringed in ink; division and borough commands filled in ink. */
+.rail__marker {
+  flex: none;
+  fill: var(--color-firehouse);
+  stroke: var(--color-firehouse-ring);
+}
+
+.rail__marker--filled {
+  fill: var(--color-firehouse-ring);
+  stroke: var(--color-firehouse);
+}
+
+.rail__marker .rail__marker-outer {
+  fill: none;
+  stroke: var(--color-firehouse-ring);
+}

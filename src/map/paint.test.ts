@@ -9,7 +9,7 @@ const base: Choropleth = { level: 'borough', focus: null, boroughs: {}, geograph
 const areaLevel: Choropleth = { ...base, level: 'area' }
 const queens: Choropleth = { ...base, level: 'area', focus: 'Queens' }
 const bronxBattalions: Choropleth = { ...base, level: 'area', focus: 'Bronx', geography: 'battalions' }
-const show = { outlines: true, labels: true, pinned: [] as number[] }
+const show = { outlines: true, labels: true, firehouses: false, pinned: [] as number[] }
 
 type FakeMap = ReturnType<typeof fakeMap>
 /** The last opacity set on a layer, or undefined if none. */
@@ -183,5 +183,56 @@ describe('the borough fill under shown areas', () => {
     paintMap(map, base, show)
     expect(opacity(map, boroughLayers('Bronx').boroughFill)).toBe(1)
     expect(transition(map, boroughLayers('Bronx').boroughFill)).toEqual({ duration: FADE_DURATION, delay: 0 })
+  })
+})
+
+describe('firehouses', () => {
+  const marker = (map: FakeMap, layer: string) =>
+    map.setPaintProperty.mock.calls.filter(([id, prop]) => id === layer && prop === 'circle-opacity').at(-1)?.[2]
+  const ring = (map: FakeMap, layer: string) =>
+    map.setPaintProperty.mock.calls.filter(([id, prop]) => id === layer && prop === 'circle-stroke-opacity').at(-1)?.[2]
+
+  it('stay hidden until asked for', () => {
+    const map = paint(base)
+    for (const b of BOROUGHS) expect(marker(map, boroughLayers(b).firehouse), b).toBe(0)
+  })
+
+  it('show across the city when asked for, at any level and in either geography', () => {
+    for (const plan of [base, areaLevel, { ...areaLevel, geography: 'battalions' as const }]) {
+      const map = paint(plan, { ...show, firehouses: true })
+      for (const b of BOROUGHS) {
+        expect(marker(map, boroughLayers(b).firehouse), b).toBe(1)
+        expect(ring(map, boroughLayers(b).firehouse), b).toBe(1)
+      }
+    }
+  })
+
+  it('bring the borough commands’ outer rings with them, and only their rings, never a fill', () => {
+    const on = paint(base, { ...show, firehouses: true })
+    const off = paint(base)
+    expect(ring(on, boroughLayers('Queens').firehouseRing)).toBe(1)
+    expect(ring(off, boroughLayers('Queens').firehouseRing)).toBe(0)
+    expect(marker(on, boroughLayers('Queens').firehouseRing)).toBeUndefined()
+  })
+
+  it('show only in a focused borough, fading with the rest of the city', () => {
+    const map = paint(queens, { ...show, firehouses: true })
+    expect(marker(map, boroughLayers('Queens').firehouse)).toBe(1)
+    expect(marker(map, boroughLayers('Bronx').firehouse)).toBe(0)
+    expect(ring(map, boroughLayers('Bronx').firehouse)).toBe(0)
+  })
+
+  it('outline the firehouse under the pointer, and no area with it', () => {
+    const map = fakeMap()
+    paintHover(map, { kind: 'firehouse', id: 12, firehouse: { id: 12, name: 'Engine 1', address: '', neighbourhood: '', borough: 'Queens', battalion: 50, command: null } }, 'precincts')
+    expect(map.setFilter).toHaveBeenCalledWith(LAYERS.firehouseHover, ['in', ['get', 'id'], ['literal', [12]]])
+    expect(map.setFilter).toHaveBeenCalledWith(LAYERS.precinctHover, ['in', ['get', 'precinct'], ['literal', []]])
+    expect(map.setFilter).toHaveBeenCalledWith(LAYERS.boroughHover, ['==', ['get', 'borough'], ''])
+  })
+
+  it('outline none when the pointer is over an area', () => {
+    const map = fakeMap()
+    paintHover(map, { kind: 'area', id: '44' }, 'precincts')
+    expect(map.setFilter).toHaveBeenCalledWith(LAYERS.firehouseHover, ['in', ['get', 'id'], ['literal', []]])
   })
 })

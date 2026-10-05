@@ -210,7 +210,7 @@ describe('BaseMap', () => {
         <BaseMap />
         <Breadcrumb />
       </>,
-      { borough: 'Queens' },
+      { geography: 'precincts', borough: 'Queens' },
     )
     load()
     clickMapOn(
@@ -296,6 +296,46 @@ describe('BaseMap', () => {
     expect(screen.queryByText('Click to focus on Queens')).not.toBeInTheDocument()
   })
 
+  describe('over a firehouse', () => {
+    const engine = { id: 9, name: 'Battalion 50/Engine 298/Ladder 127', address: '153-11 Hillside Avenue', neighbourhood: 'Jamaica', borough: 'Queens', battalion: 50, command: 'battalion' }
+    const hoverFirehouse = () => {
+      map()
+        .queryRenderedFeatures.mockReturnValueOnce([feature(boroughLayers('Queens').boroughFill, { borough: 'Queens' })])
+        .mockReturnValueOnce([feature(boroughLayers('Queens').firehouse, engine)])
+      act(() => map().fire('mousemove', { point: { x: 100, y: 100 } }))
+    }
+    function ToggleFirehouses() {
+      const dispatch = useExplorerDispatch()
+      return <button onClick={() => dispatch({ type: 'toggleFirehouses' })}>firehouses</button>
+    }
+
+    it('shows the firehouse’s card, not the borough’s, once firehouses are on', () => {
+      renderWithExplorer(<BaseMap />, { showFirehouses: true })
+      load()
+      hoverFirehouse()
+      expect(map().setFilter).toHaveBeenCalledWith(LAYERS.firehouseHover, ['in', ['get', 'id'], ['literal', [9]]])
+      act(() => vi.advanceTimersByTime(HOVER_DELAY))
+      expect(screen.getByText('Engine 298')).toBeInTheDocument()
+      expect(screen.getByText('153-11 Hillside Avenue')).toBeInTheDocument()
+      expect(screen.queryByText('Click to focus on Queens')).not.toBeInTheDocument()
+    })
+
+    it('drops the card when firehouses are turned off without moving the pointer', () => {
+      renderWithExplorer(
+        <>
+          <BaseMap />
+          <ToggleFirehouses />
+        </>,
+        { showFirehouses: true },
+      )
+      load()
+      hoverFirehouse()
+      act(() => vi.advanceTimersByTime(HOVER_DELAY))
+      act(() => screen.getByRole('button', { name: 'firehouses' }).click())
+      expect(screen.queryByText('Engine 298')).not.toBeInTheDocument()
+    })
+  })
+
   it('drops a hover card when switching to battalions without moving the pointer, instead of crashing', () => {
     function SwitchToBattalions() {
       const dispatch = useExplorerDispatch()
@@ -306,7 +346,7 @@ describe('BaseMap', () => {
         <BaseMap />
         <SwitchToBattalions />
       </>,
-      { storyId: 'fire', metricId: 'structural-fires', borough: 'Queens' },
+      { geography: 'precincts', storyId: 'fire', metricId: 'structural-fires', borough: 'Queens' },
     )
     load()
     map().queryRenderedFeatures.mockReturnValueOnce([feature(boroughLayers('Queens').precinctFill, { precinct: 114, borough: 'Queens' })])

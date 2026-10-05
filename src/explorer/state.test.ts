@@ -8,7 +8,8 @@ import {
   type ExplorerState,
 } from './state'
 
-const at = (patch: Partial<ExplorerState>): ExplorerState => ({ ...initial, ...patch })
+// Precinct view unless a test says otherwise: the app opens on battalions.
+const at = (patch: Partial<ExplorerState>): ExplorerState => ({ ...initial, geography: 'precincts', ...patch })
 
 describe('initial state', () => {
   it('opens on the first story and layer, the whole city, the latest full year', () => {
@@ -17,10 +18,11 @@ describe('initial state', () => {
       metricId: 'population-density',
       borough: null,
       pinnedArea: null,
-      geography: 'precincts',
+      geography: 'battalions',
       detail: 'borough',
       showOutlines: true,
       showLabels: true,
+      showFirehouses: false,
       yearFrom: 2025,
       yearTo: 2025,
       trendOpen: false,
@@ -86,8 +88,10 @@ describe('pinArea', () => {
   })
 
   it('ignores ids that are not areas of the current geography', () => {
-    expect(reduce(initial, { type: 'pinArea', id: '2' })).toBe(initial)
-    expect(reduce(initial, { type: 'pinArea', id: 'bn14' })).toBe(initial)
+    const precincts = at({})
+    expect(reduce(precincts, { type: 'pinArea', id: '2' })).toBe(precincts)
+    expect(reduce(precincts, { type: 'pinArea', id: 'bn14' })).toBe(precincts)
+    expect(reduce(initial, { type: 'pinArea', id: '44' })).toBe(initial)
   })
 
   it('unpins back to the borough', () => {
@@ -109,6 +113,13 @@ describe('detail and map toggles', () => {
   it('flips outlines and labels', () => {
     expect(reduce(initial, { type: 'toggleOutlines' }).showOutlines).toBe(false)
     expect(reduce(initial, { type: 'toggleLabels' }).showLabels).toBe(false)
+  })
+
+  it('shows firehouses when asked, and keeps them shown in every story', () => {
+    const shown = reduce(initial, { type: 'toggleFirehouses' })
+    expect(shown.showFirehouses).toBe(true)
+    expect(reduce(shown, { type: 'selectStory', storyId: 'medical' }).showFirehouses).toBe(true)
+    expect(reduce(shown, { type: 'toggleFirehouses' }).showFirehouses).toBe(false)
   })
 })
 

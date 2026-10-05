@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { initialExplorerState } from '../explorer/state'
 import { LAYERS, boroughLayers } from './config'
-import { clickAction, hitKind, hoverTarget, liveTarget } from './interaction'
+import { clickAction, hitKind, hoverTarget, liveTarget, nearestFirst } from './interaction'
 
 const borough = (name: string) => ({ kind: 'borough' as const, properties: { borough: name } })
 const precinct = (n: number, b: string) => ({ kind: 'precincts' as const, properties: { precinct: n, borough: b } })
 const battalion = (n: number, b: string) => ({ kind: 'battalions' as const, properties: { battalion: n, borough: b } })
-const city = initialExplorerState
+// Precinct view, explicitly: the app opens on battalions.
+const city = { ...initialExplorerState, geography: 'precincts' as const }
 const battalions = { ...city, geography: 'battalions' as const }
 
 describe('clickAction', () => {
@@ -76,5 +77,44 @@ describe('liveTarget', () => {
     expect(liveTarget({ kind: 'area', id: 'bn14' }, 'battalions')).toEqual({ kind: 'area', id: 'bn14' })
     expect(liveTarget({ kind: 'borough', borough: 'Bronx' }, 'battalions')).toEqual({ kind: 'borough', borough: 'Bronx' })
     expect(liveTarget(null, 'precincts')).toBeNull()
+  })
+})
+
+describe('firehouses under the pointer', () => {
+  const props = { id: 7, name: 'Engine 1/Ladder 24', address: '142 West 31st Street', neighbourhood: 'Midtown', borough: 'Manhattan', battalion: 7 }
+  const firehouse = { kind: 'firehouse' as const, properties: props }
+  const shown = { ...city, showFirehouses: true }
+
+  it('are what the pointer is over when shown, ahead of the borough or area beneath', () => {
+    expect(hoverTarget(shown, [firehouse, borough('Manhattan')])).toEqual({ kind: 'firehouse', id: 7, firehouse: { ...props, command: null } })
+    expect(hoverTarget({ ...shown, detail: 'area' }, [firehouse, precinct(14, 'Manhattan')])).toMatchObject({ kind: 'firehouse', id: 7 })
+  })
+
+  it('are nothing while hidden, or outside the focused borough', () => {
+    expect(hoverTarget(city, [firehouse, borough('Manhattan')])).toEqual({ kind: 'borough', borough: 'Manhattan' })
+    expect(hoverTarget({ ...shown, borough: 'Queens' }, [firehouse])).toBeNull()
+  })
+
+  it('let clicks through to what is beneath', () => {
+    expect(clickAction(shown, [firehouse, borough('Manhattan')])).toEqual({ type: 'focusBorough', borough: 'Manhattan' })
+  })
+
+  it('are told apart from other layers by id', () => {
+    expect(hitKind(boroughLayers('Queens').firehouse)).toBe('firehouse')
+  })
+})
+
+describe('nearestFirst', () => {
+  it('orders marker hits by how near they are to the pointer, not by drawing order', () => {
+    const at = (x: number) => ({ geometry: { type: 'Point', coordinates: [x, 0] } })
+    const project = ([x]: number[]) => ({ x: x * 10, y: 0 })
+    expect(nearestFirst([at(3), at(1), at(2)], { x: 12, y: 0 }, project)).toEqual([at(1), at(2), at(3)])
+  })
+})
+
+describe('a firehouse whose properties the map dropped', () => {
+  it('reads a missing battalion or command as none, as the map leaves out null values', () => {
+    const target = hoverTarget({ ...city, showFirehouses: true }, [{ kind: 'firehouse', properties: { id: 4, name: 'Marine 1', address: 'Pier', neighbourhood: '', borough: 'Manhattan' } }])
+    expect(target).toMatchObject({ kind: 'firehouse', firehouse: { battalion: null, command: null } })
   })
 })

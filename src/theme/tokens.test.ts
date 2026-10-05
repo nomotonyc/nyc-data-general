@@ -52,6 +52,14 @@ describe('lightTheme', () => {
     expect(contrastRatio(lightTheme.color.inkFaint, lightTheme.color.background)).toBeGreaterThanOrEqual(3)
   })
 
+  it('keeps firehouse markers visible on every map colour: the fill or the ring at 3:1 or better', () => {
+    const c = lightTheme.color
+    const grounds = [c.boroughFill, c.mapWater, ...Object.values(lightTheme.story).flatMap((s) => s.ramp)]
+    for (const ground of grounds) {
+      expect(Math.max(contrastRatio(c.firehouse, ground), contrastRatio(c.firehouseRing, ground)), ground).toBeGreaterThanOrEqual(3)
+    }
+  })
+
   it('keeps the hover card’s strip visible against the card', () => {
     const c = lightTheme.color
     expect(contrastRatio(c.tooltipInkFaint, c.tooltipTrack), 'borough average tick').toBeGreaterThanOrEqual(1.8)

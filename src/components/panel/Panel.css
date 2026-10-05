@@ -399,3 +399,50 @@
   margin: 0;
   color: var(--color-ink-secondary);
 }
+
+/* Firehouses in a focused borough or pinned battalion. */
+.panel__firehouse-totals {
+  margin: 0;
+  color: var(--color-ink-secondary);
+  font-size: 13px;
+}
+
+.panel__firehouse-kinds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* As on the firehouse hover card: companies in the story's colours (unitColours). */
+.panel__firehouse-kind {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.panel__firehouse-list {
+  display: flex;
+  flex-direction: column;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.panel__firehouse {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 0;
+  border-top: 1px solid var(--color-line);
+}
+
+.panel__firehouse-address {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.panel__firehouse-units {
+  color: var(--color-ink-muted);
+  font-size: 12px;
+}

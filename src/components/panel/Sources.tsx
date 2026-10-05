@@ -1,9 +1,11 @@
 import type { Placement } from '../../data/dataset'
 import { useId } from 'react'
+import { FIREHOUSE_METHOD, FIREHOUSE_SOURCE } from '../../data/firehouses'
 import { METHOD_URL } from '../../domain/stories'
+import { firehouseScope } from '../../panel/firehouses'
 import { useDataset, useExplorerState } from '../../explorer/context'
 import { activeMetric } from '../../explorer/state'
-import { layerMethod, layerSources } from '../../layers'
+import { BATTALION_BOUNDARIES, layerMethod, layerSources } from '../../layers'
 
 const asOfDate = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
 
@@ -16,7 +18,14 @@ const sharePercent = (share: number) => (share > 0 && share < 0.005 ? '<1%' : `$
 /** Where the active layer's numbers come from, straight from its layer file. Closed until opened. */
 export function Sources() {
   const labelId = useId()
-  const layer = activeMetric(useExplorerState())
+  const state = useExplorerState()
+  const layer = activeMetric(state)
+  // Credited whenever firehouses are on screen: as markers, or in the panel's Firehouses section.
+  const firehousesShown = state.showFirehouses || firehouseScope(state) !== null
+  // Firehouses are placed in battalion areas ("In Battalion 14"), so their boundaries are credited too.
+  const listed = [...layerSources(layer), ...(firehousesShown ? [FIREHOUSE_SOURCE, BATTALION_BOUNDARIES] : [])]
+  const sources = listed.filter((s, i) => listed.findIndex((o) => o.url === s.url) === i)
+  const method = [...layerMethod(layer), ...(firehousesShown ? FIREHOUSE_METHOD : [])]
   const ds = useDataset()
   return (
     <section className="panel__section panel__sources" aria-labelledby={labelId}>
@@ -36,7 +45,7 @@ export function Sources() {
             </p>
           )}
           <ul className="panel__source-list">
-            {layerSources(layer).map((source) => (
+            {sources.map((source) => (
               <li key={source.url + source.name}>
                 <a href={source.url}>{source.name}</a>
                 <span className="panel__source-meta">
@@ -48,7 +57,7 @@ export function Sources() {
           <div className="panel__method">
             <div className="panel__method-title">How this is calculated</div>
             <ul>
-              {layerMethod(layer).map((line) => (
+              {method.map((line) => (
                 <li key={line}>{line}</li>
               ))}
             </ul>

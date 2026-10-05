@@ -1,3 +1,4 @@
+import { expression } from '@maplibre/maplibre-gl-style-spec'
 import { describe, expect, it } from 'vitest'
 import { BOROUGHS } from '../domain/geography'
 import { lightTheme } from '../theme/tokens'
@@ -10,6 +11,7 @@ describe('mapSources', () => {
     expect(sources[SOURCES.boroughs]).toMatchObject({ type: 'geojson', promoteId: 'borough' })
     expect(sources[SOURCES.precincts]).toMatchObject({ type: 'geojson', promoteId: 'precinct' })
     expect(sources[SOURCES.precinctLabels]).toMatchObject({ type: 'geojson' })
+    expect(sources[SOURCES.firehouses]).toMatchObject({ type: 'geojson', promoteId: 'id' })
   })
 })
 
@@ -31,6 +33,9 @@ describe('mapLayers', () => {
       LAYERS.precinctHighlight,
       LAYERS.battalionHover,
       LAYERS.battalionHighlight,
+      ...perBorough('firehouseRing'),
+      ...perBorough('firehouse'),
+      LAYERS.firehouseHover,
       LAYERS.boroughLabel,
       LAYERS.precinctLabel,
       LAYERS.battalionLabel,
@@ -40,6 +45,7 @@ describe('mapLayers', () => {
   it('gives each borough its own layers, so each can fade on its own', () => {
     for (const b of BOROUGHS) {
       for (const id of Object.values(boroughLayers(b))) {
+        if (id === boroughLayers(b).firehouseRing) continue // also filtered by rank; tested below
         expect((byId(id) as { filter?: unknown }).filter, id).toEqual(['==', ['get', 'borough'], b])
       }
     }
@@ -79,5 +85,54 @@ describe('mapLayers', () => {
 
   it('starts with the pin highlight hidden', () => {
     expect(byId(LAYERS.precinctHighlight).layout).toMatchObject({ visibility: 'none' })
+  })
+})
+
+describe('firehouse layers', () => {
+  const layers = mapLayers(lightTheme)
+  const byId = (id: string) => layers.find((l) => l.id === id) as { paint: Record<string, unknown> }
+
+  it('starts hidden and fades like everything else', () => {
+    for (const b of BOROUGHS) {
+      expect(byId(boroughLayers(b).firehouse).paint).toMatchObject({
+        'circle-opacity': 0,
+        'circle-stroke-opacity': 0,
+        'circle-opacity-transition': { duration: FADE_DURATION },
+        'circle-stroke-opacity-transition': { duration: FADE_DURATION },
+      })
+    }
+  })
+
+  const evaluate = (spec: unknown, zoom: number, command: string | null) => {
+    const parsed = expression.createExpression(spec)
+    if (parsed.result !== 'success') throw new Error(JSON.stringify(parsed.value))
+    return parsed.value.evaluate({ zoom }, { type: 'Point', properties: { command }, geometry: [] } as never)
+  }
+
+  it('marks each rank of command more heavily: battalion larger with a heavier ring, division and borough filled', () => {
+    const paint = byId(boroughLayers('Queens').firehouse).paint
+    for (const zoom of [10, 12, 14]) {
+      const radius = (rank: string | null) => evaluate(paint['circle-radius'], zoom, rank) as number
+      const ring = (rank: string | null) => evaluate(paint['circle-stroke-width'], zoom, rank) as number
+      expect(radius('battalion'), `at ${zoom}`).toBeGreaterThan(radius(null))
+      expect(ring('battalion'), `at ${zoom}`).toBeGreaterThan(ring(null))
+      expect(radius('borough'), `at ${zoom}`).toBeGreaterThanOrEqual(radius('division'))
+    }
+    const fill = (rank: string | null) => evaluate(paint['circle-color'], 12, rank)
+    expect([null, 'battalion', 'division', 'borough'].map((r) => String(fill(r)))).toEqual(
+      [lightTheme.color.firehouse, lightTheme.color.firehouse, lightTheme.color.firehouseRing, lightTheme.color.firehouseRing].map((c) => String(evaluate(c, 12, null))),
+    )
+  })
+
+  it('rings borough command headquarters a second time, and only those', () => {
+    for (const b of BOROUGHS) {
+      const ring = layers.find((l) => l.id === boroughLayers(b).firehouseRing) as { filter: unknown; paint: Record<string, unknown> }
+      expect(ring.filter).toEqual(['all', ['==', ['get', 'borough'], b], ['==', ['get', 'command'], 'borough']])
+      expect(ring.paint).toMatchObject({ 'circle-opacity': 0, 'circle-stroke-opacity': 0, 'circle-stroke-color': lightTheme.color.firehouseRing })
+    }
+  })
+
+  it('outlines no firehouse until the pointer is over one', () => {
+    expect((layers.find((l) => l.id === LAYERS.firehouseHover) as { filter: unknown }).filter).toEqual(['in', ['get', 'id'], ['literal', []]])
   })
 })

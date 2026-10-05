@@ -22,6 +22,7 @@ and the Where list. Nothing else needs editing. The file holds:
 | `unit` | Shown after values: "fires", "people per sq mi" |
 | `aggregation` | `sum` for counts; `ratio` for rates like density (numerator ÷ denominator) |
 | `data` | Monthly or yearly, first and last year |
+| `geographies` | Precincts, and battalions if the layer can be placed in them (precincts only when omitted) |
 | `breakdown` | The panel's breakdown title and parts |
 | `sources` | This layer's own data sources (boundary credits are added for every layer) |
 | `method` | Caveats specific to this layer, in plain sentences |
@@ -54,6 +55,74 @@ file at startup and checks it covers every area and month.
 The tests check every layer file is complete (a known story, sources, caveats,
 breakdown, sample range, valid years) and name the file that is not. Record the
 source audit for a new layer in this document too.
+
+## Precincts and battalions
+
+Every view works for NYPD precincts or FDNY battalions, chosen with the Areas
+switch. They don't nest (only 14 of 78 precincts have 99% of their residents in
+one battalion), so the app shows one or the other below the boroughs; no
+battalion crosses a borough line (`battalionData.test` checks points across each
+whole shape).
+
+Battalion boundaries come from NYC Open Data "Fire Battalions"
+(https://data.cityofnewyork.us/d/xzng-ft6f), simplified like the precincts by
+`npm run data:battalions`. Each battalion's borough is taken from the precincts
+that cover it (`BATTALIONS` in `src/domain/geography.ts`).
+
+A layer is shown by battalion only when it lists `battalions` in its
+`geographies`; otherwise the switch says it isn't available yet. The source data
+records precincts, not battalions, so each battalion file says how its records
+were placed, and the app shows it under Data sources:
+
+| Layer | Placed by | Exact or estimated |
+|---|---|---|
+| Fire apparatus accidents | each crash's coordinates | exact |
+| Population density | the 2020 census blocks residents live in | exact |
+| Structural fires | its alarm box's published location (68.6%); else its box's street corner, geocoded (25.8%); else residents in its precinct, ZIP code and districts (5.6%) | 94.4% exact, 5.6% estimated |
+| Ambulance calls, life-threatening response time | residents in its precinct, ZIP code and community and council districts | estimated |
+
+The shares each build placed are shown in the app under Data sources, and the
+map legend says how much of a battalion view is estimated ("By battalion: 31%
+estimated"), so a screenshot carries it too. A box or corner that falls in another
+borough's battalion (a corner on a borough line, such as Linden Blvd & Sapphire St)
+isn't trusted and falls back to the estimate, so borough totals match between the
+two views.
+
+**Structural fires.** Fire dispatch records name the alarm box FDNY used. The
+build regroups fires by box and matches each box to the city's in-service alarm
+box locations (https://data.cityofnewyork.us/d/v57i-gtxb; borough letter plus
+four-digit box number, e.g. `X0364`): 68.6% of 2019–2026 fires. Boxes missing
+from that list are geocoded from their street corner with NYC Geoclient
+(`https://api.nyc.gov/geoclient/v2/intersection.json`, api-portal.nyc.gov):
+4,625 of 5,781 corners were recognised, placing another 25.8%. This needs a
+subscription key in `NYC_GEOCLIENT_KEY` (environment or the gitignored
+`.env.local`), used only by the build; results are cached in
+`.cache/geoclient.json`. Without a key those fires fall back to the estimate
+below.
+
+**Estimates (EMS, and fires not placed above).** EMS records carry no location
+finer than precinct, ZIP code, community district and council district. Each
+group is split among the battalions its area overlaps in proportion to the 2020
+census residents living in each overlap (ZIP areas
+https://data.cityofnewyork.us/d/pri4-ifjk, community districts
+https://data.cityofnewyork.us/d/5crt-au7u, council districts
+https://data.cityofnewyork.us/d/872g-cjhh). Where that area has no residents,
+by precinct and ZIP code; failing that, by precinct. In 2025, 52.5% of ambulance
+calls fell in areas lying wholly in one battalion (45.6% with precinct and ZIP
+alone), so those are placed as if exact; the rest are split. The app still
+labels every EMS battalion figure an estimate. A response
+time is split as its total seconds and its count, so averages stay averages.
+
+Records with no precinct are left out of both views, so both count the same
+records.
+
+Records are placed in the original NYC Open Data boundaries, downloaded by the
+build to `.cache/shapes/`, not the simplified ones the map draws: simplifying
+leaves slivers where neighbouring areas meet, and a point there would land in no
+area or the wrong one. Borough totals therefore match between the two views:
+exactly for fire apparatus accidents, and within a dozen people for population
+(each area's estimate is rounded to whole people, and 11 residents live on
+shoreline blocks inside a precinct but outside every battalion).
 
 ## Shared: police precinct boundaries
 
@@ -119,7 +188,7 @@ No API key is needed; all are bulk files.
 1. Assign each 2020 census block (37,984 in NYC) to the precinct that contains
    its interior point. Checked: 8,802,430 of 8,804,190 residents (99.98%) land
    in a precinct; 555 blocks (1,760 people) sit on shoreline or water edges
-   outside every precinct polygon.
+   outside every precinct polygon. The build reproduces this exactly.
 2. Precinct land area = sum of its blocks' `AREALAND`. Water is excluded.
 3. Split each tract's ACS population among precincts in proportion to the 2020
    population of its blocks in each precinct. 289 of 2,327 tracts span more

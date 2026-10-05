@@ -224,7 +224,7 @@ describe('firehouses', () => {
 
   it('outline the firehouse under the pointer, and no area with it', () => {
     const map = fakeMap()
-    paintHover(map, { kind: 'firehouse', id: 12, firehouse: { id: 12, name: 'Engine 1', address: '', neighbourhood: '', borough: 'Queens', battalion: 50, command: null } }, 'precincts')
+    paintHover(map, { kind: 'firehouse', id: 12, firehouse: { id: 12, name: 'Engine 1', address: '', neighbourhood: '', borough: 'Queens', battalion: 50, command: null, note: null } }, 'precincts')
     expect(map.setFilter).toHaveBeenCalledWith(LAYERS.firehouseHover, ['in', ['get', 'id'], ['literal', [12]]])
     expect(map.setFilter).toHaveBeenCalledWith(LAYERS.precinctHover, ['in', ['get', 'precinct'], ['literal', []]])
     expect(map.setFilter).toHaveBeenCalledWith(LAYERS.boroughHover, ['==', ['get', 'borough'], ''])

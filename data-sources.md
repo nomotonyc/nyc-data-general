@@ -493,6 +493,37 @@ buildings no longer in the footprints; NYC Geoclient places their street address
 Geocoding every address independently with Geoclient, the median distance to the listed
 point is 4 m.
 
+**Checked against current data (October 2026).** The listing dates from April 2022, so
+it was compared with two current sources:
+
+- [Fire Companies](https://data.cityofnewyork.us/d/bst7-5464) (City Planning, May 2026),
+  each engine, ladder and squad company's response area with its battalion and division.
+  All 340 engine and ladder companies and all 8 squads in the listing are current, and no
+  current company is missing. The 49 battalions and 9 divisions match the listing's
+  headquarters.
+- FDNY's own station list in [NERIS](https://neris.fsri.org/departments/FD36047901/stations),
+  the national fire reporting system. Every company in the listing is there, grouped into
+  the same firehouses, and the two sets of locations are a median of 9 m apart (95% within
+  20 m).
+
+Two differences, both disclosed rather than changed, so the city's listing stays the one
+source:
+
+- **Engine 287, Ladder 136 and Battalion 46** have worked from temporary quarters at
+  90-26 57th Avenue since December 2023, while their firehouse at 86-53 Grand Avenue is
+  demolished and rebuilt after construction next door damaged it (planned to the end of
+  2026; NYC Public Design Commission and Juniper Park Civic Association). The card's note
+  is dated "As of October 2026"; re-check it once the rebuild is due to finish. The marker stays
+  at 86-53 Grand Avenue and the card says where they are. Notes like this live in
+  `FIREHOUSE_NOTES` (src/data/build/firehouses.ts); the build stops if a note names a
+  firehouse the listing no longer has.
+- **Marine 3, 4 and 8** (Manhattan Beach, Fort Totten, Great Kills) are temporary marine
+  units on FDNY's station list but not in the listing, which has only the three full-time
+  fireboat companies. They are not shown, and Data sources says so.
+
+The rescue and marine companies have no response areas in Fire Companies, so for them the
+check rests on NERIS alone.
+
 The battalion area each firehouse stands in is found from the original FDNY boundaries
 ([Fire Battalions](https://data.cityofnewyork.us/d/xzng-ft6f)). As a check on the locations,
 each of the 49 battalion headquarters stands inside its own battalion's area.
@@ -512,7 +543,8 @@ companies FDNY assigns to a battalion, so the panel says "in Battalion N's area"
 
 What it doesn't tell you:
 
-- **Changes since April 2022.** Units that opened, closed or moved since are not reflected.
+- **Changes after the October 2026 check.** The listing itself dates from April 2022; the
+  check above found one temporary move and no openings or closings since.
 - **Apparatus.** It names companies, not the vehicles they run (a tower ladder vs. an aerial
   ladder, say), and doesn't list special units such as Hazmat 1 separately.
 - **Activity.** It has no call volumes or first-due areas per firehouse.

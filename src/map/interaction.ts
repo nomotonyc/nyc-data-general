@@ -36,7 +36,7 @@ export function hoverTarget(
     if (hit) {
       // The map leaves null values out of feature properties, so a missing one means none.
       const p = hit.properties as Partial<Firehouse> & Pick<Firehouse, 'id' | 'name' | 'address' | 'neighbourhood' | 'borough'>
-      const firehouse: Firehouse = { ...p, battalion: p.battalion ?? null, command: p.command ?? null }
+      const firehouse: Firehouse = { ...p, battalion: p.battalion ?? null, command: p.command ?? null, note: p.note ?? null }
       return { kind: 'firehouse', id: firehouse.id, firehouse }
     }
   }

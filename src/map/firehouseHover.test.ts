@@ -10,6 +10,7 @@ const brooklyn: Firehouse = {
   borough: 'Brooklyn',
   battalion: 31,
   command: 'borough',
+  note: null,
 }
 
 describe('firehouseDetails', () => {
@@ -35,7 +36,12 @@ describe('firehouseDetails', () => {
         },
       ],
       area: 'In Battalion 31',
+      note: null,
     })
+  })
+
+  it('carries a note where the listing is out of date', () => {
+    expect(firehouseDetails({ ...brooklyn, note: 'Temporarily at 90-26 57th Avenue' }).note).toBe('Temporarily at 90-26 57th Avenue')
   })
 
   it('leaves out an empty group and an unknown battalion area', () => {

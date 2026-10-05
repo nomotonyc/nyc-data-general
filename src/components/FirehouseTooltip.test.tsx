@@ -17,6 +17,7 @@ const details = {
     { label: 'Command', units: [{ kind: 'Battalion' as const, label: 'Battalion 31' }] },
   ],
   area: 'In Battalion 31',
+  note: null,
 }
 const fire = lightTheme.story.fire
 const at = { palette: fire, pointer: { x: 10, y: 10 }, area: { width: 800, height: 600 } }
@@ -48,5 +49,10 @@ describe('FirehouseTooltip', () => {
   it('leaves out the area line when the firehouse is in no battalion area', () => {
     render(<FirehouseTooltip details={{ ...details, area: null }} {...at} />)
     expect(screen.queryByText(/In Battalion/)).not.toBeInTheDocument()
+  })
+
+  it('shows a note where the listing is out of date', () => {
+    render(<FirehouseTooltip details={{ ...details, note: 'Temporarily at 90-26 57th Avenue' }} {...at} />)
+    expect(screen.getByText('Temporarily at 90-26 57th Avenue').closest('.firehouse-card__note')).toBeInTheDocument()
   })
 })

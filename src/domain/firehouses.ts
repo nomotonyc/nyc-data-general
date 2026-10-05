@@ -18,6 +18,8 @@ export type Firehouse = {
   battalion: number | null
   /** The highest command it houses, if any; the map marks each rank differently. */
   command: CommandRank | null
+  /** Where the listing is out of date (see FIREHOUSE_NOTES), what has changed; otherwise null. */
+  note: string | null
 }
 
 export type UnitKind = (typeof COMPANIES)[number] | (typeof COMMANDS)[number]

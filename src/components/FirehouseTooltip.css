@@ -38,3 +38,22 @@
 .firehouse-card__unit--company {
   font-weight: 600;
 }
+
+/* Where the listing is out of date: set apart in the card's own raised tone, with an info mark. */
+.firehouse-card__note {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--color-tooltip-raised);
+  color: var(--color-tooltip-ink-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.firehouse-card__note-icon {
+  flex: none;
+  margin-top: 1px;
+  color: var(--color-tooltip-ink-faint);
+}

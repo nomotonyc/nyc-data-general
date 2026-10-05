@@ -11,6 +11,7 @@ const fh = (id: number, name: string, borough: string, battalion: number, addres
   borough,
   battalion,
   command: commandRank(parseUnits(name)),
+  note: null,
 })
 const all = [
   fh(1, 'Battalion 31/Engine 207/Ladder 110', 'Brooklyn', 31, '172 Tillary Street'),

@@ -1,10 +1,16 @@
 import { describe, expect, it } from 'vitest'
+import { FIREHOUSE_NOTES } from './build/firehouses'
 import { FIREHOUSES, FIREHOUSE_METHOD, FIREHOUSE_SOURCE, firehouseSourceUsed } from './firehouses'
 
 describe('firehouse data', () => {
   it('holds every firehouse the build wrote, each in a borough', () => {
     expect(FIREHOUSES.length).toBe(219)
     expect(new Set(FIREHOUSES.map((f) => f.borough))).toEqual(new Set(['Manhattan', 'Bronx', 'Brooklyn', 'Queens', 'Staten Island']))
+  })
+
+  it('carries every note the build adds, so the data was rebuilt after the notes changed', () => {
+    for (const [name, note] of Object.entries(FIREHOUSE_NOTES)) expect(FIREHOUSES.find((f) => f.name === name)?.note, name).toBe(note)
+    expect(FIREHOUSES.filter((f) => f.note !== null)).toHaveLength(Object.keys(FIREHOUSE_NOTES).length)
   })
 
   it('credits the listing with the month and year the city last updated it, read from the file', () => {
@@ -18,5 +24,12 @@ describe('firehouse data', () => {
     expect(text).toMatch(/battalion.*division.*borough command/i)
     expect(text).toMatch(/where firehouses stand/)
     expect(text).toMatch(/April 2022/)
+  })
+
+  it('says what the check against current FDNY and City Planning data found, including what is missing', () => {
+    const text = FIREHOUSE_METHOD.join(' ')
+    expect(text).toMatch(/NERIS/)
+    expect(text).toMatch(/Marine 3, 4 and 8/)
+    expect(text).toMatch(/Engine 287/)
   })
 })

@@ -9,6 +9,8 @@ export type FirehouseDetails = {
   groups: { label: string; units: Unit[] }[]
   /** The battalion area it stands in, or null when it is in none. */
   area: string | null
+  /** What has changed since the listing, if anything. */
+  note: string | null
 }
 
 export function firehouseDetails(firehouse: Firehouse): FirehouseDetails {
@@ -19,5 +21,6 @@ export function firehouseDetails(firehouse: Firehouse): FirehouseDetails {
     place: [firehouse.neighbourhood, firehouse.borough].filter(Boolean).join(', '),
     groups: [...group('Company', 'Companies', companies), ...group('Command', 'Commands', commands)],
     area: firehouse.battalion == null ? null : `In Battalion ${firehouse.battalion}`,
+    note: firehouse.note ?? null,
   }
 }

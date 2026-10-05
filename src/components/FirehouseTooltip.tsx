@@ -27,6 +27,16 @@ export function FirehouseTooltip({ details, palette, pointer, area }: Props) {
         <span className="map-tooltip__title">{details.address}</span>
         <span className="map-tooltip__subtitle">{details.place}</span>
       </div>
+      {details.note && (
+        <p className="firehouse-card__note">
+          <svg className="firehouse-card__note-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+            <circle cx="8" cy="8" r="6.5" />
+            <path d="M8 7.2v4" strokeLinecap="round" />
+            <circle cx="8" cy="4.9" r="0.4" fill="currentColor" />
+          </svg>
+          <span>{details.note}</span>
+        </p>
+      )}
       {details.groups.map((g) => (
         <div key={g.label} className="firehouse-card__group">
           <span className="firehouse-card__label">{g.label}</span>

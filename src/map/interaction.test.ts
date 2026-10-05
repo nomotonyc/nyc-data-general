@@ -86,7 +86,7 @@ describe('firehouses under the pointer', () => {
   const shown = { ...city, showFirehouses: true }
 
   it('are what the pointer is over when shown, ahead of the borough or area beneath', () => {
-    expect(hoverTarget(shown, [firehouse, borough('Manhattan')])).toEqual({ kind: 'firehouse', id: 7, firehouse: { ...props, command: null } })
+    expect(hoverTarget(shown, [firehouse, borough('Manhattan')])).toEqual({ kind: 'firehouse', id: 7, firehouse: { ...props, command: null, note: null } })
     expect(hoverTarget({ ...shown, detail: 'area' }, [firehouse, precinct(14, 'Manhattan')])).toMatchObject({ kind: 'firehouse', id: 7 })
   })
 

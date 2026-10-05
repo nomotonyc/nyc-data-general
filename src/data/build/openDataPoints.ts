@@ -1,11 +1,17 @@
+import type { Geography } from '../../domain/geography'
 import type { OpenDataPointsBuild } from '../../layers'
 import type { CountRow } from './openDataCounts'
 
 type Ring = number[][]
-export type PrecinctShapes = {
+/** Precinct or battalion shapes: each feature carries its number under `precinct` or `battalion`. */
+export type AreaShapes = {
   type: 'FeatureCollection'
-  features: { type: 'Feature'; properties: { precinct: number }; geometry: { type: 'MultiPolygon'; coordinates: Ring[][] } }[]
+  features: { type: 'Feature'; properties: { precinct?: number; battalion?: number }; geometry: { type: 'MultiPolygon'; coordinates: Ring[][] } }[]
 }
+export type PrecinctShapes = AreaShapes
+
+/** The feature property holding each geography's area number. */
+export const NUMBER_PROPERTY = { precincts: 'precinct', battalions: 'battalion' } as const satisfies Record<Geography, string>
 
 /** One fetched record: when, where (as the API returns numbers, text) and its breakdown part. */
 export type PointRow = { date: string; lat?: string; lon?: string; part: string }
@@ -36,26 +42,33 @@ export function inRing(ring: Ring, x: number, y: number): boolean {
   return inside
 }
 
-/** The precinct containing a point (longitude, latitude), or null in water or outside the city. */
-export function precinctAt(shapes: PrecinctShapes, lon: number, lat: number): number | null {
+/** The number of the area containing a point (longitude, latitude), or null in water or outside the city. */
+export function areaNumberAt(shapes: AreaShapes, lon: number, lat: number, geography: Geography): number | null {
   for (const f of shapes.features) {
     for (const [outer, ...holes] of f.geometry.coordinates) {
-      if (inRing(outer, lon, lat) && !holes.some((h) => inRing(h, lon, lat))) return f.properties.precinct
+      if (inRing(outer, lon, lat) && !holes.some((h) => inRing(h, lon, lat))) return f.properties[NUMBER_PROPERTY[geography]] ?? null
     }
   }
   return null
 }
 
+/** The precinct containing a point (longitude, latitude), or null in water or outside the city. */
+export function precinctAt(shapes: PrecinctShapes, lon: number, lat: number): number | null {
+  return areaNumberAt(shapes, lon, lat, 'precincts')
+}
+
 /**
- * One count per record, in the precinct its coordinates fall in. Records without
- * coordinates, at 0,0, or outside every precinct get no precinct (and are reported).
+ * One count per record, in the precinct (or battalion) its coordinates fall in. Records
+ * without coordinates, at 0,0, or outside every area get none (and are reported).
  */
-export function pointsToCountRows(rows: readonly PointRow[], shapes: PrecinctShapes): CountRow[] {
+export function pointsToCountRows(rows: readonly PointRow[], shapes: AreaShapes, geography: Geography = 'precincts'): CountRow[] {
   return rows.map((r) => {
     const lat = Number(r.lat)
     const lon = Number(r.lon)
     const located = r.lat !== undefined && r.lon !== undefined && lat !== 0 && lon !== 0
-    const precinct = located ? precinctAt(shapes, lon, lat) : null
-    return { precinct: precinct === null ? undefined : String(precinct), month: r.date, part: r.part, n: '1' }
+    const n = located ? areaNumberAt(shapes, lon, lat, geography) : null
+    const area = n === null ? undefined : String(n)
+    const row = { month: r.date, part: r.part, n: '1' }
+    return geography === 'battalions' ? { battalion: area, ...row } : { precinct: area, ...row }
   })
 }

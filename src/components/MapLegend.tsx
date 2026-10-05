@@ -9,8 +9,8 @@ export function MapLegend({ details }: { details: LegendDetails }) {
       <div className="map-legend__scale">
         <span className="map-legend__end">{details.lo}</span>
         <div className="map-legend__steps" aria-hidden="true">
-          {details.steps.map((colour) => (
-            <span key={colour} className="map-legend__step" style={{ background: colour }} />
+          {details.steps.map((colour, i) => (
+            <span key={i} className="map-legend__step" style={{ background: colour }} />
           ))}
         </div>
         <span className="map-legend__end">{details.hi}</span>

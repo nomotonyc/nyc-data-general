@@ -1,4 +1,13 @@
+/* The story colour is a registered colour, so changing story eases it everywhere it's used
+   (tabs, rail, panel), over the same duration as the map's fades. */
+@property --story-accent {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #2a5db8;
+}
+
 .explorer {
+  transition: --story-accent 450ms ease-in-out;
   display: flex;
   flex-direction: column;
   height: 100dvh;

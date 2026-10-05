@@ -1,17 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Map as MapLibreMap, type MapMouseEvent } from 'maplibre-gl'
 import './BaseMap.css'
-import { BOROUGHS, areaOfPrecinct } from '../domain/geography'
+import { BOROUGHS, GEOGRAPHIES, areaById } from '../domain/geography'
 import { useDataset, useExplorerDispatch, useExplorerState } from '../explorer/context'
 import { activeMetric } from '../explorer/state'
 import { cameraPadding, cameraTarget } from '../map/camera'
 import { choropleth } from '../map/choropleth'
-import { FIXED_VIEW, FLY_DURATION, HOVER_DELAY, NYC_BOUNDS, boroughLayers } from '../map/config'
+import { FADE_DURATION, FIXED_VIEW, FLY_DURATION, HOVER_DELAY, NYC_BOUNDS, areaLayers, boroughLayers } from '../map/config'
 import { cameraEasing } from '../map/easing'
 import { hoverDetails } from '../map/hover'
 import { legendDetails } from '../map/legend'
-import { clickAction, hitKind, hoverTarget, type Hit, type Target } from '../map/interaction'
+import { clickAction, hitKind, hoverTarget, liveTarget, type Hit, type Target } from '../map/interaction'
 import { mapLayers, mapSources } from '../map/layers'
+import { fillsAt, planFills } from '../map/fillTween'
 import { paintHover, paintMap } from '../map/paint'
 import { buildStyle } from '../map/style'
 import { useTheme } from '../theme/context'
@@ -22,9 +23,9 @@ const sameTarget = (a: Target | null, b: Target | null) =>
   a === b ||
   (a !== null &&
     b !== null &&
-    (a.kind === 'borough' ? b.kind === 'borough' && a.borough === b.borough : b.kind === 'precinct' && a.precinct === b.precinct))
+    (a.kind === 'borough' ? b.kind === 'borough' && a.borough === b.borough : b.kind === 'area' && a.id === b.id))
 
-const CLICKABLE = BOROUGHS.flatMap((b) => [boroughLayers(b).precinctFill, boroughLayers(b).boroughFill])
+const CLICKABLE = BOROUGHS.flatMap((b) => [boroughLayers(b).boroughFill, ...GEOGRAPHIES.map((g) => areaLayers(b, g).fill)])
 
 /** Respect a request for less motion: jump instead of flying. */
 function flyDuration() {
@@ -128,29 +129,53 @@ export default function BaseMap() {
     }
   }, [dispatch])
 
-  const { storyId, metricId, borough, detail, yearFrom, yearTo, pinnedPrecinct, showOutlines, showLabels } = state
+  const { storyId, metricId, borough, detail, yearFrom, yearTo, pinnedArea, geography, showOutlines, showLabels } = state
   const ramp = theme.story[storyId].ramp
   // Only what the colours depend on, so the map toggles don't recompute them.
   const plan = useMemo(
     () => choropleth({ storyId, metricId, borough, detail, yearFrom, yearTo }, ds, ramp),
     [ds, ramp, storyId, metricId, borough, detail, yearFrom, yearTo],
   )
-  const pinned = useMemo(
-    () => (pinnedPrecinct === null ? [] : areaOfPrecinct(ds.areas, pinnedPrecinct).precincts),
-    [ds, pinnedPrecinct],
-  )
+  const pinned = useMemo(() => (pinnedArea === null ? [] : [areaById(ds.areas, pinnedArea).number]), [ds, pinnedArea])
 
   useEffect(() => {
-    if (ready && mapRef.current) paintMap(mapRef.current, plan, { outlines: showOutlines, labels: showLabels, pinned })
+    if (ready && mapRef.current) paintMap(mapRef.current, plan, { outlines: showOutlines, labels: showLabels, pinned }, { fills: false })
   }, [ready, plan, showOutlines, showLabels, pinned])
+
+  // Colours ease to each new plan (a story, layer or year change) over the fade duration, as
+  // everything else on the map does; MapLibre can't animate per-feature colours, so it's drawn
+  // frame by frame. A change mid-way starts from the colours on screen.
+  const shownFills = useRef(new Map<string, string | null>())
+  useEffect(() => {
+    const map = mapRef.current
+    if (!ready || !map) return
+    const target = planFills(plan)
+    const from = new Map(shownFills.current)
+    const duration = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : FADE_DURATION
+    const start = performance.now()
+    let frame = 0
+    const step = () => {
+      const t = duration === 0 ? 1 : Math.min(1, (performance.now() - start) / duration)
+      for (const f of fillsAt(from, target, cameraEasing(t))) {
+        map.setFeatureState({ source: f.source, id: f.id }, { fill: f.fill })
+        shownFills.current.set(`${f.source}|${f.id}`, f.fill)
+      }
+      if (t < 1) frame = requestAnimationFrame(step)
+    }
+    step()
+    return () => cancelAnimationFrame(frame)
+  }, [ready, plan])
+
+  // A hover from before a precincts/battalions switch names an area the new geography doesn't have.
+  const live = liveTarget(hovered, geography)
 
   // Outline what the pointer is over straight away; the card follows after a pause.
   useEffect(() => {
-    if (ready && mapRef.current) paintHover(mapRef.current, hovered, ds.areas)
-    if (!hovered) return
-    const timer = setTimeout(() => setCarded(hovered), HOVER_DELAY)
+    if (ready && mapRef.current) paintHover(mapRef.current, live, geography)
+    if (!live) return
+    const timer = setTimeout(() => setCarded(live), HOVER_DELAY)
     return () => clearTimeout(timer)
-  }, [ready, hovered, ds])
+  }, [ready, live, geography])
 
   // Fly to the focused borough, or back out to the city.
   const flownTo = useRef(borough)
@@ -162,7 +187,7 @@ export default function BaseMap() {
   }, [ready, borough])
 
   // Only once the pause is over for the place the pointer is still on.
-  const card = carded && sameTarget(carded, hovered) && hoverDetails(state, ds, carded)
+  const card = carded && live && sameTarget(carded, live) && hoverDetails(state, ds, carded)
 
   return (
     <>
@@ -171,7 +196,7 @@ export default function BaseMap() {
         details={legendDetails(plan, activeMetric(state), ramp, { from: yearFrom, to: yearTo }, {
           from: ds.periods[0].year,
           to: ds.periods[ds.periods.length - 1].year,
-        })}
+        }, ds.placement)}
       />
       {card && <MapTooltip details={card} dotColor={ramp[1]} pointer={pointer} area={pointer} />}
       {borough && (

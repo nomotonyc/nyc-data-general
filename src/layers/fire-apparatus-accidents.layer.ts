@@ -28,6 +28,7 @@ export default {
   measure: 'Police-reported crashes involving an FDNY fire truck, engine or ladder',
   unit: 'crashes',
   aggregation: 'sum',
+  geographies: ['precincts', 'battalions'],
   data: { resolution: 'month', firstYear: 2019, lastYear: 2026 },
   breakdown: { title: 'Injuries', parts: ['No one hurt', 'Someone injured', 'Someone killed'] },
   sources: [
@@ -41,8 +42,8 @@ export default {
   method: [
     'Counts crashes where the police report lists a fire truck, engine or ladder as one of the first three vehicles. Vehicle types are typed by officers, so the build matches 46 spellings; plain “FDNY” and FDNY ambulances are left out because they could be other vehicles.',
     'Only crashes police reported are included: anyone hurt or killed, or at least $1,000 of damage.',
-    'Crashes are placed in precincts by their coordinates; about 5% have none and are left out.',
-    'Numbers are small, a few a year in most precincts, so differences between precincts are not meaningful on their own.',
+    'Crashes are placed in precincts and battalions by their coordinates; about 5% have none and are left out.',
+    'Numbers are small, a few a year in most precincts and battalions, so differences between them are not meaningful on their own.',
     'NYPD publishes crashes with a delay: when this was built, records ran to 11 June 2026, so June 2026 is incomplete.',
   ],
   build: {
@@ -52,6 +53,7 @@ export default {
     dateField: 'crash_date',
     latitudeField: 'latitude',
     longitudeField: 'longitude',
+    record: 'crash',
     partField:
       "case(number_of_persons_killed > 0, 'Someone killed', number_of_persons_injured > 0, 'Someone injured', true, 'No one hurt')",
     parts: {

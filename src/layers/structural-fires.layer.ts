@@ -9,6 +9,7 @@ export default {
   measure: 'Incidents FDNY was dispatched to and classified as structural fires',
   unit: 'fires',
   aggregation: 'sum',
+  geographies: ['precincts', 'battalions'],
   data: { resolution: 'month', firstYear: 2019, lastYear: 2026 },
   breakdown: {
     title: 'Building type',
@@ -33,6 +34,8 @@ export default {
     dateField: 'incident_datetime',
     precinctField: 'policeprecinct',
     zipField: 'zipcode',
+    districtFields: { community: 'communitydistrict', council: 'citycouncildistrict' },
+    alarmBox: { boroughField: 'alarm_box_borough', numberField: 'alarm_box_number', locationField: 'alarm_box_location' },
     partField: 'incident_classification',
     parts: {
       'Apartment building': [

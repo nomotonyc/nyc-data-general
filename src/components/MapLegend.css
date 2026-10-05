@@ -56,3 +56,8 @@
   color: var(--color-ink-muted);
   font-size: 11px;
 }
+
+/* The scale's colours ease on a story change, like the map. */
+.map-legend__step {
+  transition: background-color 450ms ease-in-out;
+}

@@ -34,7 +34,7 @@ describe('trend', () => {
   })
 
   it('draws a pinned precinct over its dimmed borough and the city', () => {
-    const t = trend({ ...fire, borough: 'Queens', pinnedPrecinct: 116 }, ds, palette)
+    const t = trend({ ...fire, borough: 'Queens', pinnedArea: '116' }, ds, palette)
     expect(t.title).toBe('Precinct 116')
     expect(t.lines.map((l) => [l.name, l.colour])).toEqual([
       ['New York City', palette.city],
@@ -72,7 +72,7 @@ describe('trend', () => {
   })
 
   it('keeps every point inside the chart', () => {
-    for (const l of trend({ ...fire, borough: 'Bronx', pinnedPrecinct: 44, yearFrom: 2019, yearTo: 2026 }, ds, palette).lines) {
+    for (const l of trend({ ...fire, borough: 'Bronx', pinnedArea: '44', yearFrom: 2019, yearTo: 2026 }, ds, palette).lines) {
       for (const p of l.points) {
         expect(p.x).toBeGreaterThanOrEqual(0)
         expect(p.x).toBeLessThanOrEqual(296)

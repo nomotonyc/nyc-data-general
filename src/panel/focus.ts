@@ -2,11 +2,11 @@ import type { LayerDataset } from '../data/dataset'
 import { areaIdsIn } from '../data/places'
 import { areaValue, effectiveRange, rankOf } from '../data/selectors'
 import { compareSigned, formatValue, ordinal, unitAfter } from '../domain/format'
-import { BOROUGHS, PRECINCTS, areaOfPrecinct, boroughInSentence, precinctsIn, type Borough } from '../domain/geography'
+import { BOROUGHS, areaById, areaNoun, boroughInSentence, type Borough } from '../domain/geography'
 import { yearLabel } from '../domain/stories'
 import { activeMetric, type ExplorerState } from '../explorer/state'
 
-type Input = Pick<ExplorerState, 'storyId' | 'metricId' | 'borough' | 'pinnedPrecinct' | 'yearFrom' | 'yearTo'>
+type Input = Pick<ExplorerState, 'storyId' | 'metricId' | 'borough' | 'pinnedArea' | 'yearFrom' | 'yearTo'>
 
 const mean = (xs: readonly number[]) => xs.reduce((a, b) => a + b, 0) / xs.length
 
@@ -34,7 +34,7 @@ export type FocusSummary = {
   tone: 'accent' | 'neutral'
 }
 
-/** The panel's headline for the city, a focused borough, or a pinned precinct. */
+/** The panel's headline for the city, a focused borough, or a pinned precinct or battalion. */
 export function focusSummary(state: Input, ds: LayerDataset): FocusSummary {
   const { metric, value, show, average, range } = reader(state, ds)
   const years = range.from === range.to ? yearLabel(range.from) : `${range.from}–${yearLabel(range.to)}`
@@ -42,19 +42,20 @@ export function focusSummary(state: Input, ds: LayerDataset): FocusSummary {
   const cityIds = areaIdsIn(ds, null)
   const boroughValues = BOROUGHS.map((b) => value(areaIdsIn(ds, b)))
   const tone = (comparison: string) => (comparison.startsWith('+') ? 'accent' : 'neutral')
+  const noun = areaNoun(ds.geography)
 
-  if (state.pinnedPrecinct !== null) {
-    const area = areaOfPrecinct(ds.areas, state.pinnedPrecinct)
+  if (state.pinnedArea !== null) {
+    const area = areaById(ds.areas, state.pinnedArea)
     const own = value([area.id])
     const cityValues = cityIds.map((id) => value([id]))
     const boroughValuesOfAreas = areaIdsIn(ds, area.borough).map((id) => value([id]))
-    const comparison = compareSigned(own, average(cityIds, cityValues), 'the citywide precinct average')
+    const comparison = compareSigned(own, average(cityIds, cityValues), `the citywide ${noun.one} average`)
     return {
       name: area.label,
       context: `${area.borough} · ${ordinal(rankOf(own, boroughValuesOfAreas))} of ${boroughValuesOfAreas.length} in ${boroughInSentence(area.borough)} · ${ordinal(rankOf(own, cityValues))} of ${cityValues.length} citywide`,
       value: show(own),
       unit: unitAfter(metric),
-    measure,
+      measure,
       comparison,
       tone: tone(comparison),
     }
@@ -65,10 +66,10 @@ export function focusSummary(state: Input, ds: LayerDataset): FocusSummary {
     const comparison = compareSigned(own, average(cityIds, boroughValues), 'the average borough')
     return {
       name: state.borough,
-      context: `${rankOf(own, boroughValues) === 1 ? 'Highest' : `${ordinal(rankOf(own, boroughValues))} highest`} of 5 boroughs · ${precinctsIn(state.borough).length} precincts`,
+      context: `${rankOf(own, boroughValues) === 1 ? 'Highest' : `${ordinal(rankOf(own, boroughValues))} highest`} of 5 boroughs · ${areaIdsIn(ds, state.borough).length} ${noun.many}`,
       value: show(own),
       unit: unitAfter(metric),
-    measure,
+      measure,
       comparison,
       tone: tone(comparison),
     }
@@ -77,7 +78,7 @@ export function focusSummary(state: Input, ds: LayerDataset): FocusSummary {
   const highest = BOROUGHS[boroughValues.indexOf(Math.max(...boroughValues))]
   return {
     name: 'New York City',
-    context: `All five boroughs · ${PRECINCTS.length} precincts`,
+    context: `All five boroughs · ${cityIds.length} ${noun.many}`,
     value: show(value(cityIds)),
     unit: unitAfter(metric),
     measure,
@@ -105,7 +106,7 @@ export function boroughBars(state: Input, ds: LayerDataset, ramp: readonly strin
   })
 }
 
-export type TopArea = { id: string; label: string; borough: Borough; precinct: number; value: string; rank: number; pinned: boolean }
+export type TopArea = { id: string; label: string; borough: Borough; value: string; rank: number; pinned: boolean }
 
 /** The highest areas in the focused borough, or the city. */
 export function topAreas(state: Input, ds: LayerDataset, count = 5): TopArea[] {
@@ -119,9 +120,8 @@ export function topAreas(state: Input, ds: LayerDataset, count = 5): TopArea[] {
       id: area.id,
       label: area.label,
       borough: area.borough,
-      precinct: area.precincts[0],
       value: show(v),
       rank: i + 1,
-      pinned: state.pinnedPrecinct !== null && area.precincts.includes(state.pinnedPrecinct),
+      pinned: state.pinnedArea === area.id,
     }))
 }

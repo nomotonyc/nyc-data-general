@@ -1,17 +1,19 @@
-import { boroughOfPrecinct, isPrecinct, type Borough } from '../domain/geography'
+import { areasOf, type Borough, type Geography } from '../domain/geography'
 import { STORIES, YEARS, isYear, type StoryId, type Year } from '../domain/stories'
-import { LAYERS, layersOf, type Metric } from '../layers'
+import { LAYERS, getLayer, layerGeographies, layersOf, type Metric } from '../layers'
 
-export type Detail = 'borough' | 'precinct'
+export type Detail = 'borough' | 'area'
 
 export type ExplorerState = {
   storyId: StoryId
   metricId: string
   /** Focused borough; null is the whole city. */
   borough: Borough | null
-  /** Always inside `borough`: pinning a precinct focuses its borough. */
-  pinnedPrecinct: number | null
-  /** Map level at city scale. A focused borough always shows precincts. */
+  /** Precincts or battalions: the areas below the boroughs. Only geographies the layer has. */
+  geography: Geography
+  /** An area id in `geography`, always inside `borough`: pinning an area focuses its borough. */
+  pinnedArea: string | null
+  /** Map level at city scale: boroughs, or the geography's areas. A focused borough always shows areas. */
   detail: Detail
   showOutlines: boolean
   showLabels: boolean
@@ -28,7 +30,8 @@ export const initialExplorerState: ExplorerState = {
   storyId: STORIES[0].id,
   metricId: layersOf(STORIES[0].id)[0].id,
   borough: null,
-  pinnedPrecinct: null,
+  geography: 'precincts',
+  pinnedArea: null,
   detail: 'borough',
   showOutlines: true,
   showLabels: true,
@@ -41,8 +44,9 @@ export type ExplorerAction =
   | { type: 'selectStory'; storyId: StoryId }
   | { type: 'selectMetric'; metricId: string }
   | { type: 'focusBorough'; borough: Borough | null }
-  | { type: 'pinPrecinct'; precinct: number }
-  | { type: 'unpinPrecinct' }
+  | { type: 'setGeography'; geography: Geography }
+  | { type: 'pinArea'; id: string }
+  | { type: 'unpinArea' }
   | { type: 'setDetail'; detail: Detail }
   | { type: 'toggleOutlines' }
   | { type: 'toggleLabels' }
@@ -56,18 +60,24 @@ export function explorerReducer(state: ExplorerState, action: ExplorerAction): E
   switch (action.type) {
     case 'selectStory':
       if (action.storyId === state.storyId) return state
-      return { ...state, storyId: action.storyId, metricId: layersOf(action.storyId)[0].id }
+      return keepGeography(state, { ...state, storyId: action.storyId, metricId: layersOf(action.storyId)[0].id })
     case 'selectMetric':
       if (!LAYERS.some((l) => l.id === action.metricId && l.story === state.storyId)) return state
-      return { ...state, metricId: action.metricId }
+      return keepGeography(state, { ...state, metricId: action.metricId })
+    case 'setGeography':
+      if (action.geography === state.geography || !layerGeographies(getLayer(state.metricId)).includes(action.geography)) return state
+      // Precincts and battalions don't nest, so a pin can't carry over; the borough can.
+      return { ...state, geography: action.geography, pinnedArea: null }
     case 'focusBorough':
-      return { ...state, borough: action.borough, pinnedPrecinct: null }
-    case 'pinPrecinct':
-      if (!isPrecinct(action.precinct)) return state
-      // Pinning zooms into the precinct's borough, from the city view too.
-      return { ...state, borough: boroughOfPrecinct(action.precinct), pinnedPrecinct: action.precinct }
-    case 'unpinPrecinct':
-      return { ...state, pinnedPrecinct: null }
+      return { ...state, borough: action.borough, pinnedArea: null }
+    case 'pinArea': {
+      const area = areasOf(state.geography).find((a) => a.id === action.id)
+      if (!area) return state
+      // Pinning zooms into the area's borough, from the city view too.
+      return { ...state, borough: area.borough, pinnedArea: area.id }
+    }
+    case 'unpinArea':
+      return { ...state, pinnedArea: null }
     case 'setDetail':
       return { ...state, detail: action.detail }
     case 'toggleOutlines':
@@ -88,7 +98,13 @@ export function explorerReducer(state: ExplorerState, action: ExplorerAction): E
 }
 
 export function effectiveDetail(state: Pick<ExplorerState, 'borough' | 'detail'>): Detail {
-  return state.borough ? 'precinct' : state.detail
+  return state.borough ? 'area' : state.detail
+}
+
+/** After a layer change: back to precincts, unpinned, when the new layer lacks the current geography. */
+function keepGeography(before: ExplorerState, after: ExplorerState): ExplorerState {
+  if (layerGeographies(getLayer(after.metricId)).includes(before.geography)) return after
+  return { ...after, geography: 'precincts', pinnedArea: null }
 }
 
 export function yearToOptions(state: ExplorerState): Year[] {

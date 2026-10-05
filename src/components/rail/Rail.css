@@ -166,3 +166,8 @@
   margin: 0;
   accent-color: var(--story-accent);
 }
+
+/* The swatches' colours ease on a story change, like the map. */
+.rail__swatch {
+  transition: background-color 450ms ease-in-out;
+}

@@ -1,4 +1,4 @@
-import { BOROUGHS, PRECINCT_AREAS } from '../domain/geography'
+import { BOROUGHS, areasOf, type Geography } from '../domain/geography'
 import { STORIES, YEARS } from '../domain/stories'
 import { layersOf, type Metric } from '../layers'
 import { assertDataset } from './assert'
@@ -12,7 +12,7 @@ function rnd(a: number, b: number): number {
 }
 
 /** Clearly synthetic values in the shape real data will take, from the layer's `sample` settings. */
-export function generateSampleDataset(layer: Metric): LayerDataset {
+export function generateSampleDataset(layer: Metric, geography: Geography = 'precincts'): LayerDataset {
   // Seeds from the story's and the layer's positions, so each layer gets its own pattern.
   const storyIndex = STORIES.findIndex((s) => s.id === layer.story)
   const layerIndex = layersOf(layer.story).indexOf(layer)
@@ -21,13 +21,13 @@ export function generateSampleDataset(layer: Metric): LayerDataset {
   const amplitude = seasonality?.amplitude ?? 0
   const peak = seasonality?.peakMonth ?? 0
   const periods = layerPeriods(layer)
-  const areas = PRECINCT_AREAS
+  const areas = areasOf(geography)
   const ratio = layer.aggregation === 'ratio'
 
   const byArea: Record<string, number[]> = {}
   const denominatorsByArea: Record<string, number[]> = {}
   for (const area of areas) {
-    const seed = area.precincts[0]
+    const seed = area.number
     // Mostly a per-borough level, so neighbouring areas look related.
     const level = 0.6 * rnd(BOROUGHS.indexOf(area.borough) + 1, key + 3) + 0.4 * rnd(seed, key + 7)
     const land = 0.8 + 15 * rnd(seed, 99)
@@ -45,7 +45,7 @@ export function generateSampleDataset(layer: Metric): LayerDataset {
   const parts: Record<string, number[][]> = {}
   const partCount = layer.breakdown.parts.length
   for (const area of areas) {
-    const seed = area.precincts[0]
+    const seed = area.number
     parts[area.id] = periods.map(({ year, month }) =>
       layer.breakdown.parts.map((_, part) => {
         const last = part === partCount - 1
@@ -57,8 +57,10 @@ export function generateSampleDataset(layer: Metric): LayerDataset {
 
   const ds: LayerDataset = {
     layerId: layer.id,
+    geography,
     isSample: true,
     asOf: null,
+    placement: null,
     periods,
     areas,
     values: { [layer.id]: byArea },

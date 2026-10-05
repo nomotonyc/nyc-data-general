@@ -12,7 +12,8 @@ const plan: Choropleth = {
   level: 'borough',
   focus: null,
   boroughs: {},
-  precincts: {},
+  geography: 'precincts',
+  areas: {},
   lo: 2175.4,
   hi: 9766,
   range: { from: 2025, to: 2025 },
@@ -22,8 +23,11 @@ const plan: Choropleth = {
 describe('legendDetails', () => {
   it('names the layer, years and level', () => {
     expect(legendDetails(plan, fires, ramp, { from: 2025, to: 2025 }, { from: 2019, to: 2026 }).title).toBe('Structural fires, 2025 · by borough')
-    expect(legendDetails({ ...plan, level: 'precinct' }, fires, ramp, { from: 2025, to: 2025 }, { from: 2019, to: 2026 }).title).toBe(
+    expect(legendDetails({ ...plan, level: 'area' }, fires, ramp, { from: 2025, to: 2025 }, { from: 2019, to: 2026 }).title).toBe(
       'Structural fires, 2025 · by precinct',
+    )
+    expect(legendDetails({ ...plan, level: 'area', geography: 'battalions' }, fires, ramp, { from: 2025, to: 2025 }, { from: 2019, to: 2026 }).title).toBe(
+      'Structural fires, 2025 · by battalion',
     )
   })
 
@@ -66,5 +70,41 @@ describe('legendDetails', () => {
     const share = { ...fires, format: 'percent' as const, unit: 'of fires' }
     const details = legendDetails({ ...plan, lo: 6.24, hi: 33.9 }, share, ramp, { from: 2025, to: 2025 }, { from: 2019, to: 2026 })
     expect([details.lo, details.hi]).toEqual(['6.2%', '33.9%'])
+  })
+})
+
+describe('battalion estimates in the legend', () => {
+  const battalions: Choropleth = { ...plan, level: 'area', geography: 'battalions' }
+  const y = { from: 2025, to: 2025 } as const
+
+  it('says on the map how much of a battalion view is estimated', () => {
+    const placement = [
+      { method: 'its alarm box’s published location', share: 0.69, exact: true },
+      { method: 'residents in its precinct and ZIP code', share: 0.31, exact: false },
+    ]
+    expect(legendDetails(battalions, fires, ramp, y, y, placement).note).toBe('By battalion: 31% estimated · see Data sources')
+  })
+
+  it('calls an all-estimated view estimates', () => {
+    const placement = [{ method: 'residents in its precinct and ZIP code', share: 1, exact: false }]
+    expect(legendDetails(battalions, fires, ramp, y, y, placement).note).toBe('By battalion: estimates · see Data sources')
+  })
+
+  it('says nothing at borough level, where the figures are the same in both views', () => {
+    const placement = [{ method: 'x', share: 1, exact: false }]
+    expect(legendDetails({ ...battalions, level: 'borough' }, fires, ramp, y, y, placement).note).toBeNull()
+  })
+
+  it('says nothing when every battalion figure is exact, or by precinct', () => {
+    expect(legendDetails(battalions, fires, ramp, y, y, [{ method: 'x', share: 1, exact: true }]).note).toBeNull()
+    expect(legendDetails(plan, fires, ramp, y, y, null).note).toBeNull()
+  })
+
+  it('keeps the adjusted-years note alongside', () => {
+    const placement = [{ method: 'x', share: 1, exact: false }]
+    const adjusted = { ...battalions, range: { from: 2024, to: 2024 } as const, adjusted: true }
+    expect(legendDetails(adjusted, density, ramp, y, { from: 2021, to: 2024 }, placement).note).toBe(
+      'No 2025 estimates yet · showing 2024 · By battalion: estimates · see Data sources',
+    )
   })
 })

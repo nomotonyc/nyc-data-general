@@ -17,7 +17,7 @@ const citySeries = series(ds, fires, areaIdsIn(ds, null), y2025)
 
 describe('expandedTrend header', () => {
   it('names the story, layer, place, months and what it is compared with', () => {
-    const t = expandedTrend({ ...fire, borough: 'Queens', pinnedPrecinct: 114 }, ds, palette, null)!
+    const t = expandedTrend({ ...fire, borough: 'Queens', pinnedArea: '114' }, ds, palette, null)!
     expect(t.kicker).toBe('Fire · Monthly trend')
     expect(t.title).toBe('Structural fires · Precinct 114')
     expect(t.sub).toBe('Month by month, Jan 2025 to Dec 2025, against Queens and New York City')

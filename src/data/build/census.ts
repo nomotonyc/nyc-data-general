@@ -1,8 +1,8 @@
-import { PRECINCT_AREAS } from '../../domain/geography'
+import { areaIdOf, areasOf, type Geography } from '../../domain/geography'
 import type { Metric } from '../../layers'
 import { layerPeriods, periodKey } from '../coverage'
 import type { LayerFile } from '../file'
-import { precinctAt, type PrecinctShapes } from './openDataPoints'
+import { areaNumberAt, type AreaShapes } from './openDataPoints'
 
 /** The city's five counties: Bronx, Kings, New York, Queens, Richmond. */
 const NYC_COUNTIES = new Set(['005', '047', '061', '081', '085'])
@@ -57,23 +57,25 @@ export function parseAcsTracts(lines: readonly string[]): Map<string, TractEstim
 }
 
 export type Weights = {
-  /** Land area per precinct, in square miles. */
+  /** Which areas the weights place people in. */
+  geography: Geography
+  /** Land area per area number, in square miles. */
   landSqMi: Map<number, number>
-  /** Tract -> precinct -> share of the tract's 2020 population living there. */
+  /** Tract -> area number -> share of the tract's 2020 population living there. */
   tractShares: Map<string, Map<number, number>>
-  /** Blocks whose interior point is in no precinct (shoreline and water). */
+  /** Blocks whose interior point is in no area (shoreline and water). */
   unplacedBlocks: { blocks: number; population: number }
 }
 
-/** Places each block in the precinct containing its interior point, and weighs tracts by where their people live. */
-export function apportion(blocks: readonly Block[], shapes: PrecinctShapes): Weights {
+/** Places each block in the precinct (or battalion) containing its interior point, and weighs tracts by where their people live. */
+export function apportion(blocks: readonly Block[], shapes: AreaShapes, geography: Geography = 'precincts'): Weights {
   const landSqMi = new Map<number, number>()
   const tractPop = new Map<string, number>()
   const inPrecinct = new Map<string, Map<number, number>>()
   const unplacedBlocks = { blocks: 0, population: 0 }
   for (const b of blocks) {
     tractPop.set(b.tract, (tractPop.get(b.tract) ?? 0) + b.population)
-    const precinct = precinctAt(shapes, b.lon, b.lat)
+    const precinct = areaNumberAt(shapes, b.lon, b.lat, geography)
     if (precinct === null) {
       unplacedBlocks.blocks++
       unplacedBlocks.population += b.population
@@ -89,7 +91,7 @@ export function apportion(blocks: readonly Block[], shapes: PrecinctShapes): Wei
     const total = tractPop.get(tract)!
     if (total > 0) tractShares.set(tract, new Map([...pops].map(([p, n]) => [p, n / total])))
   }
-  return { landSqMi, tractShares, unplacedBlocks }
+  return { geography, landSqMi, tractShares, unplacedBlocks }
 }
 
 export type CensusYearReport = { year: number; counted: number; unplaced: number }
@@ -103,15 +105,18 @@ export function densityFile(
   layer: Metric,
   weights: Weights,
   acsByYear: ReadonlyMap<number, ReadonlyMap<string, TractEstimate>>,
-  areaIds: readonly string[] = PRECINCT_AREAS.map((a) => a.id),
+  options: { geography?: Geography; areaIds?: readonly string[] } = {},
 ): { file: LayerFile; report: CensusYearReport[] } {
+  const geography = options.geography ?? weights.geography
+  const areaIds = options.areaIds ?? areasOf(geography).map((a) => a.id)
+  const numberOf = new Map(areasOf(geography).map((a) => [a.id, a.number]))
   const periods = layerPeriods(layer)
   const values: Record<string, number[]> = {}
   const denominators: Record<string, number[]> = {}
   const parts: Record<string, number[][]> = {}
   for (const id of areaIds) {
     values[id] = periods.map(() => 0)
-    denominators[id] = periods.map(() => weights.landSqMi.get(Number(id)) ?? 0)
+    denominators[id] = periods.map(() => weights.landSqMi.get(numberOf.get(id) ?? -1) ?? 0)
     parts[id] = periods.map(() => AGE_GROUPS.map(() => 0))
   }
   const report: CensusYearReport[] = []
@@ -126,8 +131,8 @@ export function densityFile(
         unplaced += est.population
         continue
       }
-      for (const [precinct, share] of shares) {
-        const id = String(precinct)
+      for (const [number, share] of shares) {
+        const id = areaIdOf(geography, number)
         if (!(id in values)) continue
         values[id][i] += est.population * share
         est.ages.forEach((n, g) => (parts[id][i][g] += n * share))
@@ -143,7 +148,10 @@ export function densityFile(
     parts[id] = parts[id].map((counts) => counts.map(Math.round))
   }
   return {
-    file: { layerId: layer.id, built: new Date().toISOString(), from: periodKey(periods[0]), to: periodKey(periods[periods.length - 1]), values, denominators, parts },
+    file: {
+      layerId: layer.id,
+      ...(geography === 'precincts' ? {} : { geography, placement: [{ method: 'the 2020 census blocks residents live in', share: 1, exact: true }] }),
+      built: new Date().toISOString(), from: periodKey(periods[0]), to: periodKey(periods[periods.length - 1]), values, denominators, parts },
     report,
   }
 }

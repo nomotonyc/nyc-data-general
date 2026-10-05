@@ -1,9 +1,11 @@
 import { useId } from 'react'
+import { areaNoun } from '../../domain/geography'
 import { useExplorerDispatch, useExplorerState } from '../../explorer/context'
 
 export function MapToggles() {
   const headingId = useId()
-  const { showOutlines, showLabels } = useExplorerState()
+  const { showOutlines, showLabels, geography } = useExplorerState()
+  const noun = areaNoun(geography)
   const dispatch = useExplorerDispatch()
 
   return (
@@ -13,7 +15,7 @@ export function MapToggles() {
       </h2>
       <label className="rail__check">
         <input type="checkbox" checked={showOutlines} onChange={() => dispatch({ type: 'toggleOutlines' })} />
-        Precinct outlines
+        {noun.one.charAt(0).toUpperCase() + noun.one.slice(1)} outlines
       </label>
       <label className="rail__check">
         <input type="checkbox" checked={showLabels} onChange={() => dispatch({ type: 'toggleLabels' })} />

@@ -1,4 +1,5 @@
 import type { ValueFormat } from '../domain/format'
+import type { Geography } from '../domain/geography'
 import type { StoryId, Year } from '../domain/stories'
 
 export type Source = {
@@ -31,6 +32,10 @@ export type OpenDataCountsBuild = {
   partField: string
   /** Ratio layers only: the field summed as the numerator; the record count is the denominator. */
   sumField?: string
+  /** Community and council district fields; with them, battalion estimates split finer areas (battalionPlacement). */
+  districtFields?: { community: string; council: string }
+  /** Fire records' alarm box fields, used to place records in battalions (battalionPlacement). */
+  alarmBox?: { boroughField: string; numberField: string; locationField: string }
   /** Breakdown part -> the raw values of partField it covers, in breakdown order. Every value seen must be listed. */
   parts: Readonly<Record<string, readonly string[]>>
 }
@@ -50,6 +55,8 @@ export type OpenDataPointsBuild = {
   dateField: string
   latitudeField: string
   longitudeField: string
+  /** What one record is, for the placement note: "crash" gives "each crash’s coordinates". */
+  record: string
   /** The field (or SoQL expression) the breakdown groups. */
   partField: string
   /** Breakdown part -> the raw values of partField it covers, in breakdown order. */
@@ -123,6 +130,8 @@ export type Metric = {
    * Standard caveats (merged precincts, partial final year) are added (layerMethod).
    */
   method: readonly string[]
+  /** The geographies the layer has data for; precincts only when omitted. */
+  geographies?: readonly Geography[]
   /** How real data is built. Without it the layer shows sample values. */
   build?: OpenDataCountsBuild | OpenDataPointsBuild | CensusDensityBuild
   /** Until real data lands: the yearly range per area, and any seasonal swing (peakMonth 0 = January). */

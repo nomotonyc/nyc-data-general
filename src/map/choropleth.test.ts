@@ -1,7 +1,7 @@
 import { getLayer } from '../layers'
 import { describe, expect, it } from 'vitest'
 import { getDataset } from '../data/load'
-import { BOROUGHS, precinctsIn } from '../domain/geography'
+import { BATTALIONS, BOROUGHS, precinctsIn } from '../domain/geography'
 import { initialExplorerState, type ExplorerState } from '../explorer/state'
 import { lightTheme } from '../theme/tokens'
 import { areaValue } from '../data/selectors'
@@ -23,45 +23,51 @@ describe('choropleth', () => {
     expect(colours).toContain(fireRamp[4])
   })
 
+  it('colours every battalion when showing battalions', () => {
+    const plan = choropleth({ ...fire, metricId: 'fire-apparatus-accidents', detail: 'area' }, getDataset('fire-apparatus-accidents', 'battalions'), fireRamp)
+    expect(plan.geography).toBe('battalions')
+    expect(Object.keys(plan.areas).map(Number)).toEqual(BATTALIONS.map((b) => b.number))
+  })
+
   it('colours every precinct at precinct level', () => {
-    const plan = choropleth({ ...fire, detail: 'precinct' }, getDataset('structural-fires'), fireRamp)
-    expect(plan.level).toBe('precinct')
-    expect(Object.keys(plan.precincts)).toHaveLength(78)
+    const plan = choropleth({ ...fire, detail: 'area' }, getDataset('structural-fires'), fireRamp)
+    expect(plan.level).toBe('area')
+    expect(Object.keys(plan.areas)).toHaveLength(78)
   })
 
   it('always colours both boroughs and precincts, so a fade between levels goes colour to colour, never through white', () => {
-    for (const s of [fire, { ...fire, detail: 'precinct' as const }, { ...fire, borough: 'Queens' as const }]) {
+    for (const s of [fire, { ...fire, detail: 'area' as const }, { ...fire, borough: 'Queens' as const }]) {
       const plan = choropleth(s, getDataset('structural-fires'), fireRamp)
       expect(Object.keys(plan.boroughs), JSON.stringify(s)).toHaveLength(5)
-      expect(Object.keys(plan.precincts).length, JSON.stringify(s)).toBeGreaterThan(0)
+      expect(Object.keys(plan.areas).length, JSON.stringify(s)).toBeGreaterThan(0)
     }
-    expect(Object.keys(choropleth(fire, getDataset('structural-fires'), fireRamp).precincts)).toHaveLength(78)
+    expect(Object.keys(choropleth(fire, getDataset('structural-fires'), fireRamp).areas)).toHaveLength(78)
   })
 
   it('colours 105 and 116 each from its own value', () => {
     const ds = getDataset('population-density')
-    const plan = choropleth({ ...density, detail: 'precinct', yearFrom: 2024, yearTo: 2024 }, ds, densityRamp)
+    const plan = choropleth({ ...density, detail: 'area', yearFrom: 2024, yearTo: 2024 }, ds, densityRamp)
     const people = getLayer('population-density')
     const range = { from: 2024, to: 2024 } as const
     const scale = equalIntervalScale(ds.areas.map((a) => areaValue(ds, people, [a.id], range)), densityRamp)
     expect(ds.areas.map((a) => a.id)).toEqual(expect.arrayContaining(['105', '116']))
-    expect(plan.precincts[105]).toBe(scale(areaValue(ds, people, ['105'], range)))
-    expect(plan.precincts[116]).toBe(scale(areaValue(ds, people, ['116'], range)))
+    expect(plan.areas[105]).toBe(scale(areaValue(ds, people, ['105'], range)))
+    expect(plan.areas[116]).toBe(scale(areaValue(ds, people, ['116'], range)))
   })
 
   it('scales a focused borough’s precincts to that borough', () => {
     const plan = choropleth({ ...fire, borough: 'Queens' }, getDataset('structural-fires'), fireRamp)
-    expect(plan.level).toBe('precinct')
-    const queens = precinctsIn('Queens').map((p) => plan.precincts[p])
+    expect(plan.level).toBe('area')
+    const queens = precinctsIn('Queens').map((p) => plan.areas[p])
     expect(queens).toContain(fireRamp[0])
     expect(queens).toContain(fireRamp[4])
   })
 
   it('keeps city-wide colours on the precincts outside the focus, so they fade out without flashing', () => {
-    const city = choropleth({ ...fire, detail: 'precinct' }, getDataset('structural-fires'), fireRamp)
+    const city = choropleth({ ...fire, detail: 'area' }, getDataset('structural-fires'), fireRamp)
     const queens = choropleth({ ...fire, borough: 'Queens' }, getDataset('structural-fires'), fireRamp)
-    expect(Object.keys(queens.precincts)).toHaveLength(78)
-    for (const p of precinctsIn('Brooklyn')) expect(queens.precincts[p], `precinct ${p}`).toBe(city.precincts[p])
+    expect(Object.keys(queens.areas)).toHaveLength(78)
+    for (const p of precinctsIn('Brooklyn')) expect(queens.areas[p], `precinct ${p}`).toBe(city.areas[p])
   })
 
   it('names the focused borough, or none for the whole city', () => {

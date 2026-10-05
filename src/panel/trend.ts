@@ -1,11 +1,11 @@
 import type { LayerDataset } from '../data/dataset'
 import { areaIdsIn } from '../data/places'
 import { effectiveRange, periodIndices, series } from '../data/selectors'
-import { areaOfPrecinct } from '../domain/geography'
+import { areaById, areaNoun } from '../domain/geography'
 import { yearLabel } from '../domain/stories'
 import { activeMetric, type ExplorerState } from '../explorer/state'
 
-type Input = Pick<ExplorerState, 'storyId' | 'metricId' | 'borough' | 'pinnedPrecinct' | 'yearFrom' | 'yearTo'>
+type Input = Pick<ExplorerState, 'storyId' | 'metricId' | 'borough' | 'pinnedArea' | 'yearFrom' | 'yearTo'>
 export type TrendPalette = { accent: string; ramp: readonly string[]; city: string }
 
 type Point = { x: number; y: number }
@@ -18,7 +18,7 @@ export type TrendLine = {
 }
 
 export type Trend = {
-  /** The place the chart is about: the innermost of city, borough, pinned precinct. */
+  /** The place the chart is about: the innermost of city, borough, pinned area. */
   title: string
   period: string
   change: string | null
@@ -54,16 +54,16 @@ export function trendSeries(state: Input, ds: LayerDataset, palette: TrendPalett
 
   const places: { name: string; ids: string[]; colour: string }[] = [{ name: 'New York City', ids: areaIdsIn(ds, null), colour: palette.city }]
   if (state.borough) places.push({ name: state.borough, ids: areaIdsIn(ds, state.borough), colour: palette.ramp[1] })
-  if (state.pinnedPrecinct !== null) {
-    const area = areaOfPrecinct(ds.areas, state.pinnedPrecinct)
+  if (state.pinnedArea !== null) {
+    const area = areaById(ds.areas, state.pinnedArea)
     places.push({ name: area.label, ids: [area.id], colour: palette.accent })
   }
   // The place in focus is always drawn in the story colour.
   places[places.length - 1].colour = palette.accent
-  // Counts over areas of different sizes only compare fairly per precinct.
-  const perPrecinct = places.length > 1 && metric.aggregation === 'sum'
-  const values = indices.length < 2 ? [] : places.map((p) => series(ds, metric, p.ids, range, perPrecinct))
-  return { metric, range, periods, monthly, places, values, perPrecinct }
+  // Counts over places of different sizes only compare fairly per area (precinct or battalion).
+  const perArea = places.length > 1 && metric.aggregation === 'sum'
+  const values = indices.length < 2 ? [] : places.map((p) => series(ds, metric, p.ids, range, perArea))
+  return { metric, range, periods, monthly, places, values, perArea, noun: areaNoun(ds.geography) }
 }
 
 /** "Mar 2025" for a month, "2023" for a yearly estimate. */
@@ -94,7 +94,7 @@ export function plotLines(
 /** The trend over the chosen years: the place in focus in the story colour, wider places dimmed behind it. */
 export function trend(state: Input, ds: LayerDataset, palette: TrendPalette): Trend {
   const data = trendSeries(state, ds, palette)
-  const { metric, range, periods, monthly, places, values, perPrecinct } = data
+  const { metric, range, periods, monthly, places, values, perArea, noun } = data
   const years = range.from === range.to ? yearLabel(range.from) : `${range.from}–${yearLabel(range.to)}`
   const focus = places[places.length - 1]
   const period = `${monthly ? 'Monthly' : 'Yearly estimates'} · ${years}`
@@ -145,7 +145,7 @@ export function trend(state: Input, ds: LayerDataset, palette: TrendPalette): Tr
     values,
     key: places.length > 1 ? [...lines].reverse().map((l) => ({ name: l.name, colour: l.colour })) : [],
     ticks,
-    note: perPrecinct ? 'Average per precinct, so the lines compare fairly' : null,
+    note: perArea ? `Average per ${noun.one}, so the lines compare fairly` : null,
     empty: null,
     aria,
   }

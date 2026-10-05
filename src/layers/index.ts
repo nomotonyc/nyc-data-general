@@ -1,3 +1,4 @@
+import type { Geography } from '../domain/geography'
 import { FINAL_YEAR, FINAL_YEAR_LAST_MONTH, STORIES, type StoryId } from '../domain/stories'
 import type { Metric, Source } from './types'
 
@@ -38,9 +39,69 @@ const BOROUGH_BOUNDARIES: Source = {
   used: 'Borough outlines',
 }
 
-/** The layer's own sources, then the boundary credits every layer shares. */
+const BATTALION_BOUNDARIES: Source = {
+  name: 'Fire Battalions',
+  publisher: 'FDNY, via NYC Open Data',
+  url: 'https://data.cityofnewyork.us/d/xzng-ft6f',
+  used: 'Battalion boundaries',
+}
+
+// What places precinct-recorded counts in battalions (see data-sources.md, "By battalion").
+const ALARM_BOXES: Source = {
+  name: 'In-Service Alarm Box Locations',
+  publisher: 'FDNY, via NYC Open Data',
+  url: 'https://data.cityofnewyork.us/d/v57i-gtxb',
+  used: 'Battalion placement: where each alarm box is',
+}
+
+const GEOCLIENT: Source = {
+  name: 'Geoclient',
+  publisher: 'NYC Department of City Planning and OTI',
+  url: 'https://github.com/CityOfNewYork/geoclient',
+  used: 'Battalion placement: street corners of alarm boxes not in the list above',
+}
+
+const RESIDENT_SOURCES: Source[] = [
+  {
+    name: '2020 Census Redistricting Data (P.L. 94-171)',
+    publisher: 'U.S. Census Bureau',
+    url: 'https://www2.census.gov/programs-surveys/decennial/2020/data/01-Redistricting_File--PL_94-171/New_York/ny2020.pl.zip',
+    used: 'Battalion estimates: residents of each census block',
+  },
+  {
+    name: 'Modified ZIP Code Tabulation Areas (MODZCTA)',
+    publisher: 'NYC Department of Health, via NYC Open Data',
+    url: 'https://data.cityofnewyork.us/d/pri4-ifjk',
+    used: 'Battalion estimates: ZIP code areas',
+  },
+  {
+    name: 'Community Districts',
+    publisher: 'NYC Department of City Planning, via NYC Open Data',
+    url: 'https://data.cityofnewyork.us/d/5crt-au7u',
+    used: 'Battalion estimates: community district areas',
+  },
+  {
+    name: 'City Council Districts',
+    publisher: 'NYC Department of City Planning, via NYC Open Data',
+    url: 'https://data.cityofnewyork.us/d/872g-cjhh',
+    used: 'Battalion estimates: council district areas',
+  },
+]
+
+/** The datasets that place a layer's records in battalions, beyond the battalion boundaries. */
+function placementSources(layer: Metric): Source[] {
+  if (!layerGeographies(layer).includes('battalions') || layer.build?.kind !== 'open-data-counts') return []
+  return [...(layer.build.alarmBox ? [ALARM_BOXES, GEOCLIENT] : []), ...RESIDENT_SOURCES]
+}
+
+/**
+ * The layer's own sources, then the boundary credits (precincts and boroughs always, battalions
+ * when it has them), then whatever places its records in battalions. Each dataset is listed once.
+ */
 export function layerSources(layer: Metric): Source[] {
-  return [...layer.sources, PRECINCT_BOUNDARIES, BOROUGH_BOUNDARIES]
+  const battalions = layerGeographies(layer).includes('battalions') ? [BATTALION_BOUNDARIES] : []
+  const all = [...layer.sources, PRECINCT_BOUNDARIES, ...battalions, BOROUGH_BOUNDARIES, ...placementSources(layer)]
+  return all.filter((s, i) => all.findIndex((o) => o.url === s.url) === i)
 }
 
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
@@ -55,4 +116,9 @@ export function layerMethod(layer: Metric): string[] {
     method.push(`${FINAL_YEAR} covers January to ${MONTH_NAMES[FINAL_YEAR_LAST_MONTH]}.`)
   }
   return method
+}
+
+/** The geographies a layer can be shown in. */
+export function layerGeographies(layer: Pick<Metric, 'geographies'>): readonly Geography[] {
+  return layer.geographies ?? ['precincts']
 }

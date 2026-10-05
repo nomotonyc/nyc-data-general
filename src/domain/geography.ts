@@ -38,25 +38,74 @@ export function boroughInSentence(borough: Borough): string {
   return borough === 'Bronx' ? 'the Bronx' : borough
 }
 
-/** The unit a layer's values are reported for: a precinct. */
+/** How the city is divided below the boroughs: NYPD precincts or FDNY battalions. */
+export type Geography = 'precincts' | 'battalions'
+export const GEOGRAPHIES: readonly Geography[] = ['precincts', 'battalions']
+
+/** A unit values are reported for: one precinct or one battalion. */
 export type Area = {
+  /** Unique across geographies: "14" is precinct 14, "bn14" is battalion 14. */
   id: string
+  kind: 'precinct' | 'battalion'
+  number: number
   label: string
   borough: Borough
-  precincts: readonly number[]
 }
 
 export const PRECINCT_AREAS: readonly Area[] = PRECINCTS.map((n) => ({
   id: String(n),
+  kind: 'precinct',
+  number: n,
   label: `Precinct ${n}`,
   borough: boroughOfPrecinct(n),
-  precincts: [n],
 }))
 
-export function areaOfPrecinct(areas: readonly Area[], precinct: number): Area {
-  const area = areas.find((a) => a.precincts.includes(precinct))
-  if (!area) throw new RangeError(`No area contains precinct ${precinct}`)
+/**
+ * The 49 FDNY battalions (NYC Open Data xzng-ft6f) and the borough each lies in, taken from
+ * the precincts covering it; each lies within its borough, judged by points across its whole shape
+ * (battalionData.test).
+ */
+export const BATTALIONS: readonly { number: number; borough: Borough }[] = (
+  [
+    [1, 'Manhattan'], [2, 'Manhattan'], [3, 'Bronx'], [4, 'Manhattan'], [6, 'Manhattan'], [7, 'Manhattan'],
+    [8, 'Manhattan'], [9, 'Manhattan'], [10, 'Manhattan'], [11, 'Manhattan'], [12, 'Manhattan'], [13, 'Manhattan'],
+    [14, 'Bronx'], [15, 'Bronx'], [16, 'Manhattan'], [17, 'Bronx'], [18, 'Bronx'], [19, 'Bronx'], [20, 'Bronx'],
+    [21, 'Staten Island'], [22, 'Staten Island'], [23, 'Staten Island'], [26, 'Bronx'], [27, 'Bronx'],
+    [28, 'Brooklyn'], [31, 'Brooklyn'], [32, 'Brooklyn'], [33, 'Brooklyn'], [35, 'Brooklyn'], [37, 'Brooklyn'],
+    [38, 'Brooklyn'], [39, 'Brooklyn'], [40, 'Brooklyn'], [41, 'Brooklyn'], [42, 'Brooklyn'], [43, 'Brooklyn'],
+    [44, 'Brooklyn'], [45, 'Queens'], [46, 'Queens'], [47, 'Queens'], [48, 'Brooklyn'], [49, 'Queens'],
+    [50, 'Queens'], [51, 'Queens'], [52, 'Queens'], [53, 'Queens'], [54, 'Queens'], [57, 'Brooklyn'], [58, 'Brooklyn'],
+  ] as const
+).map(([number, borough]) => ({ number, borough }))
+
+export const BATTALION_AREAS: readonly Area[] = BATTALIONS.map(({ number, borough }) => ({
+  id: `bn${number}`,
+  kind: 'battalion',
+  number,
+  label: `Battalion ${number}`,
+  borough,
+}))
+
+/** The id of a geography's area from its number, as map features carry it. */
+export function areaIdOf(geography: Geography, number: number): string {
+  return geography === 'battalions' ? `bn${number}` : String(number)
+}
+
+export function areasOf(geography: Geography): readonly Area[] {
+  return geography === 'battalions' ? BATTALION_AREAS : PRECINCT_AREAS
+}
+
+export function areaById(areas: readonly Area[], id: string): Area {
+  const area = areas.find((a) => a.id === id)
+  if (!area) throw new RangeError(`No area ${id}`)
   return area
+}
+
+/** How to name a geography's areas in sentences and controls. */
+export function areaNoun(geography: Geography): { one: string; many: string; title: string } {
+  return geography === 'battalions'
+    ? { one: 'battalion', many: 'battalions', title: 'Battalions' }
+    : { one: 'precinct', many: 'precincts', title: 'Precincts' }
 }
 
 /** ZIP codes in precinct 116, which NYPD created from the southeast of 105 in late 2024. */

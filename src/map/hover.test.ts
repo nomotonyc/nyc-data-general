@@ -13,7 +13,7 @@ const ds = getDataset('structural-fires')
 const fires = getLayer('structural-fires')
 const y2025 = { from: 2025, to: 2025 } as const
 const borough = (name: string) => ({ kind: 'borough' as const, properties: { borough: name } })
-const precinct = (n: number, b: string) => ({ kind: 'precinct' as const, properties: { precinct: n, borough: b } })
+const precinct = (n: number, b: string) => ({ kind: 'precincts' as const, properties: { precinct: n, borough: b } })
 
 describe('hoverTarget', () => {
   it('is the borough at borough level', () => {
@@ -21,9 +21,9 @@ describe('hoverTarget', () => {
   })
 
   it('is the precinct at precinct level', () => {
-    expect(hoverTarget({ ...fire, detail: 'precinct' }, [precinct(44, 'Bronx'), borough('Bronx')])).toEqual({
-      kind: 'precinct',
-      precinct: 44,
+    expect(hoverTarget({ ...fire, detail: 'area' }, [precinct(44, 'Bronx'), borough('Bronx')])).toEqual({
+      kind: 'area',
+      id: '44',
     })
   })
 
@@ -33,8 +33,8 @@ describe('hoverTarget', () => {
 })
 
 describe('hoverDetails for a precinct', () => {
-  const state = { ...fire, detail: 'precinct' as const }
-  const details = hoverDetails(state, ds, { kind: 'precinct', precinct: 44 })
+  const state = { ...fire, detail: 'area' as const }
+  const details = hoverDetails(state, ds, { kind: 'area', id: '44' })
   const values = ds.areas.map((a) => areaValue(ds, fires, [a.id], y2025))
   const bronx = ds.areas.filter((a) => a.borough === 'Bronx').map((a) => areaValue(ds, fires, [a.id], y2025))
   const own = areaValue(ds, fires, ['44'], y2025)
@@ -75,11 +75,11 @@ describe('hoverDetails for a precinct', () => {
 
   it('invites a click, or says it is pinned', () => {
     expect(details.hint).toBe('Click to pin this precinct')
-    expect(hoverDetails({ ...state, pinnedPrecinct: 44 }, ds, { kind: 'precinct', precinct: 44 }).hint).toBe('Pinned')
+    expect(hoverDetails({ ...state, pinnedArea: '44' }, ds, { kind: 'area', id: '44' }).hint).toBe('Pinned')
   })
 
   it('names precinct 116 on its own, under its borough', () => {
-    expect(hoverDetails(state, ds, { kind: 'precinct', precinct: 116 })).toMatchObject({ title: 'Precinct 116', subtitle: 'Queens' })
+    expect(hoverDetails(state, ds, { kind: 'area', id: '116' })).toMatchObject({ title: 'Precinct 116', subtitle: 'Queens' })
   })
 })
 
@@ -147,5 +147,21 @@ describe('tooltipPosition', () => {
 
   it('never goes past the top or left edge', () => {
     expect(tooltipPosition({ x: 200, y: 150 }, card, { width: 300, height: 300 })).toEqual({ left: 8, top: 8 })
+  })
+})
+
+describe('hoverDetails for a battalion', () => {
+  const bds = getDataset('fire-apparatus-accidents', 'battalions')
+  const bstate: ExplorerState = { ...initialExplorerState, storyId: 'fire', metricId: 'fire-apparatus-accidents', geography: 'battalions' }
+
+  it('names the battalion and ranks it among battalions', () => {
+    const d = hoverDetails(bstate, bds, { kind: 'area', id: 'bn14' })
+    expect(d).toMatchObject({ title: 'Battalion 14', subtitle: 'Bronx', hint: 'Click to pin this battalion' })
+    expect(d.ranks[1]).toMatchObject({ label: 'Citywide', of: 'of 49' })
+    expect(d.strip.caption).toBe('Among all 49 battalions')
+  })
+
+  it('counts a borough’s battalions', () => {
+    expect(hoverDetails(bstate, bds, { kind: 'borough', borough: 'Bronx' }).subtitle).toBe('Borough · 9 battalions')
   })
 })

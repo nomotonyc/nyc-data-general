@@ -1,9 +1,10 @@
-import { act, screen } from '@testing-library/react'
+import { act, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { BOROUGH_BOUNDS, cameraPadding } from '../map/camera'
-import { FLY_DURATION, HOVER_DELAY, LAYERS, NYC_BOUNDS, boroughLayers } from '../map/config'
+import { FADE_DURATION, FLY_DURATION, HOVER_DELAY, LAYERS, NYC_BOUNDS, SOURCES, boroughLayers } from '../map/config'
 import { cameraEasing } from '../map/easing'
+import { useExplorerDispatch } from '../explorer/context'
 import { renderWithExplorer } from '../test/renderWithExplorer'
 import { lightTheme } from '../theme/tokens'
 import BaseMap from './BaseMap'
@@ -72,6 +73,8 @@ vi.mock('maplibre-gl', async () => {
 })
 
 const map = () => maps[maps.length - 1]
+/** The last filter set on one layer (several layers get filters in each paint). */
+const lastFilter = (layer: string) => map().setFilter.mock.calls.filter((call: unknown[]) => call[0] === layer).at(-1)?.[1]
 const load = () =>
   act(() => {
     map().fire('style.load')
@@ -82,6 +85,14 @@ const fills = () =>
   map()
     .setFeatureState.mock.calls.map(([, state]) => (state as { fill: string | null }).fill)
     .filter((fill): fill is string => fill !== null)
+/** The colour each feature ends on, once any colour tween has finished. */
+const settledFills = () => {
+  const last = new Map<string, string | null>()
+  for (const [target, state] of map().setFeatureState.mock.calls as [{ source: string; id: unknown }, { fill: string | null }][]) {
+    last.set(`${target.source}|${target.id}`, state.fill)
+  }
+  return [...last.values()].filter((fill): fill is string => fill !== null)
+}
 
 beforeEach(() => {
   maps.length = 0
@@ -154,8 +165,10 @@ describe('BaseMap', () => {
     load()
     map().setFeatureState.mockClear()
     await userEvent.click(screen.getByRole('button', { name: /Medical/ }))
-    expect(fills().length).toBeGreaterThan(0)
-    for (const fill of fills()) expect(lightTheme.story.medical.ramp).toContain(fill)
+    await waitFor(() => {
+      expect(settledFills().length).toBeGreaterThan(0)
+      for (const fill of settledFills()) expect(lightTheme.story.medical.ramp).toContain(fill)
+    })
   })
 
   it('hides the borough names when Place labels is unticked', async () => {
@@ -205,7 +218,7 @@ describe('BaseMap', () => {
       feature(boroughLayers('Queens').boroughFill, { borough: 'Queens' }),
     )
     expect(current()).toHaveTextContent('Precinct 114')
-    expect(map().setFilter).toHaveBeenLastCalledWith(LAYERS.precinctHighlight, ['in', ['get', 'precinct'], ['literal', [114]]])
+    expect(lastFilter(LAYERS.precinctHighlight)).toEqual(['in', ['get', 'precinct'], ['literal', [114]]])
   })
 
   it('zooms when a borough is chosen from the Where list', async () => {
@@ -283,6 +296,28 @@ describe('BaseMap', () => {
     expect(screen.queryByText('Click to focus on Queens')).not.toBeInTheDocument()
   })
 
+  it('drops a hover card when switching to battalions without moving the pointer, instead of crashing', () => {
+    function SwitchToBattalions() {
+      const dispatch = useExplorerDispatch()
+      return <button onClick={() => dispatch({ type: 'setGeography', geography: 'battalions' })}>battalions</button>
+    }
+    renderWithExplorer(
+      <>
+        <BaseMap />
+        <SwitchToBattalions />
+      </>,
+      { storyId: 'fire', metricId: 'structural-fires', borough: 'Queens' },
+    )
+    load()
+    map().queryRenderedFeatures.mockReturnValueOnce([feature(boroughLayers('Queens').precinctFill, { precinct: 114, borough: 'Queens' })])
+    act(() => map().fire('mousemove', { point: { x: 100, y: 100 } }))
+    act(() => vi.advanceTimersByTime(HOVER_DELAY))
+    expect(screen.getByText('Precinct 114')).toBeInTheDocument()
+    act(() => screen.getByRole('button', { name: 'battalions' }).click())
+    expect(screen.queryByText('Precinct 114')).not.toBeInTheDocument()
+    expect(lastFilter(LAYERS.battalionHover)).toEqual(['in', ['get', 'battalion'], ['literal', []]])
+  })
+
   it('drops the hover card, outline and pointer when a click moves the view', () => {
     renderWithExplorer(<BaseMap />, { storyId: 'fire', metricId: 'structural-fires' })
     load()
@@ -291,7 +326,7 @@ describe('BaseMap', () => {
     map().queryRenderedFeatures.mockReturnValueOnce([feature(boroughLayers('Queens').boroughFill, { borough: 'Queens' })])
     act(() => map().fire('click', { point: { x: 100, y: 100 } }))
     expect(screen.queryByText('Click to focus on Queens')).not.toBeInTheDocument()
-    expect(map().setFilter).toHaveBeenLastCalledWith(LAYERS.precinctHover, ['in', ['get', 'precinct'], ['literal', []]])
+    expect(lastFilter(LAYERS.precinctHover)).toEqual(['in', ['get', 'precinct'], ['literal', []]])
     expect(map().canvas.style.cursor).toBe('')
   })
 
@@ -314,7 +349,41 @@ describe('BaseMap', () => {
     act(() => vi.advanceTimersByTime(HOVER_DELAY))
     act(() => map().fire('mouseout'))
     expect(screen.queryByText('Click to focus on Queens')).not.toBeInTheDocument()
-    expect(map().setFilter).toHaveBeenLastCalledWith(LAYERS.precinctHover, ['in', ['get', 'precinct'], ['literal', []]])
+    expect(lastFilter(LAYERS.precinctHover)).toEqual(['in', ['get', 'precinct'], ['literal', []]])
   })
+  })
+})
+
+describe('changing story', () => {
+  beforeEach(() => vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'setTimeout', 'clearTimeout', 'performance', 'Date'] }))
+  afterEach(() => vi.useRealTimers())
+
+  function SwitchStory() {
+    const dispatch = useExplorerDispatch()
+    return <button onClick={() => dispatch({ type: 'selectStory', storyId: 'fire' })}>fire</button>
+  }
+  const queensFills = () =>
+    (map().setFeatureState.mock.calls as [{ source: string; id: unknown }, { fill: string | null }][])
+      .filter(([target]) => target.source === SOURCES.boroughs && target.id === 'Queens')
+      .map(([, s]) => s.fill)
+
+  it('eases borough colours from the old story’s to the new one’s instead of snapping', () => {
+    renderWithExplorer(
+      <>
+        <BaseMap />
+        <SwitchStory />
+      </>,
+    )
+    load()
+    act(() => vi.advanceTimersByTime(1000))
+    const before = queensFills().at(-1)
+    act(() => screen.getByRole('button', { name: 'fire' }).click())
+    act(() => vi.advanceTimersByTime(FADE_DURATION / 2))
+    const midway = queensFills().at(-1)
+    act(() => vi.advanceTimersByTime(FADE_DURATION))
+    const after = queensFills().at(-1)
+    expect(after).not.toBe(before)
+    expect(midway).not.toBe(before)
+    expect(midway).not.toBe(after)
   })
 })

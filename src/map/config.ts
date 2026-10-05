@@ -1,4 +1,5 @@
 import type { LngLatBoundsLike } from 'maplibre-gl'
+import type { Geography } from '../domain/geography'
 
 /** Bounding box of the NYC borough geometry: the view the map fits. */
 export const NYC_BOUNDS: LngLatBoundsLike = [
@@ -31,6 +32,8 @@ export const BOROUGHS_URL = `${import.meta.env.BASE_URL}data/nyc-boroughs.geojso
 export const BOROUGH_LABELS_URL = `${import.meta.env.BASE_URL}data/nyc-borough-labels.geojson`
 export const PRECINCTS_URL = `${import.meta.env.BASE_URL}data/nyc-precincts.geojson`
 export const PRECINCT_LABELS_URL = `${import.meta.env.BASE_URL}data/nyc-precinct-labels.geojson`
+export const BATTALIONS_URL = `${import.meta.env.BASE_URL}data/nyc-battalions.geojson`
+export const BATTALION_LABELS_URL = `${import.meta.env.BASE_URL}data/nyc-battalion-labels.geojson`
 
 /** Self-hosted SDF glyphs. Only the 0-255 range ships; borough names are ASCII. */
 export const GLYPHS = `${import.meta.env.BASE_URL}fonts/{fontstack}/{range}.pbf`
@@ -44,6 +47,8 @@ export const SOURCES = {
   boroughLabels: 'borough-labels',
   precincts: 'precincts',
   precinctLabels: 'precinct-labels',
+  battalions: 'battalions',
+  battalionLabels: 'battalion-labels',
 } as const
 /** City-wide layers. Borough and precinct shapes have one layer set per borough (boroughLayers). */
 export const LAYERS = {
@@ -52,7 +57,34 @@ export const LAYERS = {
   precinctHighlight: 'precinct-highlight',
   boroughLabel: 'borough-label',
   precinctLabel: 'precinct-label',
+  battalionHover: 'battalion-hover',
+  battalionHighlight: 'battalion-highlight',
+  battalionLabel: 'battalion-label',
 } as const
+
+/** Per geography: its shape and label sources, the feature property holding the area number, and its city-wide layers. */
+export const GEOGRAPHY_MAP = {
+  precincts: {
+    source: SOURCES.precincts,
+    labelSource: SOURCES.precinctLabels,
+    url: PRECINCTS_URL,
+    labelsUrl: PRECINCT_LABELS_URL,
+    property: 'precinct',
+    hover: LAYERS.precinctHover,
+    highlight: LAYERS.precinctHighlight,
+    label: LAYERS.precinctLabel,
+  },
+  battalions: {
+    source: SOURCES.battalions,
+    labelSource: SOURCES.battalionLabels,
+    url: BATTALIONS_URL,
+    labelsUrl: BATTALION_LABELS_URL,
+    property: 'battalion',
+    hover: LAYERS.battalionHover,
+    highlight: LAYERS.battalionHighlight,
+    label: LAYERS.battalionLabel,
+  },
+} as const satisfies Record<Geography, unknown>
 
 /** Each borough's own layers, so it can fade in and out by itself. */
 export function boroughLayers(borough: string) {
@@ -61,8 +93,18 @@ export function boroughLayers(borough: string) {
     boroughFill: `borough-fill-${slug}`,
     precinctFill: `precinct-fill-${slug}`,
     precinctLine: `precinct-line-${slug}`,
+    battalionFill: `battalion-fill-${slug}`,
+    battalionLine: `battalion-line-${slug}`,
     boroughLine: `borough-line-${slug}`,
   }
+}
+
+/** A borough's fill and line layers for one geography's areas. */
+export function areaLayers(borough: string, geography: Geography) {
+  const layers = boroughLayers(borough)
+  return geography === 'battalions'
+    ? { fill: layers.battalionFill, line: layers.battalionLine }
+    : { fill: layers.precinctFill, line: layers.precinctLine }
 }
 
 /** How long the camera takes to glide between the city and a borough. */

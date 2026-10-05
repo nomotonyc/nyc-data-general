@@ -29,21 +29,22 @@ const layer = (id: string, aggregation: Metric['aggregation']): Metric => ({
 const count = layer('n', 'sum')
 const density = layer('d', 'ratio')
 
-const area = (id: string, precincts: number[]) => ({ id, label: id, borough: 'Queens' as const, precincts })
+const area = (id: string, number: number) => ({ id, kind: 'precinct' as const, number, label: id, borough: 'Queens' as const })
 
 // Two areas; two months in 2023 and two in 2024 (real monthly data has twelve a year).
 const monthly: LayerDataset = {
   layerId: 'fire',
+  geography: 'precincts',
   isSample: true,
   asOf: null,
+  placement: null,
   periods: [
     { year: 2023, month: 0 },
     { year: 2023, month: 1 },
     { year: 2024, month: 0 },
     { year: 2024, month: 1 },
   ],
-  // b stands for two precincts that can't be told apart, like 105 & 116.
-  areas: [area('a', [1]), area('b', [5, 6])],
+  areas: [area('a', 1), area('b', 5)],
   values: {
     n: { a: [1, 2, 3, 4], b: [10, 20, 30, 40] },
     d: { a: [10, 20, 30, 40], b: [50, 50, 50, 50] },
@@ -132,9 +133,8 @@ describe('series', () => {
     expect(series(monthly, count, ['a', 'b'], y2024)).toEqual([33, 44])
   })
 
-  it('can express counts per precinct so places of different sizes compare', () => {
-    // three precincts between the two areas
-    expect(series(monthly, count, ['a', 'b'], y2024, true)).toEqual([33 / 3, 44 / 3])
+  it('can express counts per area so places of different sizes compare', () => {
+    expect(series(monthly, count, ['a', 'b'], y2024, true)).toEqual([33 / 2, 44 / 2])
   })
 
   it('computes ratios from totals each period', () => {

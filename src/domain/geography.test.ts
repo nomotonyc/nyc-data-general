@@ -1,5 +1,19 @@
 import { describe, expect, it } from 'vitest'
-import { BOROUGHS, PRECINCTS, PRECINCT_AREAS, areaOfPrecinct, boroughInSentence, boroughOfPrecinct, isPrecinct, precinctsIn, dispatchPrecinct } from './geography'
+import {
+  BATTALIONS,
+  BATTALION_AREAS,
+  BOROUGHS,
+  PRECINCTS,
+  PRECINCT_AREAS,
+  areaById,
+  areaNoun,
+  areasOf,
+  boroughInSentence,
+  boroughOfPrecinct,
+  dispatchPrecinct,
+  isPrecinct,
+  precinctsIn,
+} from './geography'
 
 describe('PRECINCTS', () => {
   it('lists the 78 NYPD precincts once each, in ascending order', () => {
@@ -50,29 +64,49 @@ describe('boroughInSentence', () => {
   })
 })
 
-describe('map areas', () => {
-  const coversEveryPrecinctOnce = (areas: typeof PRECINCT_AREAS) => {
-    const all = areas.flatMap((a) => a.precincts)
-    expect([...all].sort((a, b) => a - b)).toEqual(PRECINCTS)
-  }
-
-  it('gives census-based layers one area per precinct', () => {
+describe('precinct areas', () => {
+  it('gives every precinct one area, numbered and labelled', () => {
     expect(PRECINCT_AREAS).toHaveLength(78)
-    expect(PRECINCT_AREAS.find((a) => a.id === '14')).toEqual({
-      id: '14',
-      label: 'Precinct 14',
-      borough: 'Manhattan',
-      precincts: [14],
-    })
-    coversEveryPrecinctOnce(PRECINCT_AREAS)
+    expect(PRECINCT_AREAS.find((a) => a.id === '14')).toEqual({ id: '14', kind: 'precinct', number: 14, label: 'Precinct 14', borough: 'Manhattan' })
+    expect(PRECINCT_AREAS.map((a) => a.number)).toEqual(PRECINCTS)
+  })
+})
+
+describe('battalions', () => {
+  it('lists the 49 FDNY battalions once each, in ascending order, each in one borough', () => {
+    expect(BATTALIONS).toHaveLength(49)
+    const numbers = BATTALIONS.map((b) => b.number)
+    expect([...numbers].sort((a, b) => a - b)).toEqual(numbers)
+    expect(new Set(numbers).size).toBe(49)
   })
 
-  it('keeps 105 and 116 apart', () => {
-    expect(areaOfPrecinct(PRECINCT_AREAS, 116).id).toBe('116')
+  it('splits across the boroughs as the shapes do', () => {
+    const counts = Object.fromEntries(BOROUGHS.map((b) => [b, BATTALIONS.filter((x) => x.borough === b).length]))
+    expect(counts).toEqual({ Manhattan: 12, Bronx: 9, Brooklyn: 16, Queens: 9, 'Staten Island': 3 })
   })
 
-  it('rejects a precinct no area contains', () => {
-    expect(() => areaOfPrecinct(PRECINCT_AREAS, 2)).toThrow(/precinct 2/)
+  it('gives each battalion an area with an id no precinct can share', () => {
+    expect(BATTALION_AREAS.find((a) => a.number === 14)).toEqual({ id: 'bn14', kind: 'battalion', number: 14, label: 'Battalion 14', borough: 'Bronx' })
+    const precinctIds = new Set(PRECINCT_AREAS.map((a) => a.id))
+    for (const a of BATTALION_AREAS) expect(precinctIds.has(a.id)).toBe(false)
+  })
+})
+
+describe('areasOf and areaById', () => {
+  it('returns the areas of a geography', () => {
+    expect(areasOf('precincts')).toBe(PRECINCT_AREAS)
+    expect(areasOf('battalions')).toBe(BATTALION_AREAS)
+  })
+
+  it('finds an area by id, and refuses one that is not there', () => {
+    expect(areaById(PRECINCT_AREAS, '116').label).toBe('Precinct 116')
+    expect(areaById(BATTALION_AREAS, 'bn3').borough).toBe('Bronx')
+    expect(() => areaById(PRECINCT_AREAS, 'bn3')).toThrow(/bn3/)
+  })
+
+  it('names a geography’s areas', () => {
+    expect(areaNoun('precincts')).toEqual({ one: 'precinct', many: 'precincts', title: 'Precincts' })
+    expect(areaNoun('battalions')).toEqual({ one: 'battalion', many: 'battalions', title: 'Battalions' })
   })
 })
 

@@ -16,7 +16,8 @@ describe('initial state', () => {
       storyId: 'demographic',
       metricId: 'population-density',
       borough: null,
-      pinnedPrecinct: null,
+      pinnedArea: null,
+      geography: 'precincts',
       detail: 'borough',
       showOutlines: true,
       showLabels: true,
@@ -35,9 +36,9 @@ describe('selectStory', () => {
   })
 
   it('keeps the place, pin and years', () => {
-    const before = at({ borough: 'Bronx', pinnedPrecinct: 44, yearFrom: 2021, yearTo: 2023 })
+    const before = at({ borough: 'Bronx', pinnedArea: '44', yearFrom: 2021, yearTo: 2023 })
     const s = reduce(before, { type: 'selectStory', storyId: 'medical' })
-    expect(s).toMatchObject({ borough: 'Bronx', pinnedPrecinct: 44, yearFrom: 2021, yearTo: 2023 })
+    expect(s).toMatchObject({ borough: 'Bronx', pinnedArea: '44', yearFrom: 2021, yearTo: 2023 })
   })
 
   it('changes nothing when the story is already selected', () => {
@@ -58,50 +59,51 @@ describe('selectMetric', () => {
 
 describe('focusBorough', () => {
   it('focuses a borough and clears any pin', () => {
-    const s = reduce(at({ borough: 'Bronx', pinnedPrecinct: 44 }), { type: 'focusBorough', borough: 'Queens' })
-    expect(s).toMatchObject({ borough: 'Queens', pinnedPrecinct: null })
+    const s = reduce(at({ borough: 'Bronx', pinnedArea: '44' }), { type: 'focusBorough', borough: 'Queens' })
+    expect(s).toMatchObject({ borough: 'Queens', pinnedArea: null })
   })
 
   it('returns to the whole city with null', () => {
-    const s = reduce(at({ borough: 'Bronx', pinnedPrecinct: 44 }), { type: 'focusBorough', borough: null })
-    expect(s).toMatchObject({ borough: null, pinnedPrecinct: null })
+    const s = reduce(at({ borough: 'Bronx', pinnedArea: '44' }), { type: 'focusBorough', borough: null })
+    expect(s).toMatchObject({ borough: null, pinnedArea: null })
   })
 })
 
-describe('pinPrecinct', () => {
+describe('pinArea', () => {
   it('zooms into the borough of a precinct pinned from the city view', () => {
-    const s = reduce(at({ detail: 'precinct' }), { type: 'pinPrecinct', precinct: 14 })
-    expect(s).toMatchObject({ borough: 'Manhattan', pinnedPrecinct: 14 })
+    const s = reduce(at({ detail: 'area' }), { type: 'pinArea', id: '14' })
+    expect(s).toMatchObject({ borough: 'Manhattan', pinnedArea: '14' })
   })
 
   it('keeps a pin inside a focused borough when Detail changes', () => {
-    const s = reduce(at({ borough: 'Bronx', pinnedPrecinct: 44 }), { type: 'setDetail', detail: 'borough' })
-    expect(s.pinnedPrecinct).toBe(44)
+    const s = reduce(at({ borough: 'Bronx', pinnedArea: '44' }), { type: 'setDetail', detail: 'borough' })
+    expect(s.pinnedArea).toBe('44')
   })
 
   it('moves focus when the precinct is in another borough', () => {
-    const s = reduce(at({ borough: 'Bronx', pinnedPrecinct: 44 }), { type: 'pinPrecinct', precinct: 75 })
-    expect(s).toMatchObject({ borough: 'Brooklyn', pinnedPrecinct: 75 })
+    const s = reduce(at({ borough: 'Bronx', pinnedArea: '44' }), { type: 'pinArea', id: '75' })
+    expect(s).toMatchObject({ borough: 'Brooklyn', pinnedArea: '75' })
   })
 
-  it('ignores numbers that are not precincts', () => {
-    expect(reduce(initial, { type: 'pinPrecinct', precinct: 2 })).toBe(initial)
+  it('ignores ids that are not areas of the current geography', () => {
+    expect(reduce(initial, { type: 'pinArea', id: '2' })).toBe(initial)
+    expect(reduce(initial, { type: 'pinArea', id: 'bn14' })).toBe(initial)
   })
 
   it('unpins back to the borough', () => {
-    const s = reduce(at({ borough: 'Bronx', pinnedPrecinct: 44 }), { type: 'unpinPrecinct' })
-    expect(s).toMatchObject({ borough: 'Bronx', pinnedPrecinct: null })
+    const s = reduce(at({ borough: 'Bronx', pinnedArea: '44' }), { type: 'unpinArea' })
+    expect(s).toMatchObject({ borough: 'Bronx', pinnedArea: null })
   })
 })
 
 describe('detail and map toggles', () => {
   it('sets detail', () => {
-    expect(reduce(initial, { type: 'setDetail', detail: 'precinct' }).detail).toBe('precinct')
+    expect(reduce(initial, { type: 'setDetail', detail: 'area' }).detail).toBe('area')
   })
 
   it('always shows precincts when a borough is focused', () => {
     expect(effectiveDetail(at({ detail: 'borough' }))).toBe('borough')
-    expect(effectiveDetail(at({ detail: 'borough', borough: 'Queens' }))).toBe('precinct')
+    expect(effectiveDetail(at({ detail: 'borough', borough: 'Queens' }))).toBe('area')
   })
 
   it('flips outlines and labels', () => {
@@ -157,5 +159,25 @@ describe('activeMetric', () => {
   it('returns the selected layer of the current story', () => {
     expect(activeMetric(initial).label).toBe('Population density')
     expect(activeMetric(reduce(initial, { type: 'selectStory', storyId: 'medical' })).label).toBe('Ambulance calls')
+  })
+})
+
+describe('geography', () => {
+  const fires = at({ storyId: 'fire', metricId: 'fire-apparatus-accidents' })
+
+  it('switches to battalions for a layer that has them, keeping the borough and clearing the pin', () => {
+    const s = reduce({ ...fires, borough: 'Bronx', pinnedArea: '44' }, { type: 'setGeography', geography: 'battalions' })
+    expect(s).toMatchObject({ geography: 'battalions', borough: 'Bronx', pinnedArea: null })
+  })
+
+  it('pins battalions by their own ids once switched', () => {
+    const s = reduce(reduce(fires, { type: 'setGeography', geography: 'battalions' }), { type: 'pinArea', id: 'bn14' })
+    expect(s).toMatchObject({ borough: 'Bronx', pinnedArea: 'bn14' })
+  })
+
+  // A layer without battalions is covered in state.geography.test.ts, with a fixture layer.
+  it('stays in battalions across layers that have them', () => {
+    const s = reduce(reduce(fires, { type: 'setGeography', geography: 'battalions' }), { type: 'selectStory', storyId: 'demographic' })
+    expect(s.geography).toBe('battalions')
   })
 })

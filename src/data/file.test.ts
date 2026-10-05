@@ -39,3 +39,17 @@ describe('datasetFromFile', () => {
     expect(() => datasetFromFile(fires, { ...file(), layerId: 'ambulance-calls' }, ['1'])).toThrow(/ambulance-calls/)
   })
 })
+
+describe('placement', () => {
+  it('carries how a battalion file placed its records into the dataset', () => {
+    const placement = [{ method: 'each crash’s coordinates', share: 1, exact: true }]
+    const f = { ...file(), geography: 'battalions' as const, placement, values: { bn14: zeros() }, parts: { bn14: zeros().map(() => fires.breakdown.parts.map(() => 0)) } }
+    expect(datasetFromFile(fires, f, ['bn14']).placement).toEqual(placement)
+  })
+
+  it('refuses shares that do not add up to the whole', () => {
+    const placement = [{ method: 'alarm box', share: 0.7, exact: true }]
+    const f = { ...file(), geography: 'battalions' as const, placement, values: { bn14: zeros() }, parts: { bn14: zeros().map(() => fires.breakdown.parts.map(() => 0)) } }
+    expect(() => datasetFromFile(fires, f, ['bn14'])).toThrow(/placement shares add to 70%/)
+  })
+})

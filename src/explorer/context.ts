@@ -18,7 +18,8 @@ export function useExplorerDispatch(): Dispatch<ExplorerAction> {
   return dispatch
 }
 
-/** The active layer's dataset. */
+/** The active layer's dataset in the current geography. */
 export function useDataset(): LayerDataset {
-  return getDataset(useExplorerState().metricId)
+  const { metricId, geography } = useExplorerState()
+  return getDataset(metricId, geography)
 }

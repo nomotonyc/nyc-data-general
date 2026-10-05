@@ -57,12 +57,9 @@ function ratio(ds: LayerDataset, metric: Metric, areaIds: readonly string[], ind
   return (total(ds, ds.values, metric, areaIds, indices) / denominator) * (metric.scale ?? 1)
 }
 
-function precinctCount(ds: LayerDataset, areaIds: readonly string[]): number {
-  return sum(areaIds.map((id) => {
-    const area = ds.areas.find((a) => a.id === id)
-    if (!area) throw new Error(`Dataset ${ds.layerId} has no area ${id}`)
-    return area.precincts.length
-  }))
+function areaCount(ds: LayerDataset, areaIds: readonly string[]): number {
+  for (const id of areaIds) if (!ds.areas.some((a) => a.id === id)) throw new Error(`Dataset ${ds.layerId} has no area ${id}`)
+  return areaIds.length
 }
 
 /**
@@ -97,7 +94,7 @@ export function series(
   range: YearRange,
   perPrecinct = false,
 ): number[] {
-  const divisor = perPrecinct && metric.aggregation === 'sum' ? precinctCount(ds, areaIds) : 1
+  const divisor = perPrecinct && metric.aggregation === 'sum' ? areaCount(ds, areaIds) : 1
   return indicesIn(ds, range).map((i) =>
     metric.aggregation === 'ratio' ? ratio(ds, metric, areaIds, [i]) : total(ds, ds.values, metric, areaIds, [i]) / divisor,
   )

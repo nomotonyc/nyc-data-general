@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { LAYERS, getLayer } from '../layers'
+import { LAYERS, getLayer, layerGeographies } from '../layers'
 import { layerFileText } from '../test/layerFiles'
 import { DatasetStore, getDataset, layerFileUrl } from './load'
 
@@ -21,7 +21,8 @@ describe('DatasetStore', () => {
     expect(store.ready()).toBe(false)
     await store.load()
     await store.load()
-    expect(asked).toEqual(LAYERS.filter((l) => l.build).map((l) => layerFileUrl(l.id)))
+    expect(asked).toEqual(LAYERS.filter((l) => l.build).flatMap((l) => layerGeographies(l).map((g) => layerFileUrl(l.id, g))))
+    expect(asked).toContain(layerFileUrl('fire-apparatus-accidents', 'battalions'))
     expect(store.ready()).toBe(true)
   })
 
@@ -37,7 +38,7 @@ describe('DatasetStore', () => {
   })
 
   it('refuses a built layer before it has loaded', () => {
-    expect(() => new DatasetStore(fakeFetch().fetcher).get('structural-fires')).toThrow(/structural-fires is not loaded/)
+    expect(() => new DatasetStore(fakeFetch().fetcher).get('structural-fires')).toThrow(/structural-fires \(precincts\) is not loaded/)
   })
 
   it('names the layer when its file cannot be fetched', async () => {
@@ -48,6 +49,17 @@ describe('DatasetStore', () => {
   it('names the layer when its file is missing and the server answers with a page instead', async () => {
     const store = new DatasetStore(fakeFetch({ 'structural-fires': new Response('<!doctype html><html></html>') }).fetcher)
     await expect(store.load()).rejects.toThrow('Couldn’t load Structural fires data (not a data file; has it been built?)')
+  })
+
+  it('refuses a file whose geography is not the one asked for, naming both', async () => {
+    const precinctFile = fileFor('fire-apparatus-accidents')
+    const store = new DatasetStore(async (url) => new Response(url.includes('fire-apparatus-accidents.battalions') ? precinctFile : fileFor(url.split('/').pop()!.replace('.battalions.json', '').replace('.json', ''), url.includes('.battalions.json') ? 'battalions' : 'precincts')))
+    await expect(store.load()).rejects.toThrow(/fire-apparatus-accidents.*battalions.*precincts/)
+  })
+
+  it('names the geography when a battalion file cannot be fetched', async () => {
+    const failing = new DatasetStore(async (url) => (url.includes('structural-fires.battalions') ? new Response('', { status: 404 }) : new Response(fileFor(url.split('/').pop()!.replace('.battalions.json', '').replace('.json', ''), url.includes('.battalions.json') ? 'battalions' : 'precincts'))))
+    await expect(failing.load()).rejects.toThrow('Couldn’t load Structural fires data by battalion (404)')
   })
 
   it('names the layer when its file is incomplete', async () => {
@@ -80,7 +92,10 @@ describe('getDataset', () => {
 })
 
 describe('every built layer', () => {
-  it.each(LAYERS.filter((l) => l.build).map((l) => [l.id]))('%s has its file in public/data/layers', (id) => {
-    expect(() => fileFor(id)).not.toThrow()
-  })
+  it.each(LAYERS.filter((l) => l.build).flatMap((l) => layerGeographies(l).map((g) => [l.id, g] as const)))(
+    '%s has its %s file in public/data/layers',
+    (id, geography) => {
+      expect(() => layerFileText(id, geography)).not.toThrow()
+    },
+  )
 })

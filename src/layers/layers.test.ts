@@ -118,6 +118,33 @@ describe('layerSources', () => {
   })
 })
 
+describe('battalion placement sources', () => {
+  const urls = (id: string) => layerSources(getLayer(id)).map((s) => s.url).join(' ')
+
+  it('credits every dataset used to estimate battalion shares from residents', () => {
+    for (const id of ['structural-fires', 'ambulance-calls', 'ambulance-response-time']) {
+      expect(urls(id), id).toContain('PL_94-171')
+      expect(urls(id), id).toContain('pri4-ifjk')
+      expect(urls(id), id).toContain('5crt-au7u')
+      expect(urls(id), id).toContain('872g-cjhh')
+    }
+  })
+
+  it('credits the alarm box locations and Geoclient where fires are placed by alarm box', () => {
+    expect(urls('structural-fires')).toContain('v57i-gtxb')
+    expect(urls('structural-fires')).toContain('geoclient')
+    expect(urls('ambulance-calls')).not.toContain('v57i-gtxb')
+  })
+
+  it('adds nothing for layers placed exactly from their own data, and never lists a source twice', () => {
+    expect(urls('fire-apparatus-accidents')).not.toContain('pri4-ifjk')
+    for (const layer of LAYERS) {
+      const list = layerSources(layer).map((s) => s.url)
+      expect(new Set(list).size, layer.id).toBe(list.length)
+    }
+  })
+})
+
 describe('battalion boundary credit', () => {
   it('credits the Fire Battalions boundaries on layers shown by battalion, and only those', () => {
     for (const layer of LAYERS) {

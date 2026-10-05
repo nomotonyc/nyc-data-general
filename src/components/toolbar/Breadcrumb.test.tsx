@@ -20,27 +20,34 @@ describe('Breadcrumb', () => {
   })
 
   it('steps back to the city', async () => {
-    renderWithExplorer(<Breadcrumb />, { borough: 'Bronx', pinnedPrecinct: 44 })
+    renderWithExplorer(<Breadcrumb />, { borough: 'Bronx', pinnedArea: '44' })
     await userEvent.click(screen.getByRole('button', { name: 'New York City' }))
     expect(current()).toHaveTextContent('New York City')
   })
 
   it('steps back from a pinned precinct to its borough', async () => {
-    renderWithExplorer(<Breadcrumb />, { borough: 'Bronx', pinnedPrecinct: 44 })
+    renderWithExplorer(<Breadcrumb />, { borough: 'Bronx', pinnedArea: '44' })
     expect(current()).toHaveTextContent('Precinct 44')
     await userEvent.click(screen.getByRole('button', { name: 'Bronx' }))
     expect(current()).toHaveTextContent('Bronx')
   })
 
   it('keeps the separators out of what screen readers announce', () => {
-    const { container } = renderWithExplorer(<Breadcrumb />, { borough: 'Bronx', pinnedPrecinct: 44 })
+    const { container } = renderWithExplorer(<Breadcrumb />, { borough: 'Bronx', pinnedArea: '44' })
     const separators = container.querySelectorAll('.breadcrumb__separator')
     expect(separators).toHaveLength(2)
     for (const s of separators) expect(s).toHaveAttribute('aria-hidden', 'true')
   })
 
   it('names precinct 116 on its own', () => {
-    renderWithExplorer(<Breadcrumb />, { storyId: 'fire', metricId: 'structural-fires', borough: 'Queens', pinnedPrecinct: 116 })
+    renderWithExplorer(<Breadcrumb />, { storyId: 'fire', metricId: 'structural-fires', borough: 'Queens', pinnedArea: '116' })
     expect(current()).toHaveTextContent('Precinct 116')
+  })
+})
+
+describe('Breadcrumb by battalion', () => {
+  it('names a pinned battalion', () => {
+    renderWithExplorer(<Breadcrumb />, { storyId: 'fire', metricId: 'fire-apparatus-accidents', geography: 'battalions', borough: 'Bronx', pinnedArea: 'bn14' })
+    expect(screen.getByText('Battalion 14')).toHaveAttribute('aria-current', 'location')
   })
 })

@@ -1,3 +1,4 @@
+import { AreaSwitch } from './AreaSwitch'
 import { DetailToggle } from './DetailToggle'
 import { LayerPicker } from './LayerPicker'
 import { MapToggles } from './MapToggles'
@@ -8,6 +9,7 @@ export function Rail() {
   return (
     <div className="rail">
       <PlaceList />
+      <AreaSwitch />
       <DetailToggle />
       <LayerPicker />
       <MapToggles />

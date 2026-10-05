@@ -40,3 +40,12 @@ input {
   outline: 2px solid var(--color-focus);
   outline-offset: 2px;
 }
+
+/* Colour fades follow the system setting, as the map's do. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0s !important;
+  }
+}

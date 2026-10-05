@@ -18,3 +18,11 @@ describe('MapToggles', () => {
     expect(screen.getByRole('checkbox', { name: 'Precinct outlines' })).toBeChecked()
   })
 })
+
+describe('MapToggles by geography', () => {
+  it('names the outlines after the areas shown', () => {
+    renderWithExplorer(<MapToggles />, { storyId: 'fire', metricId: 'fire-apparatus-accidents', geography: 'battalions' })
+    expect(screen.getByRole('checkbox', { name: 'Battalion outlines' })).toBeInTheDocument()
+    expect(screen.queryByRole('checkbox', { name: 'Precinct outlines' })).not.toBeInTheDocument()
+  })
+})

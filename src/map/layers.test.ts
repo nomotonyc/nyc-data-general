@@ -22,13 +22,18 @@ describe('mapLayers', () => {
     expect(layers.map((l) => l.id)).toEqual([
       ...perBorough('boroughFill'),
       ...perBorough('precinctFill'),
+      ...perBorough('battalionFill'),
       ...perBorough('precinctLine'),
+      ...perBorough('battalionLine'),
       ...perBorough('boroughLine'),
       LAYERS.boroughHover,
       LAYERS.precinctHover,
       LAYERS.precinctHighlight,
+      LAYERS.battalionHover,
+      LAYERS.battalionHighlight,
       LAYERS.boroughLabel,
       LAYERS.precinctLabel,
+      LAYERS.battalionLabel,
     ])
   })
 

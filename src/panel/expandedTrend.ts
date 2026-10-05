@@ -4,7 +4,7 @@ import { getStory } from '../domain/stories'
 import type { ExplorerState } from '../explorer/state'
 import { MONTHS, mean, periodLabel, plotLines, signed, trendSeries, type TrendLine, type TrendPalette } from './trend'
 
-type Input = Pick<ExplorerState, 'storyId' | 'metricId' | 'borough' | 'pinnedPrecinct' | 'yearFrom' | 'yearTo'>
+type Input = Pick<ExplorerState, 'storyId' | 'metricId' | 'borough' | 'pinnedArea' | 'yearFrom' | 'yearTo'>
 
 export type ExpandedTrend = {
   kicker: string
@@ -28,7 +28,7 @@ export const BIG = { width: 900, height: 360, left: 64, right: 884, plotLeft: 80
 /** The larger trend view: the panel's lines with stats, gridlines and a readout for one period. */
 export function expandedTrend(state: Input, ds: LayerDataset, palette: TrendPalette, hover: number | null): ExpandedTrend | null {
   const data = trendSeries(state, ds, palette)
-  const { metric, periods, monthly, places, values, perPrecinct } = data
+  const { metric, periods, monthly, places, values, perArea, noun } = data
   if (periods.length < 2) return null
 
   const show = (v: number) => formatValue(metric.format ?? 'count', v)
@@ -50,8 +50,8 @@ export function expandedTrend(state: Input, ds: LayerDataset, palette: TrendPale
   const total = main.reduce((a, b) => a + b, 0)
 
   let first: ExpandedTrend['stats'][number]
-  if (metric.aggregation === 'sum' && !perPrecinct) first = { label: 'Total for the period', value: show(total), note: metric.unit }
-  else if (perPrecinct) first = { label: `${monthly ? 'Monthly' : 'Yearly'} average`, value: show(mean(main)), note: 'per precinct' }
+  if (metric.aggregation === 'sum' && !perArea) first = { label: 'Total for the period', value: show(total), note: metric.unit }
+  else if (perArea) first = { label: `${monthly ? 'Monthly' : 'Yearly'} average`, value: show(mean(main)), note: `per ${noun.one}` }
   else first = { label: 'Average for the period', value: show(mean(main)), note: metric.unit }
 
   let lastStat: ExpandedTrend['stats'][number]
@@ -60,7 +60,7 @@ export function expandedTrend(state: Input, ds: LayerDataset, palette: TrendPale
     lastStat = {
       label: 'Compared with New York City',
       value: Math.abs(diff) < 0.5 ? 'Level' : `${Math.abs(diff).toFixed(0)}% ${diff > 0 ? 'higher' : 'lower'}`,
-      note: perPrecinct ? 'per-precinct average' : 'period average',
+      note: perArea ? `per-${noun.one} average` : 'period average',
     }
   } else if (monthly) {
     const start = mean(main.slice(0, 3))

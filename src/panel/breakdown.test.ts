@@ -24,7 +24,7 @@ describe('breakdown', () => {
   it('follows the focused borough, or the pinned precinct', () => {
     const queens = breakdown({ ...ems, borough: 'Queens' }, ds, palette)
     expect(queens.parts.map((p) => p.width)).toEqual(breakdownShares(ds, areaIdsIn(ds, 'Queens'), { from: 2025, to: 2025 }).map((s) => s * 100))
-    const pinned = breakdown({ ...ems, borough: 'Queens', pinnedPrecinct: 116 }, ds, palette)
+    const pinned = breakdown({ ...ems, borough: 'Queens', pinnedArea: '116' }, ds, palette)
     expect(pinned.parts.map((p) => p.width)).toEqual(breakdownShares(ds, ['116'], { from: 2025, to: 2025 }).map((s) => s * 100))
   })
 

@@ -1,17 +1,17 @@
-import { areaOfPrecinct } from '../../domain/geography'
+import { areaById } from '../../domain/geography'
 import { useDataset, useExplorerDispatch, useExplorerState } from '../../explorer/context'
 import './Breadcrumb.css'
 
 type Crumb = { label: string; go: () => void }
 
 export function Breadcrumb() {
-  const { borough, pinnedPrecinct } = useExplorerState()
+  const { borough, pinnedArea } = useExplorerState()
   const dispatch = useExplorerDispatch()
   const ds = useDataset()
 
   const crumbs: Crumb[] = [{ label: 'New York City', go: () => dispatch({ type: 'focusBorough', borough: null }) }]
-  if (borough) crumbs.push({ label: borough, go: () => dispatch({ type: 'unpinPrecinct' }) })
-  if (pinnedPrecinct !== null) crumbs.push({ label: areaOfPrecinct(ds.areas, pinnedPrecinct).label, go: () => {} })
+  if (borough) crumbs.push({ label: borough, go: () => dispatch({ type: 'unpinArea' }) })
+  if (pinnedArea !== null) crumbs.push({ label: areaById(ds.areas, pinnedArea).label, go: () => {} })
 
   return (
     <nav className="breadcrumb" aria-label="Geography">

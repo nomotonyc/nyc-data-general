@@ -1,8 +1,10 @@
 import { useId } from 'react'
 import { useDataset, useExplorerDispatch, useExplorerState } from '../../explorer/context'
+import { areaNoun } from '../../domain/geography'
 import { topAreas } from '../../panel/focus'
 
-export function TopPrecincts() {
+/** The highest precincts or battalions in the focused borough, or the city; clicking one pins it. */
+export function TopAreas() {
   const headingId = useId()
   const state = useExplorerState()
   const dispatch = useExplorerDispatch()
@@ -10,7 +12,7 @@ export function TopPrecincts() {
   return (
     <section className="panel__section" aria-labelledby={headingId}>
       <h3 id={headingId} className="panel__title">
-        Highest precincts in {state.borough ?? 'the city'}
+        Highest {areaNoun(state.geography).many} in {state.borough ?? 'the city'}
       </h3>
       {top.map((area) => (
         <button
@@ -18,7 +20,7 @@ export function TopPrecincts() {
           type="button"
           className="panel__top"
           aria-pressed={area.pinned}
-          onClick={() => dispatch({ type: 'pinPrecinct', precinct: area.precinct })}
+          onClick={() => dispatch({ type: 'pinArea', id: area.id })}
         >
           <span className="panel__top-rank">{area.rank}</span>
           <span className="panel__top-name">

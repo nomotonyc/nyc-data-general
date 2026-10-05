@@ -9,6 +9,7 @@ export default {
   measure: 'Medical emergencies ambulances responded to',
   unit: 'responses',
   aggregation: 'sum',
+  geographies: ['precincts', 'battalions'],
   data: { resolution: 'month', firstYear: 2019, lastYear: 2026 },
   breakdown: {
     title: 'Call type',
@@ -36,6 +37,7 @@ export default {
     dateField: 'incident_datetime',
     precinctField: 'policeprecinct',
     zipField: 'zipcode',
+    districtFields: { community: 'communitydistrict', council: 'citycouncildistrict' },
     partField: 'final_call_type',
     // FDNY's final call type codes (fdny-ems-call-types.json describes each). Fever, rash and travel
     // variants, and T- codes for text and TTY calls, go with their base code.

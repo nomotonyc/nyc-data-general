@@ -1,3 +1,4 @@
+import type { Geography } from '../domain/geography'
 import { FINAL_YEAR, FINAL_YEAR_LAST_MONTH, STORIES, type StoryId } from '../domain/stories'
 import type { Metric, Source } from './types'
 
@@ -38,9 +39,17 @@ const BOROUGH_BOUNDARIES: Source = {
   used: 'Borough outlines',
 }
 
-/** The layer's own sources, then the boundary credits every layer shares. */
+const BATTALION_BOUNDARIES: Source = {
+  name: 'Fire Battalions',
+  publisher: 'FDNY, via NYC Open Data',
+  url: 'https://data.cityofnewyork.us/d/xzng-ft6f',
+  used: 'Battalion boundaries',
+}
+
+/** The layer's own sources, then the boundary credits: precincts and boroughs always, battalions when it has them. */
 export function layerSources(layer: Metric): Source[] {
-  return [...layer.sources, PRECINCT_BOUNDARIES, BOROUGH_BOUNDARIES]
+  const battalions = layerGeographies(layer).includes('battalions') ? [BATTALION_BOUNDARIES] : []
+  return [...layer.sources, PRECINCT_BOUNDARIES, ...battalions, BOROUGH_BOUNDARIES]
 }
 
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
@@ -55,4 +64,9 @@ export function layerMethod(layer: Metric): string[] {
     method.push(`${FINAL_YEAR} covers January to ${MONTH_NAMES[FINAL_YEAR_LAST_MONTH]}.`)
   }
   return method
+}
+
+/** The geographies a layer can be shown in. */
+export function layerGeographies(layer: Pick<Metric, 'geographies'>): readonly Geography[] {
+  return layer.geographies ?? ['precincts']
 }

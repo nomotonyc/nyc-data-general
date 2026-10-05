@@ -113,6 +113,13 @@ alone), so those are placed as if exact; the rest are split. The app still
 labels every EMS battalion figure an estimate. A response
 time is split as its total seconds and its count, so averages stay averages.
 
+**Water inside the borough outlines.** The borough outlines count some water as
+land, such as the Hutchinson River in the Bronx (0.7 km², with no census land
+area). Battalion boundaries leave it out, so when areas are shown the borough
+fill underneath fades away and such places show as water instead of the
+borough's colour. In all, borough land outside every battalion comes to about
+3 km² of shoreline and islets (1,771 residents in 2020).
+
 Records with no precinct are left out of both views, so both count the same
 records.
 

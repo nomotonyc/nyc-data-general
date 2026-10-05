@@ -13,6 +13,7 @@ export default {
   format: 'minutes',
   aggregation: 'ratio',
   scale: 1 / 60,
+  geographies: ['precincts', 'battalions'],
   data: { resolution: 'month', firstYear: 2019, lastYear: 2026 },
   breakdown: {
     title: 'How long responses took',
@@ -47,6 +48,7 @@ export default {
     dateField: 'incident_datetime',
     precinctField: 'policeprecinct',
     zipField: 'zipcode',
+    districtFields: { community: 'communitydistrict', council: 'citycouncildistrict' },
     sumField: seconds,
     partField:
       `case(${seconds} < 300, 'Under 5 minutes', ${seconds} < 600, '5 to 10 minutes', ` +

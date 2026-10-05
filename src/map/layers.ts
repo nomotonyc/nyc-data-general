@@ -1,6 +1,6 @@
 import type { ExpressionSpecification } from '@maplibre/maplibre-gl-style-spec'
 import type { LayerSpecification, SourceSpecification } from 'maplibre-gl'
-import { BOROUGHS } from '../domain/geography'
+import { BOROUGHS, GEOGRAPHIES } from '../domain/geography'
 import type { Theme } from '../theme/tokens'
 import {
   ATTRIBUTION,
@@ -8,21 +8,25 @@ import {
   BOROUGH_LABELS_URL,
   FADE_DURATION,
   LABEL_FONT,
+  GEOGRAPHY_MAP,
   LAYERS,
-  PRECINCTS_URL,
-  PRECINCT_LABELS_URL,
   SOURCES,
+  areaLayers,
   boroughLayers,
 } from './config'
 
-/** promoteId lets paintMap address features by borough name and precinct number. */
+/** promoteId lets paintMap address features by borough name and precinct or battalion number. */
 export function mapSources(): Record<string, SourceSpecification> {
-  return {
+  const sources: Record<string, SourceSpecification> = {
     [SOURCES.boroughs]: { type: 'geojson', data: BOROUGHS_URL, attribution: ATTRIBUTION, promoteId: 'borough' },
     [SOURCES.boroughLabels]: { type: 'geojson', data: BOROUGH_LABELS_URL },
-    [SOURCES.precincts]: { type: 'geojson', data: PRECINCTS_URL, promoteId: 'precinct' },
-    [SOURCES.precinctLabels]: { type: 'geojson', data: PRECINCT_LABELS_URL },
   }
+  for (const g of GEOGRAPHIES) {
+    const { source, labelSource, url, labelsUrl, property } = GEOGRAPHY_MAP[g]
+    sources[source] = { type: 'geojson', data: url, promoteId: property }
+    sources[labelSource] = { type: 'geojson', data: labelsUrl }
+  }
+  return sources
 }
 
 /**
@@ -42,20 +46,25 @@ export function mapLayers(theme: Theme): LayerSpecification[] {
     filter: inBorough(b),
     paint: { 'fill-color': ['coalesce', fill, theme.color.boroughFill], 'fill-opacity': 1, 'fill-opacity-transition': fade },
   }))
-  const precinctFills = BOROUGHS.map((b): LayerSpecification => ({
-    id: boroughLayers(b).precinctFill,
-    type: 'fill',
-    source: SOURCES.precincts,
-    filter: inBorough(b),
-    paint: { 'fill-color': ['coalesce', fill, theme.color.boroughFill], 'fill-opacity': 0, 'fill-opacity-transition': fade },
-  }))
-  const precinctLines = BOROUGHS.map((b): LayerSpecification => ({
-    id: boroughLayers(b).precinctLine,
-    type: 'line',
-    source: SOURCES.precincts,
-    filter: inBorough(b),
-    paint: { 'line-color': theme.color.boroughLine, 'line-width': 0.8, 'line-opacity': 0, 'line-opacity-transition': fade },
-  }))
+  // Each geography's areas, per borough; paintMap shows only the current geography's.
+  const areaFills = GEOGRAPHIES.flatMap((g) =>
+    BOROUGHS.map((b): LayerSpecification => ({
+      id: areaLayers(b, g).fill,
+      type: 'fill',
+      source: GEOGRAPHY_MAP[g].source,
+      filter: inBorough(b),
+      paint: { 'fill-color': ['coalesce', fill, theme.color.boroughFill], 'fill-opacity': 0, 'fill-opacity-transition': fade },
+    })),
+  )
+  const areaLines = GEOGRAPHIES.flatMap((g) =>
+    BOROUGHS.map((b): LayerSpecification => ({
+      id: areaLayers(b, g).line,
+      type: 'line',
+      source: GEOGRAPHY_MAP[g].source,
+      filter: inBorough(b),
+      paint: { 'line-color': theme.color.boroughLine, 'line-width': 0.8, 'line-opacity': 0, 'line-opacity-transition': fade },
+    })),
+  )
   const boroughLines = BOROUGHS.map((b): LayerSpecification => ({
     id: boroughLayers(b).boroughLine,
     type: 'line',
@@ -66,8 +75,8 @@ export function mapLayers(theme: Theme): LayerSpecification[] {
 
   return [
     ...boroughFills,
-    ...precinctFills,
-    ...precinctLines,
+    ...areaFills,
+    ...areaLines,
     ...boroughLines,
     {
       // Thin outline on whatever the pointer is over; paintHover sets the filters.
@@ -77,22 +86,21 @@ export function mapLayers(theme: Theme): LayerSpecification[] {
       filter: ['==', ['get', 'borough'], ''],
       paint: { 'line-color': theme.color.ink, 'line-width': 1.8 },
     },
-    {
-      id: LAYERS.precinctHover,
-      type: 'line',
-      source: SOURCES.precincts,
-      filter: ['in', ['get', 'precinct'], ['literal', []]],
-      paint: { 'line-color': theme.color.ink, 'line-width': 1.8 },
-    },
-    {
-      // Outlines the pinned precinct (both halves of a merged area); paintMap sets the filter.
-      id: LAYERS.precinctHighlight,
-      type: 'line',
-      source: SOURCES.precincts,
-      layout: { visibility: 'none' },
-      filter: ['in', ['get', 'precinct'], ['literal', []]],
-      paint: { 'line-color': theme.color.ink, 'line-width': 2.5 },
-    },
+    ...GEOGRAPHIES.flatMap((g): LayerSpecification[] => {
+      const { source, property, hover, highlight } = GEOGRAPHY_MAP[g]
+      return [
+        { id: hover, type: 'line', source, filter: ['in', ['get', property], ['literal', []]], paint: { 'line-color': theme.color.ink, 'line-width': 1.8 } },
+        {
+          // Outlines the pinned area; paintMap sets the filter.
+          id: highlight,
+          type: 'line',
+          source,
+          layout: { visibility: 'none' },
+          filter: ['in', ['get', property], ['literal', []]],
+          paint: { 'line-color': theme.color.ink, 'line-width': 2.5 },
+        },
+      ]
+    }),
     {
       id: LAYERS.boroughLabel,
       type: 'symbol',
@@ -112,13 +120,13 @@ export function mapLayers(theme: Theme): LayerSpecification[] {
         'text-opacity-transition': fade,
       },
     },
-    {
-      // Precinct numbers inside a focused borough; paintMap sets the filter.
-      id: LAYERS.precinctLabel,
+    // Area numbers inside a focused borough; paintMap sets the filter and shows the current geography's.
+    ...GEOGRAPHIES.map((g): LayerSpecification => ({
+      id: GEOGRAPHY_MAP[g].label,
       type: 'symbol',
-      source: SOURCES.precinctLabels,
+      source: GEOGRAPHY_MAP[g].labelSource,
       layout: {
-        'text-field': ['to-string', ['get', 'precinct']],
+        'text-field': ['to-string', ['get', GEOGRAPHY_MAP[g].property]],
         'text-font': LABEL_FONT,
         'text-size': 12,
         // Fading numbers never stop the borough names from being placed.
@@ -131,6 +139,6 @@ export function mapLayers(theme: Theme): LayerSpecification[] {
         'text-opacity': 0,
         'text-opacity-transition': fade,
       },
-    },
+    })),
   ]
 }

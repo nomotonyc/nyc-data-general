@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { STORIES, YEARS } from '../domain/stories'
-import { LAYERS, getLayer, layerMethod, layerSources, layersOf, type OpenDataCountsBuild, type OpenDataPointsBuild } from '.'
+import { LAYERS, getLayer, layerGeographies, layerMethod, layerSources, layersOf, type OpenDataCountsBuild, type OpenDataPointsBuild } from '.'
 import fdnyCallTypes from './fdny-ems-call-types.json'
 
 describe('the layer registry', () => {
@@ -115,6 +115,15 @@ describe('layerSources', () => {
     expect(urls('ambulance-calls')).toContain('76xm-jjuj')
     expect(urls('population-density')).toContain('acs/summary_file')
     expect(urls('population-density')).toContain('PL_94-171')
+  })
+})
+
+describe('battalion boundary credit', () => {
+  it('credits the Fire Battalions boundaries on layers shown by battalion, and only those', () => {
+    for (const layer of LAYERS) {
+      const credited = layerSources(layer).some((s) => s.url === 'https://data.cityofnewyork.us/d/xzng-ft6f')
+      expect(credited, layer.id).toBe(layerGeographies(layer).includes('battalions'))
+    }
   })
 })
 

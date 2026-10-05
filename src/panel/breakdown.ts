@@ -1,10 +1,9 @@
 import type { LayerDataset } from '../data/dataset'
 import { areaIdsIn } from '../data/places'
 import { breakdownShares, effectiveRange } from '../data/selectors'
-import { areaOfPrecinct } from '../domain/geography'
 import { activeMetric, type ExplorerState } from '../explorer/state'
 
-type Input = Pick<ExplorerState, 'storyId' | 'metricId' | 'borough' | 'pinnedPrecinct' | 'yearFrom' | 'yearTo'>
+type Input = Pick<ExplorerState, 'storyId' | 'metricId' | 'borough' | 'pinnedArea' | 'yearFrom' | 'yearTo'>
 
 export type Breakdown = {
   title: string
@@ -16,7 +15,7 @@ export function breakdown(state: Input, ds: LayerDataset, palette: { ramp: reado
   const layer = activeMetric(state)
   const { range } = effectiveRange(ds, { from: state.yearFrom, to: state.yearTo })
   const ids =
-    state.pinnedPrecinct !== null ? [areaOfPrecinct(ds.areas, state.pinnedPrecinct).id] : areaIdsIn(ds, state.borough)
+    state.pinnedArea !== null ? [state.pinnedArea] : areaIdsIn(ds, state.borough)
   const shares = breakdownShares(ds, ids, range)
   // Darkest first down the story's ramp, then greys for any parts beyond it.
   const colours = [...[...palette.ramp].reverse(), ...palette.greys]

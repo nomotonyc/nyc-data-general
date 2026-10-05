@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { getLayer } from '../../layers'
 import { AGE_GROUPS, apportion, densityFile, parseAcsTracts, parseBlock, SQ_M_PER_SQ_MI, type Block } from './census'
-import type { PrecinctShapes } from './openDataPoints'
+import type { AreaShapes, PrecinctShapes } from './openDataPoints'
 
 /** A P.L. 94-171 geographic header line: 97 pipe-separated fields, the ones used filled in. */
 function plLine(fields: Record<number, string>): string {
@@ -75,7 +75,7 @@ describe('apportion and densityFile', () => {
   it('splits each year’s ACS estimates by those shares, with land as the denominator', () => {
     const layer = getLayer('population-density')
     const acs = new Map([['A', { population: 1000, ages: [200, 300, 400, 100] }]])
-    const { file, report } = densityFile(layer, apportion(blocks, shapes), new Map([[2021, acs], [2022, acs], [2023, acs], [2024, acs]]), ['1', '5'])
+    const { file, report } = densityFile(layer, apportion(blocks, shapes), new Map([[2021, acs], [2022, acs], [2023, acs], [2024, acs]]), { areaIds: ['1', '5'] })
     expect(file.values['1']).toEqual([750, 750, 750, 750])
     expect(file.values['5'][0]).toBe(250)
     expect(file.denominators!['1'][0]).toBeCloseTo(1)
@@ -85,7 +85,30 @@ describe('apportion and densityFile', () => {
 
   it('reports ACS population in tracts with no 2020 residents to split it by', () => {
     const acs = new Map([['A', { population: 1000, ages: [250, 250, 250, 250] }], ['B', { population: 40, ages: [10, 10, 10, 10] }]])
-    const { report } = densityFile(getLayer('population-density'), apportion(blocks, shapes), new Map([[2021, acs], [2022, acs], [2023, acs], [2024, acs]]), ['1', '5'])
+    const { report } = densityFile(getLayer('population-density'), apportion(blocks, shapes), new Map([[2021, acs], [2022, acs], [2023, acs], [2024, acs]]), { areaIds: ['1', '5'] })
     expect(report[0]).toEqual({ year: 2021, counted: 1000, unplaced: 40 })
+  })
+})
+
+describe('battalions', () => {
+  const square = (x: number, y: number, s: number) => [[x, y], [x + s, y], [x + s, y + s], [x, y + s], [x, y]]
+  const battalions: AreaShapes = {
+    type: 'FeatureCollection',
+    features: [
+      { type: 'Feature', properties: { battalion: 3 }, geometry: { type: 'MultiPolygon', coordinates: [[square(0, 0, 20)]] } },
+    ],
+  }
+  const blocks: Block[] = [
+    { tract: 'A', population: 300, landSqM: SQ_M_PER_SQ_MI, lat: 5, lon: 2 },
+    { tract: 'A', population: 100, landSqM: SQ_M_PER_SQ_MI, lat: 5, lon: 12 },
+  ]
+
+  it('splits tracts among battalions and keys the file by battalion id', () => {
+    const acs = new Map([['A', { population: 1000, ages: [200, 300, 400, 100] }]])
+    const years = new Map([[2021, acs], [2022, acs], [2023, acs], [2024, acs]])
+    const { file } = densityFile(getLayer('population-density'), apportion(blocks, battalions, 'battalions'), years, { geography: 'battalions', areaIds: ['bn3'] })
+    expect(file.geography).toBe('battalions')
+    expect(file.values.bn3).toEqual([1000, 1000, 1000, 1000])
+    expect(file.denominators!.bn3[0]).toBeCloseTo(2)
   })
 })

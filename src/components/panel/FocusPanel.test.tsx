@@ -26,7 +26,7 @@ describe('FocusPanel', () => {
   })
 
   it('headlines a pinned precinct with both ranks', () => {
-    renderWithExplorer(<FocusPanel />, { ...fire, borough: 'Bronx', pinnedPrecinct: 44 })
+    renderWithExplorer(<FocusPanel />, { ...fire, borough: 'Bronx', pinnedArea: '44' })
     expect(within(section('In focus')).getByRole('heading', { name: 'Precinct 44' })).toBeInTheDocument()
     expect(section('In focus')).toHaveTextContent(/in the Bronx · .* citywide/)
   })
@@ -105,5 +105,43 @@ describe('data sources', () => {
   it('follows the story', () => {
     renderWithExplorer(<FocusPanel />)
     expect(within(section('Data sources')).getByRole('link', { name: /American Community Survey/ })).toBeInTheDocument()
+  })
+})
+
+describe('by battalion', () => {
+  const battalions = { storyId: 'fire' as const, metricId: 'fire-apparatus-accidents', geography: 'battalions' as const }
+
+  it('says how battalion figures were placed, and that they are exact', () => {
+    renderWithExplorer(<FocusPanel />, battalions)
+    expect(section('Data sources')).toHaveTextContent('By battalion: 100% placed by each crash’s coordinates (exact).')
+  })
+
+  it('says nothing about placement by precinct, where records carry their precinct', () => {
+    renderWithExplorer(<FocusPanel />, { ...battalions, geography: 'precincts' })
+    expect(section('Data sources')).not.toHaveTextContent('By battalion')
+  })
+
+  it('counts battalions and lists the highest ones', () => {
+    renderWithExplorer(<FocusPanel />, battalions)
+    expect(section('In focus')).toHaveTextContent('All five boroughs · 49 battalions')
+    const top = section('Highest battalions in the city')
+    for (const button of within(top).getAllByRole('button')) expect(button).toHaveTextContent(/^\dBattalion \d+/)
+  })
+
+  it('pins a battalion from the highest list and ranks it', async () => {
+    renderWithExplorer(<FocusPanel />, battalions)
+    await userEvent.click(within(section('Highest battalions in the city')).getAllByRole('button')[0])
+    expect(within(section('In focus')).getByRole('heading', { name: /^Battalion \d+$/ })).toBeInTheDocument()
+    expect(section('In focus')).toHaveTextContent(/of \d+ in .* · \d+(st|nd|rd|th) of 49 citywide/)
+    expect(section('In focus')).toHaveTextContent(/the citywide battalion average/)
+  })
+})
+
+describe('placement for estimated battalions', () => {
+  it('says which share is exact and which estimated, writing tiny shares as under 1%', () => {
+    renderWithExplorer(<FocusPanel />, { storyId: 'fire', metricId: 'structural-fires', geography: 'battalions' })
+    const text = section('Data sources').textContent ?? ''
+    expect(text).toMatch(/By battalion: \d+% placed by its alarm box’s published location \(exact\); \d+% placed by its alarm box’s street corner, geocoded \(exact\); .*\(estimated\)/)
+    expect(text).not.toMatch(/ 0% placed/)
   })
 })

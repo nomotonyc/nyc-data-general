@@ -22,12 +22,12 @@ describe('countQuery', () => {
     expect(url.origin + url.pathname).toBe('https://data.cityofnewyork.us/resource/8m42-w767.json')
     const p = url.searchParams
     expect(p.get('$select')).toBe(
-      'policeprecinct as precinct, zipcode as zip, date_trunc_ym(incident_datetime) as month, incident_classification as part, count(*) as n',
+      'policeprecinct as precinct, zipcode as zip, communitydistrict as cd, citycouncildistrict as cc, date_trunc_ym(incident_datetime) as month, incident_classification as part, count(*) as n',
     )
     expect(p.get('$where')).toBe(
       "(incident_classification_group = 'Structural Fires') AND incident_datetime >= '2025-03-01T00:00:00' AND incident_datetime < '2025-04-01T00:00:00'",
     )
-    expect(p.get('$group')).toBe('precinct, zip, month, part')
+    expect(p.get('$group')).toBe('precinct, zip, cd, cc, month, part')
     expect(Number(p.get('$limit'))).toBeGreaterThanOrEqual(50000)
   })
 
@@ -115,5 +115,14 @@ describe('ratio layers', () => {
     expect(file.values['14'][at(2025, 2)]).toBe(4500)
     expect(file.denominators!['14'][at(2025, 2)]).toBe(15)
     expect(file.parts['14'][at(2025, 2)]).toEqual([10, 5, 0, 0, 0])
+  })
+})
+
+describe('district fields', () => {
+  it('asks for community and council districts when the layer names them', () => {
+    const ems = getLayer('ambulance-calls').build as OpenDataCountsBuild
+    const p = new URL(countQuery(ems, { year: 2025, month: 2 })).searchParams
+    expect(p.get('$select')).toContain('communitydistrict as cd, citycouncildistrict as cc')
+    expect(p.get('$group')).toBe('precinct, zip, cd, cc, month, part')
   })
 })

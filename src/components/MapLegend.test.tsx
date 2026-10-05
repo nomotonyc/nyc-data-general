@@ -42,3 +42,14 @@ describe('MapLegend', () => {
     expect(screen.getByRole('region', { name: 'Map legend' })).toBeInTheDocument()
   })
 })
+
+describe('MapLegend across a story change', () => {
+  it('keeps its colour steps, so their colours can ease rather than the steps being replaced', () => {
+    const { container, rerender } = render(<MapLegend details={details} />)
+    const before = [...container.querySelectorAll('.map-legend__step')]
+    rerender(<MapLegend details={{ ...details, steps: ['#d5eeea', '#98d4cb', '#52b2a6', '#1e8a7e', '#0d5c54'] }} />)
+    const after = [...container.querySelectorAll('.map-legend__step')]
+    expect(after).toHaveLength(before.length)
+    after.forEach((step, i) => expect(step).toBe(before[i]))
+  })
+})

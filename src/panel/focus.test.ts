@@ -51,14 +51,14 @@ describe('focusSummary', () => {
   })
 
   it('ranks a pinned precinct in its borough and citywide', () => {
-    const s = focusSummary({ ...fire, borough: 'Bronx', pinnedPrecinct: 44 }, ds)
+    const s = focusSummary({ ...fire, borough: 'Bronx', pinnedArea: '44' }, ds)
     expect(s.name).toBe('Precinct 44')
     expect(s.context).toMatch(/^Bronx · \d+(st|nd|rd|th) of 12 in the Bronx · \d+(st|nd|rd|th) of 78 citywide$/)
     expect(s.comparison).toMatch(/^([+−]\d+% vs\. |Level with )the citywide precinct average$/)
   })
 
   it('names precinct 116 on its own', () => {
-    expect(focusSummary({ ...fire, borough: 'Queens', pinnedPrecinct: 116 }, ds).name).toBe('Precinct 116')
+    expect(focusSummary({ ...fire, borough: 'Queens', pinnedArea: '116' }, ds).name).toBe('Precinct 116')
   })
 
   it('marks above-average places in the story colour and below-average ones neutral', () => {
@@ -116,7 +116,7 @@ describe('topAreas', () => {
 
   it('carries what to pin, and marks the pinned one', () => {
     const [first] = topAreas(fire, ds)
-    const pinned = topAreas({ ...fire, borough: first.borough, pinnedPrecinct: first.precinct }, ds)
+    const pinned = topAreas({ ...fire, borough: first.borough, pinnedArea: first.id }, ds)
     expect(pinned.find((t) => t.id === first.id)?.pinned).toBe(true)
   })
 })

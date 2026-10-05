@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import precinctsJson from '../../../public/data/nyc-precincts.geojson?raw'
 import { getLayer, type OpenDataPointsBuild } from '../../layers'
 import { aggregateCounts } from './openDataCounts'
-import { pointsQuery, pointsToCountRows, precinctAt, type PointRow, type PrecinctShapes } from './openDataPoints'
+import { pointsQuery, pointsToCountRows, precinctAt, type AreaShapes, type PointRow, type PrecinctShapes } from './openDataPoints'
 
 const nyc = JSON.parse(precinctsJson) as PrecinctShapes
 const layer = getLayer('fire-apparatus-accidents')
@@ -66,5 +66,30 @@ describe('pointsToCountRows', () => {
     expect(file.values['14'][march2025]).toBe(2)
     expect(file.parts['14'][march2025]).toEqual([1, 0, 1])
     expect(report.find((r) => r.year === 2025)).toEqual({ year: 2025, counted: 2, noPrecinct: 1 })
+  })
+})
+
+describe('battalions', () => {
+  // Battalion 14 is a 10×10 square.
+  const battalions: AreaShapes = {
+    type: 'FeatureCollection',
+    features: [{ type: 'Feature', properties: { battalion: 14 }, geometry: { type: 'MultiPolygon', coordinates: [[square(0, 0, 10)]] } }],
+  }
+  const row = (lat: number, lon: number): PointRow => ({ date: '2025-03-14T00:00:00.000', lat: String(lat), lon: String(lon), part: 'No one hurt' })
+
+  it('places each record in the battalion containing it', () => {
+    expect(pointsToCountRows([row(1, 1), row(20, 20)], battalions, 'battalions')).toEqual([
+      { battalion: '14', month: '2025-03-14T00:00:00.000', part: 'No one hurt', n: '1' },
+      { battalion: undefined, month: '2025-03-14T00:00:00.000', part: 'No one hurt', n: '1' },
+    ])
+  })
+
+  it('counts by battalion, every battalion present', () => {
+    const { file, report } = aggregateCounts(layer, pointsToCountRows([row(1, 1), row(20, 20)], battalions, 'battalions'), 'battalions')
+    const march2025 = (2025 - 2019) * 12 + 2
+    expect(file.geography).toBe('battalions')
+    expect(Object.keys(file.values)).toHaveLength(49)
+    expect(file.values.bn14[march2025]).toBe(1)
+    expect(report.find((r) => r.year === 2025)).toEqual({ year: 2025, counted: 1, noPrecinct: 1 })
   })
 })

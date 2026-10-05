@@ -2,7 +2,7 @@ import type { LayerDataset, YearRange } from '../data/dataset'
 import { areaIdsIn } from '../data/places'
 import { areaValue, effectiveRange, rankOf } from '../data/selectors'
 import { compareToAverage, formatValue, formatWithUnit, ordinal } from '../domain/format'
-import { BOROUGHS, areaOfPrecinct, boroughInSentence, precinctsIn } from '../domain/geography'
+import { BOROUGHS, areaById, areaNoun, boroughInSentence } from '../domain/geography'
 import { yearLabel } from '../domain/stories'
 import type { Metric } from '../layers'
 import { activeMetric, type ExplorerState } from '../explorer/state'
@@ -32,9 +32,9 @@ function average(ds: LayerDataset, metric: Metric, areaIds: readonly string[], v
   return metric.aggregation === 'sum' ? mean(values) : areaValue(ds, metric, areaIds, range)
 }
 
-/** What the hover card says about a borough or precinct. */
+/** What the hover card says about a borough, precinct or battalion. */
 export function hoverDetails(
-  state: Pick<ExplorerState, 'storyId' | 'metricId' | 'yearFrom' | 'yearTo' | 'pinnedPrecinct'>,
+  state: Pick<ExplorerState, 'storyId' | 'metricId' | 'yearFrom' | 'yearTo' | 'pinnedArea'>,
   ds: LayerDataset,
   target: Target,
 ): HoverDetails {
@@ -44,9 +44,10 @@ export function hoverDetails(
   const years = range.from === range.to ? yearLabel(range.from) : `${range.from}–${yearLabel(range.to)}`
   const value = (ids: readonly string[]) => areaValue(ds, metric, ids, range)
   const position = (lo: number, hi: number) => (v: number) => (hi === lo ? 50 : ((v - lo) / (hi - lo)) * 100)
+  const noun = areaNoun(ds.geography)
 
-  if (target.kind === 'precinct') {
-    const area = areaOfPrecinct(ds.areas, target.precinct)
+  if (target.kind === 'area') {
+    const area = areaById(ds.areas, target.id)
     const own = value([area.id])
     const cityIds = ds.areas.map((a) => a.id)
     const boroughIds = areaIdsIn(ds, area.borough)
@@ -55,7 +56,7 @@ export function hoverDetails(
     const cityAverage = average(ds, metric, cityIds, cityValues, range)
     const boroughAverage = average(ds, metric, boroughIds, boroughValues, range)
     const at = position(Math.min(...cityValues), Math.max(...cityValues))
-    const pinned = state.pinnedPrecinct !== null && area.precincts.includes(state.pinnedPrecinct)
+    const pinned = state.pinnedArea === area.id
     return {
       title: area.label,
       subtitle: area.borough,
@@ -69,7 +70,7 @@ export function hoverDetails(
         dot: at(own),
         cityAverage: at(cityAverage),
         boroughAverage: at(boroughAverage),
-        caption: `Among all ${cityValues.length} precincts`,
+        caption: `Among all ${cityValues.length} ${noun.many}`,
         lo: formatValue(format, Math.min(...cityValues)),
         hi: formatValue(format, Math.max(...cityValues)),
       },
@@ -77,7 +78,7 @@ export function hoverDetails(
         compareToAverage(own, cityAverage, 'the city average'),
         compareToAverage(own, boroughAverage, `the ${area.borough} average`),
       ],
-      hint: pinned ? 'Pinned' : 'Click to pin this precinct',
+      hint: pinned ? 'Pinned' : `Click to pin this ${noun.one}`,
     }
   }
 
@@ -94,12 +95,12 @@ export function hoverDetails(
   } else {
     const areas = ds.areas.filter((a) => a.borough === borough)
     const top = areas.reduce((best, a) => (value([a.id]) > value([best.id]) ? a : best))
-    second = { label: 'Highest precinct', rank: `No. ${top.precincts.join(' & ')}`, of: formatWithUnit(metric, value([top.id])) }
+    second = { label: `Highest ${noun.one}`, rank: `No. ${top.number}`, of: formatWithUnit(metric, value([top.id])) }
   }
 
   return {
     title: borough,
-    subtitle: `Borough · ${precinctsIn(borough).length} precincts`,
+    subtitle: `Borough · ${areaIdsIn(ds, borough).length} ${noun.many}`,
     metric: `${metric.label}, ${years}`,
     value: formatWithUnit(metric, own),
     ranks: [{ label: 'Among boroughs', rank: ordinal(rankOf(own, boroughValues)), of: 'of 5' }, second],

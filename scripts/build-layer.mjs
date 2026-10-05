@@ -198,10 +198,15 @@ async function buildBattalionsByPlacement(layer, precinctRows) {
         const res = await fetch(url, { headers, signal: AbortSignal.timeout(60_000) }).catch(() => null)
         if (res && (res.status === 401 || res.status === 403)) throw new Error(`Geoclient refused the key (${res.status}); check NYC_GEOCLIENT_KEY`)
         if (res?.ok) {
-          answer = geoclientPoint(await res.json())
+          const body = await res.json().catch(() => undefined)
+          if (body !== undefined) answer = geoclientPoint(body)
+          if (answer !== undefined) break
+        } else if (res && res.status >= 400 && res.status < 500 && res.status !== 429) {
+          // A request Geoclient rejects outright won't succeed on retry: the corner is unusable.
+          answer = null
           break
         }
-        await new Promise((resolve) => setTimeout(resolve, 2_000 * attempt))
+        if (attempt < 5) await new Promise((resolve) => setTimeout(resolve, 2_000 * attempt))
       }
       if (answer === undefined) failed++
       else geocodeCache[k] = answer

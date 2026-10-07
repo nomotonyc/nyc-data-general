@@ -187,6 +187,13 @@ export default function BaseMap() {
     }
     map.on('resize', refit)
 
+    // Print styles give the map a much larger share of the page. MapLibre's
+    // canvas must be resized after those styles take effect or the old screen
+    // dimensions are scaled and cropped in the PDF preview.
+    const resizeForPrint = () => map.resize()
+    window.addEventListener('beforeprint', resizeForPrint)
+    window.addEventListener('afterprint', resizeForPrint)
+
     return () => {
       window.removeEventListener('pointerdown', notePointer, { capture: true })
       window.removeEventListener('pointermove', notePointer, { capture: true })
@@ -194,6 +201,8 @@ export default function BaseMap() {
       map.off('mousemove', onMove)
       map.off('mouseout', onLeave)
       map.off('resize', refit)
+      window.removeEventListener('beforeprint', resizeForPrint)
+      window.removeEventListener('afterprint', resizeForPrint)
       map.remove()
       mapRef.current = null
       setReady(false)

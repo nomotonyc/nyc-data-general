@@ -21,6 +21,7 @@ type FakeMap = {
   options: Record<string, unknown>
   triggerRepaint: Mock
   fitBounds: Mock
+  resize: Mock
   remove: Mock
   setFeatureState: Mock
   setLayoutProperty: Mock
@@ -45,6 +46,7 @@ vi.mock('maplibre-gl', async () => {
       options: Record<string, unknown>
       handlers: Record<string, Handler[]> = {}
       fitBounds = vi.fn()
+      resize = vi.fn()
       remove = vi.fn()
       addSource = vi.fn()
       addLayer = vi.fn()
@@ -138,6 +140,15 @@ describe('BaseMap', () => {
     renderWithExplorer(<BaseMap />)
     map().fire('resize')
     expect(map().fitBounds).toHaveBeenCalledWith(NYC_BOUNDS, { padding: cameraPadding(null), animate: false })
+  })
+
+  it('resizes its canvas for print and restores it afterwards', () => {
+    renderWithExplorer(<BaseMap />)
+
+    act(() => window.dispatchEvent(new Event('beforeprint')))
+    act(() => window.dispatchEvent(new Event('afterprint')))
+
+    expect(map().resize).toHaveBeenCalledTimes(2)
   })
 
   it('removes the map when it unmounts', () => {

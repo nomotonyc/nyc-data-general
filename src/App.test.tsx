@@ -37,4 +37,14 @@ describe('App', () => {
     await userEvent.click(screen.getByRole('button', { name: /Fire/ }))
     expect(explorer.style.getPropertyValue('--story-accent')).toBe(lightTheme.story.fire.accent)
   })
+
+  it('opens the print dialog to save the current view as a PDF', async () => {
+    const print = vi.spyOn(window, 'print').mockImplementation(() => {})
+    render(<App />)
+
+    await userEvent.click(screen.getByRole('button', { name: 'Save as PDF' }))
+
+    expect(print).toHaveBeenCalledOnce()
+    print.mockRestore()
+  })
 })

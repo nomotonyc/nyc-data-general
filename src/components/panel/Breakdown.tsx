@@ -1,11 +1,10 @@
-import { useId } from 'react'
 import { useDataset, useExplorerState } from '../../explorer/context'
 import { breakdown } from '../../panel/breakdown'
 import { useTheme } from '../../theme/context'
+import { SaveableSection } from './SaveableSection'
 
 /** How the value splits into the layer's parts, for the place in focus. */
 export function Breakdown() {
-  const headingId = useId()
   const state = useExplorerState()
   const theme = useTheme()
   const b = breakdown(state, useDataset(), {
@@ -14,10 +13,7 @@ export function Breakdown() {
   })
 
   return (
-    <section className="panel__section" aria-labelledby={headingId}>
-      <h3 id={headingId} className="panel__title">
-        {b.title}
-      </h3>
+    <SaveableSection of="focus" title={b.title}>
       <div className="panel__stack" aria-hidden="true">
         {b.parts.map((p) => (
           <span key={p.label} className="panel__stack-part" style={{ width: `${p.width}%`, background: p.colour }} />
@@ -32,6 +28,6 @@ export function Breakdown() {
           </li>
         ))}
       </ul>
-    </section>
+    </SaveableSection>
   )
 }

@@ -1,12 +1,16 @@
 import { useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent } from 'react'
 import { trapTab, useEscape } from '../dialog'
-import { createPortal, flushSync } from 'react-dom'
+import { createPortal } from 'react-dom'
 import { useDataset, useExplorerState } from '../../explorer/context'
 import { BIG, chartSize, expandedTrend, periodAt } from '../../panel/expandedTrend'
 import { trend } from '../../panel/trend'
 import { useTheme } from '../../theme/context'
 import { useWidth } from '../useWidth'
-import { saveImage, type Saved } from './saveImage'
+import { pictureCaption, pictureView, slug } from '../../panel/caption'
+import { rangeLabel } from '../../domain/stories'
+import { SaveImageButton } from '../SaveImageButton'
+import { useSaveImage } from '../useSaveImage'
+import '../Picture.css'
 import './TrendDialog.css'
 
 /**
@@ -20,8 +24,7 @@ export function TrendDialog({ onClose }: { onClose: () => void }) {
   const ds = useDataset()
   const theme = useTheme()
   const [hover, setHover] = useState<number | null>(null)
-  // Saving a picture: idle, under way, failed, or waiting for the tap a phone's share sheet needs.
-  const [status, setStatus] = useState<'idle' | 'saving' | 'failed' | Exclude<Saved, 'done'>>('idle')
+  const picture = useSaveImage(theme.color.background, pictureView(state))
   const dialogRef = useRef<HTMLDivElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
   // Drawn at the width it has, so a phone's chart keeps readable labels rather than shrinking.
@@ -42,26 +45,13 @@ export function TrendDialog({ onClose }: { onClose: () => void }) {
 
   if (!big) return null
   // The month pointed at (its readout, guide, dots and label), shown except while saving a picture.
-  const marked = status !== 'saving'
+  const marked = !picture.saving
   const last = big.columns.length - 1
 
   // The dialog as it looks, named for what it shows (structural-fires-queens-2025), without its
   // buttons or the month pointed at: on its own, a picture of one month's figures reads as the point.
-  const save = async () => {
-    if (status === 'saving' || !dialogRef.current) return
-    const { from, to } = big.years
-    const years = from === to ? `${from}` : `${from}-${to}`
-    // A second tap shares the picture already drawn, straight away, while the tap still counts.
-    const pending = typeof status === 'object' ? status.tapToSave : null
-    flushSync(() => setStatus('saving')) // the month's marks are gone before the capture starts
-    try {
-      const saved = await (pending ? pending() : saveImage(dialogRef.current, { name: `${slug(big.title)}-${years}`, background: theme.color.background }))
-      setStatus(saved === 'done' ? 'idle' : saved)
-    } catch {
-      setStatus('failed')
-    }
-  }
-  const saveLabel = status === 'saving' ? 'Saving…' : status === 'failed' ? 'Couldn’t save, try again' : status === 'idle' ? 'Save image' : 'Tap to save'
+  const save = () =>
+    picture.save(() => dialogRef.current && { node: dialogRef.current, name: `${slug(big.title)}-${slug(rangeLabel(big.years))}` })
 
   // The period under the pointer, from where the chart is drawn on screen.
   const point = (e: PointerEvent<SVGSVGElement>) => {
@@ -93,13 +83,7 @@ export function TrendDialog({ onClose }: { onClose: () => void }) {
             <div className="trend-dialog__sub">{big.sub}</div>
           </div>
           <div className="trend-dialog__actions">
-            {/* Never disabled: a disabled button drops focus out of the dialog. */}
-            <button type="button" className="trend-dialog__save" data-export="skip" aria-label={saveLabel} aria-disabled={status === 'saving'} onClick={save}>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M8 2.5v8M4.5 7 8 10.5 11.5 7M3 13.5h10" />
-              </svg>
-              <span className="trend-dialog__save-label">{saveLabel}</span>
-            </button>
+            <SaveImageButton state={picture.button} onClick={save} labelled />
             <button ref={closeRef} type="button" className="trend-dialog__close" data-export="skip" aria-label="Close" onClick={onClose}>
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <path d="M4 4l10 10M14 4L4 14" />
@@ -185,16 +169,9 @@ export function TrendDialog({ onClose }: { onClose: () => void }) {
           </svg>
         </div>
         {note && <p className="trend-dialog__note">{note}</p>}
+        {picture.saving && <p className="picture__credit">{pictureCaption('focus', state, ds).credit}</p>}
       </div>
     </div>,
     document.body,
   )
-}
-
-/** Words as a file name: "Structural fires · Queens" → structural-fires-queens. */
-function slug(text: string) {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
 }

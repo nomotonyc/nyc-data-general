@@ -91,8 +91,7 @@
   cursor: pointer;
 }
 
-.trend-dialog__close:hover,
-.trend-dialog__save:hover {
+.trend-dialog__close:hover {
   background: var(--color-surface-sunken);
 }
 
@@ -100,27 +99,6 @@
   display: flex;
   flex-shrink: 0;
   gap: 8px;
-}
-
-/* Beside Close, as it. */
-.trend-dialog__save {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 44px;
-  padding: 0 14px;
-  border: 1px solid var(--color-line);
-  border-radius: 10px;
-  background: var(--color-background);
-  color: var(--color-ink);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.trend-dialog__save[aria-disabled='true'] {
-  color: var(--color-ink-muted);
-  cursor: progress;
 }
 
 .trend-dialog__stats {
@@ -261,17 +239,6 @@
 
   .trend-dialog__title {
     font-size: 20px;
-  }
-
-  /* Save image as its icon alone, so the title keeps the width; aria-label still names it. */
-  .trend-dialog__save {
-    justify-content: center;
-    width: 44px;
-    padding: 0;
-  }
-
-  .trend-dialog__save-label {
-    display: none;
   }
 
   .trend-dialog__stats {

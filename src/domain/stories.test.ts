@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { lightTheme } from '../theme/tokens'
-import { METHOD_URL, STORIES, YEARS, getStory, isYear, yearLabel } from './stories'
+import { METHOD_URL, STORIES, YEARS, getStory, isYear, rangeLabel, yearLabel } from './stories'
 
 describe('STORIES', () => {
   it('runs Demographic, Fire, Medical as chapters 01 to 03', () => {
@@ -44,5 +44,11 @@ describe('years', () => {
   it('labels the partial final year', () => {
     expect(yearLabel(2026)).toBe('2026 (Jan–Jun)')
     expect(yearLabel(2025)).toBe('2025')
+  })
+
+  it('labels a range of years, with the partial final year marked once', () => {
+    expect(rangeLabel({ from: 2025, to: 2025 })).toBe('2025')
+    expect(rangeLabel({ from: 2026, to: 2026 })).toBe('2026 (Jan–Jun)')
+    expect(rangeLabel({ from: 2024, to: 2026 })).toBe('2024–2026 (Jan–Jun)')
   })
 })

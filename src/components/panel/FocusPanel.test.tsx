@@ -12,6 +12,8 @@ import { FocusPanel } from './FocusPanel'
 
 const fire = { storyId: 'fire' as const, metricId: 'structural-fires' }
 const section = (name: string) => screen.getByRole('region', { name })
+/** A list's rows: the buttons that pin or focus, not the section's save button. */
+const rows = (el: HTMLElement) => within(el).getAllByRole('button').filter((b) => b.hasAttribute('aria-pressed'))
 
 describe('FocusPanel', () => {
   it('headlines the whole city at first', () => {
@@ -48,9 +50,9 @@ describe('FocusPanel', () => {
 
   it('pins a precinct from the highest list, zooming into its borough', async () => {
     renderWithExplorer(<FocusPanel />, { ...fire, geography: 'precincts' })
-    await userEvent.click(within(section('Highest precincts in the city')).getAllByRole('button')[0])
+    await userEvent.click(rows(section('Highest precincts in the city'))[0])
     const list = screen.getByRole('region', { name: /^Highest precincts in (Manhattan|Bronx|Brooklyn|Queens|Staten Island)$/ })
-    expect(within(list).getAllByRole('button')[0]).toHaveAttribute('aria-pressed', 'true')
+    expect(rows(list)[0]).toHaveAttribute('aria-pressed', 'true')
   })
 })
 
@@ -157,12 +159,12 @@ describe('by battalion', () => {
     renderWithExplorer(<FocusPanel />, battalions)
     expect(section('In focus')).toHaveTextContent('All five boroughs · 49 battalions')
     const top = section('Highest battalions in the city')
-    for (const button of within(top).getAllByRole('button')) expect(button).toHaveTextContent(/^\dBattalion \d+/)
+    for (const button of rows(top)) expect(button).toHaveTextContent(/^\dBattalion \d+/)
   })
 
   it('pins a battalion from the highest list and ranks it', async () => {
     renderWithExplorer(<FocusPanel />, battalions)
-    await userEvent.click(within(section('Highest battalions in the city')).getAllByRole('button')[0])
+    await userEvent.click(rows(section('Highest battalions in the city'))[0])
     expect(within(section('In focus')).getByRole('heading', { name: /^Battalion \d+$/ })).toBeInTheDocument()
     expect(section('In focus')).toHaveTextContent(/of \d+ in .* · \d+(st|nd|rd|th) of 49 citywide/)
     expect(section('In focus')).toHaveTextContent(/the citywide battalion average/)

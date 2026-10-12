@@ -1,19 +1,15 @@
-import { useId } from 'react'
 import { useDataset, useExplorerDispatch, useExplorerState } from '../../explorer/context'
 import { boroughBars } from '../../panel/focus'
 import { useTheme } from '../../theme/context'
+import { SaveableSection } from './SaveableSection'
 
 export function BoroughBars() {
-  const headingId = useId()
   const state = useExplorerState()
   const dispatch = useExplorerDispatch()
   const theme = useTheme()
   const bars = boroughBars(state, useDataset(), theme.story[state.storyId].ramp, theme.color.lineStrong)
   return (
-    <section className="panel__section" aria-labelledby={headingId}>
-      <h3 id={headingId} className="panel__title">
-        How the boroughs compare
-      </h3>
+    <SaveableSection of="boroughs" title="How the boroughs compare">
       {bars.map((bar) => (
         <button
           key={bar.borough}
@@ -29,6 +25,6 @@ export function BoroughBars() {
           <span className="panel__bar-value">{bar.value}</span>
         </button>
       ))}
-    </section>
+    </SaveableSection>
   )
 }

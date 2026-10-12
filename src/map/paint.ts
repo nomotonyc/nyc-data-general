@@ -85,6 +85,9 @@ export function paintFills(map: Pick<PaintableMap, 'setFeatureState'>, plan: Cho
   }
 }
 
+/** The layers that outline what the pointer is over (paintHover). */
+export const HOVER_LAYERS = [LAYERS.boroughHover, ...GEOGRAPHIES.map((g) => GEOGRAPHY_MAP[g].hover), LAYERS.firehouseHover]
+
 /** Outlines what the pointer is over: a borough, or an area of the current geography. */
 export function paintHover(map: Pick<PaintableMap, 'setFilter'>, target: Target | null, geography: Geography) {
   map.setFilter(LAYERS.boroughHover, ['==', ['get', 'borough'], target?.kind === 'borough' ? target.borough : ''])

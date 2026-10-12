@@ -1,0 +1,44 @@
+/* What only a saved picture shows: room around it, what it is above, whose data below. */
+.picture {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  background: var(--color-background);
+}
+
+.picture__title,
+.picture__credit {
+  margin: 0;
+}
+
+.picture__title {
+  color: var(--color-ink);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.picture__credit {
+  color: var(--color-ink-muted);
+  font-size: 11px;
+}
+
+/* Off the screen: where a picture that isn't on screen as it is (the map's) is laid out. */
+.picture-stage {
+  position: fixed;
+  top: 0;
+  left: -10000px;
+}
+
+/* The map's picture: its pixels, then its legend under them, whatever the layout on screen. */
+.map-picture img {
+  display: block;
+  border-radius: 8px;
+}
+
+.map-picture .map-legend {
+  position: static;
+  width: auto;
+  max-width: none;
+  margin: 0;
+}

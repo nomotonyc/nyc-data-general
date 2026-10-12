@@ -12,6 +12,28 @@
   gap: 8px;
 }
 
+/* A section's heading, with its save button at the end of the row. */
+.panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 32px;
+}
+
+/* Where a mouse can hover, the save button shows on the section it's over, or with focus in it;
+   on a touch screen it always shows. */
+@media (hover: hover) {
+  .panel__head .save-image {
+    opacity: 0;
+  }
+
+  .panel__section:hover .panel__head .save-image,
+  .panel__section:focus-within .panel__head .save-image {
+    opacity: 1;
+  }
+}
+
 .panel__kicker {
   color: var(--color-ink-muted);
   font-size: 12px;

@@ -18,6 +18,11 @@ export function yearLabel(year: Year): string {
   return year === FINAL_YEAR ? `${year} (Jan–Jun)` : String(year)
 }
 
+/** A range of years, e.g. "2025" or "2024–2026 (Jan–Jun)". */
+export function rangeLabel(range: { from: Year; to: Year }): string {
+  return range.from === range.to ? yearLabel(range.from) : `${range.from}–${yearLabel(range.to)}`
+}
+
 export const METHOD_URL = 'https://github.com/nomotonyc/nyc-data-general/blob/main/data-sources.md'
 
 export type Story = {

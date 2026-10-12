@@ -1,6 +1,6 @@
 import type { LayerDataset } from '../data/dataset'
 import { formatValue } from '../domain/format'
-import { getStory } from '../domain/stories'
+import { getStory, type Year } from '../domain/stories'
 import type { ExplorerState } from '../explorer/state'
 import { MONTHS, mean, periodLabel, plotLines, signed, trendSeries, type TrendLine, type TrendPalette } from './trend'
 
@@ -10,7 +10,7 @@ export type ExpandedTrend = {
   kicker: string
   title: string
   /** The first and last years the chart shows: those picked, cut to the data's. */
-  years: { from: number; to: number }
+  years: { from: Year; to: Year }
   sub: string
   stats: { label: string; value: string; note: string }[]
   /** Index of the period the readout, guide and highlighted dots show. */

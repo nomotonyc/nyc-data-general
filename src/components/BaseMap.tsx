@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { Map as MapLibreMap, type MapMouseEvent, type PointLike } from 'maplibre-gl'
 import './BaseMap.css'
 import './MapControl.css'
@@ -14,13 +15,16 @@ import { legendDetails } from '../map/legend'
 import { cardAction, clickAction, hitKind, hoverTarget, liveTarget, nearestFirst, sameTarget, tapResult, type Hit, type Target } from '../map/interaction'
 import { mapLayers, mapSources } from '../map/layers'
 import { fillsAt, planFills } from '../map/fillTween'
-import { paintHover, paintMap } from '../map/paint'
+import { HOVER_LAYERS, paintHover, paintMap } from '../map/paint'
 import { buildStyle } from '../map/style'
 import { useTheme } from '../theme/context'
 import { firehouseDetails } from '../map/firehouseHover'
 import { FirehouseTooltip } from './FirehouseTooltip'
 import { MapLegend } from './MapLegend'
 import { MapTooltip } from './MapTooltip'
+import { pictureCaption, pictureView } from '../panel/caption'
+import { useSaveImage } from './useSaveImage'
+import './Picture.css'
 
 const CLICKABLE = BOROUGHS.flatMap((b) => [boroughLayers(b).boroughFill, ...GEOGRAPHIES.map((g) => areaLayers(b, g).fill)])
 const FIREHOUSES = BOROUGHS.map((b) => boroughLayers(b).firehouse)
@@ -30,6 +34,44 @@ const MARKER_REACH = { mouse: 6, touch: 20 }
 /** The camera's margin for what's in view, given whether the columns are stacked now. */
 function padding(borough: Parameters<typeof cameraPadding>[0]) {
   return cameraPadding(borough, { stacked: window.matchMedia?.(STACKED_LAYOUT).matches ?? false })
+}
+
+/** The map's pixels as an object URL, at its size on screen. */
+type Shot = { url: string; width: number; height: number }
+
+/** How long a frame may take before the map is taken to be unable to draw (its context lost). */
+const SHOT_TIMEOUT = 5000
+
+/**
+ * The map's pixels, without the outline of what the pointer is over. A WebGL canvas keeps its
+ * pixels only for the frame that draws them, so a frame is asked for and they're read in it, as
+ * MapLibre's 'render' fires; toBlob copies them there and encodes them off the main thread.
+ * The outline layers are hidden for it, not filtered: a filter change shows a frame late.
+ */
+function shoot(map: MapLibreMap): Promise<Shot> {
+  const shown = HOVER_LAYERS.map((id) => [id, map.getLayoutProperty(id, 'visibility') ?? 'visible'] as const)
+  for (const [id] of shown) map.setLayoutProperty(id, 'visibility', 'none')
+  const restore = () => {
+    for (const [id, visibility] of shown) map.setLayoutProperty(id, 'visibility', visibility)
+  }
+  return new Promise<Shot>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('The map drew no frame')), SHOT_TIMEOUT)
+    map.once('render', () => {
+      const canvas = map.getCanvas()
+      const { clientWidth: width, clientHeight: height } = canvas
+      try {
+        canvas.toBlob((blob) => {
+          clearTimeout(timer)
+          if (blob) resolve({ url: URL.createObjectURL(blob), width, height })
+          else reject(new Error('The map gave no pixels'))
+        }, 'image/png')
+      } catch (e) {
+        clearTimeout(timer)
+        reject(e)
+      }
+    })
+    map.triggerRepaint()
+  }).finally(restore)
 }
 
 /** Respect a request for less motion: jump instead of flying. */
@@ -46,6 +88,9 @@ export default function BaseMap() {
   const [pointer, setPointer] = useState({ x: 0, y: 0, width: 0, height: 0 })
   // The card waits HOVER_DELAY after the pointer settles on a place.
   const [carded, setCarded] = useState<Target | null>(null)
+  // The map's pixels while its picture is laid out (saveMap).
+  const [shot, setShot] = useState<Shot | null>(null)
+  const pictureRef = useRef<HTMLDivElement>(null)
   // Touch has no hover: a tap selects a place, and its card opens at once as a sheet.
   const [tapped, setTapped] = useState(false)
   // The place under the pointer, as last seen by the map's handlers.
@@ -271,17 +316,45 @@ export default function BaseMap() {
   const at = { pointer, area: pointer }
   let card = null
   if (settled?.kind === 'firehouse') {
-    const props = { key: `firehouse-${settled.id}`, details: firehouseDetails(settled.firehouse), palette: theme.story[storyId] }
-    card = tapped ? <FirehouseTooltip {...props} sheet={{ onClose: clearHover }} /> : <FirehouseTooltip {...props} {...at} />
+    const key = `firehouse-${settled.id}`
+    const props = { details: firehouseDetails(settled.firehouse), palette: theme.story[storyId] }
+    card = tapped ? <FirehouseTooltip key={key} {...props} sheet={{ onClose: clearHover }} /> : <FirehouseTooltip key={key} {...props} {...at} />
   } else if (settled) {
-    const props = { key: settled.kind === 'borough' ? settled.borough : settled.id, details: hoverDetails(state, ds, settled), dotColor: ramp[1] }
+    const key = settled.kind === 'borough' ? settled.borough : settled.id
+    const props = { details: hoverDetails(state, ds, settled), dotColor: ramp[1] }
     // Focusing a borough goes into it and closes the card; a pin or unpin keeps it open.
     const onAction = () => {
       const action = cardAction(settled, state.pinnedArea)
       if (action.type === 'focusBorough') clearHover()
       dispatch(action)
     }
-    card = tapped ? <MapTooltip {...props} sheet={{ onAction, onClose: clearHover }} /> : <MapTooltip {...props} {...at} />
+    card = tapped ? <MapTooltip key={key} {...props} sheet={{ onAction, onClose: clearHover }} /> : <MapTooltip key={key} {...props} {...at} />
+  }
+
+  const legend = legendDetails(plan, activeMetric(state), ramp, { from: yearFrom, to: yearTo }, {
+    from: ds.periods[0].year,
+    to: ds.periods[ds.periods.length - 1].year,
+  }, ds.placement)
+
+  // The map as a picture: its pixels, what it shows above, its legend, whose data below. It's laid
+  // out off the screen, since on screen the legend may sit on the map and buttons and cards do.
+  const picture = useSaveImage(theme.color.background, pictureView(state))
+  const caption = picture.saving ? pictureCaption('map', state, ds) : null
+  const saveMap = async () => {
+    const taken: { shot?: Shot } = {}
+    const ran = await picture.save(async () => {
+      const map = mapRef.current
+      if (!map) return null
+      const shot = (taken.shot = await shoot(map))
+      flushSync(() => setShot(shot))
+      await pictureRef.current?.querySelector('img')?.decode?.()
+      return pictureRef.current && { node: pictureRef.current, name: `map-${pictureCaption('map', state, ds).name}` }
+    })
+    // Only a press that saved clears its picture: one made mid-save leaves that save's alone.
+    if (ran) {
+      setShot(null)
+      if (taken.shot) URL.revokeObjectURL(taken.shot.url)
+    }
   }
 
   return (
@@ -303,12 +376,18 @@ export default function BaseMap() {
       {/* Opened by a tap: beside the columns, over the map on the side away from the tap, so the
           place tapped stays in view; under the map once they stack. */}
       {tapped && card && <div className={`map-sheet map-sheet--${pointer.x < pointer.width / 2 ? 'right' : 'left'}`}>{card}</div>}
-      <MapLegend
-        details={legendDetails(plan, activeMetric(state), ramp, { from: yearFrom, to: yearTo }, {
-          from: ds.periods[0].year,
-          to: ds.periods[ds.periods.length - 1].year,
-        }, ds.placement)}
-      />
+      {/* Saving waits for the map to load: its style takes no changes before. */}
+      <MapLegend details={legend} save={ready ? { state: picture.button, onClick: saveMap } : undefined} />
+      {caption && shot && (
+        <div className="picture-stage" inert>
+          <div ref={pictureRef} className="picture map-picture" style={{ width: `${shot.width}px` }}>
+            <p className="picture__title">{caption.title}</p>
+            <img src={shot.url} width={shot.width} height={shot.height} alt="" />
+            <MapLegend details={legend} />
+            <p className="picture__credit">{caption.credit}</p>
+          </div>
+        </div>
+      )}
     </>
   )
 }

@@ -24,7 +24,7 @@ type FakeMap = {
   setPaintProperty: Mock
   setFilter: Mock
   queryRenderedFeatures: Mock
-  canvas: { style: { cursor: string } }
+  canvas: { style: { cursor: string }; focus: Mock }
   fire: (event: string, payload?: unknown) => void
 }
 
@@ -47,7 +47,7 @@ vi.mock('maplibre-gl', async () => {
       setPaintProperty = vi.fn()
       setFilter = vi.fn()
       queryRenderedFeatures = vi.fn(() => [])
-      canvas = { style: { cursor: '' } }
+      canvas = { style: { cursor: '' }, focus: vi.fn() }
       getCanvas() {
         return this.canvas
       }
@@ -380,6 +380,159 @@ describe('BaseMap', () => {
     expect(screen.queryByText('Click to focus on Queens')).not.toBeInTheDocument()
     act(() => vi.advanceTimersByTime(HOVER_DELAY))
     expect(screen.getByText('Click to focus on Queens')).toBeInTheDocument()
+  })
+
+  describe('by touch', () => {
+    /** A pointer event from some input, as the window sees it before the map does. */
+    const pointer = (type: 'pointerdown' | 'pointermove', pointerType: string) =>
+      act(() => {
+        const e = new Event(type)
+        Object.defineProperty(e, 'pointerType', { value: pointerType })
+        window.dispatchEvent(e)
+      })
+    /** A finger on the screen, as Pointer Events report it before the tap's click. */
+    const fingerDown = () => pointer('pointerdown', 'touch')
+    const tapQueens = () => {
+      fingerDown()
+      // A tap also sends the mouse events browsers emulate for it, which must not count as a hover.
+      act(() => map().fire('mousemove', { point: { x: 100, y: 100 } }))
+      map().queryRenderedFeatures.mockReturnValueOnce([feature(boroughLayers('Queens').boroughFill, { borough: 'Queens' })])
+      act(() => map().fire('click', { point: { x: 100, y: 100 } }))
+    }
+
+    it('shows the tapped place’s card at once and outlines it, without focusing it', () => {
+      renderWithExplorer(<BaseMap />, { storyId: 'fire', metricId: 'structural-fires' })
+      load()
+      tapQueens()
+      expect(screen.getByRole('region', { name: 'Queens' })).toBeInTheDocument()
+      expect(map().setFilter).toHaveBeenCalledWith(LAYERS.boroughHover, ['==', ['get', 'borough'], 'Queens'])
+      expect(screen.queryByRole('button', { name: /All of New York City/ })).not.toBeInTheDocument()
+    })
+
+    it('focuses the borough from the card’s button, and closes the card', async () => {
+      vi.useRealTimers()
+      renderWithExplorer(<BaseMap />, { storyId: 'fire', metricId: 'structural-fires' })
+      load()
+      tapQueens()
+      await userEvent.click(screen.getByRole('button', { name: 'Focus on Queens' }))
+      expect(map().fitBounds).toHaveBeenLastCalledWith(BOROUGH_BOUNDS.Queens, expect.anything())
+      expect(screen.queryByRole('region', { name: 'Queens' })).not.toBeInTheDocument()
+    })
+
+    it('focuses a borough tapped twice', () => {
+      renderWithExplorer(<BaseMap />, { storyId: 'fire', metricId: 'structural-fires' })
+      load()
+      tapQueens()
+      tapQueens()
+      expect(map().fitBounds).toHaveBeenLastCalledWith(BOROUGH_BOUNDS.Queens, expect.anything())
+      expect(screen.queryByRole('region', { name: 'Queens' })).not.toBeInTheDocument()
+    })
+
+    it('closes the card when the view changes from outside the map', async () => {
+      vi.useRealTimers()
+      renderWithExplorer(
+        <>
+          <BaseMap />
+          <PlaceList />
+        </>,
+        { storyId: 'fire', metricId: 'structural-fires' },
+      )
+      load()
+      tapQueens()
+      await userEvent.click(screen.getByRole('button', { name: /^Brooklyn/ }))
+      expect(screen.queryByRole('region', { name: 'Queens' })).not.toBeInTheDocument()
+    })
+
+    it('treats a pen as a finger: a tap shows the card first', () => {
+      renderWithExplorer(<BaseMap />, { storyId: 'fire', metricId: 'structural-fires' })
+      load()
+      pointer('pointerdown', 'pen')
+      map().queryRenderedFeatures.mockReturnValueOnce([feature(boroughLayers('Queens').boroughFill, { borough: 'Queens' })])
+      act(() => map().fire('click', { point: { x: 100, y: 100 } }))
+      expect(screen.getByRole('region', { name: 'Queens' })).toBeInTheDocument()
+    })
+
+    it('forgets a tap’s selection once a mouse moves, so the next tap shows the card again', () => {
+      renderWithExplorer(<BaseMap />, { storyId: 'fire', metricId: 'structural-fires' })
+      load()
+      tapQueens()
+      pointer('pointermove', 'mouse')
+      act(() => map().fire('mousemove', { point: { x: 300, y: 300 } }))
+      tapQueens()
+      expect(screen.getByRole('region', { name: 'Queens' })).toBeInTheDocument()
+      expect(map().fitBounds).not.toHaveBeenLastCalledWith(BOROUGH_BOUNDS.Queens, expect.anything())
+    })
+
+    it('takes focus when it opens, so a screen reader reads it, without scrolling the page', () => {
+      const focus = vi.spyOn(HTMLElement.prototype, 'focus')
+      renderWithExplorer(<BaseMap />, { storyId: 'fire', metricId: 'structural-fires' })
+      load()
+      tapQueens()
+      expect(screen.getByRole('region', { name: 'Queens' })).toHaveFocus()
+      expect(focus).toHaveBeenCalledWith({ preventScroll: true })
+      focus.mockRestore()
+    })
+
+    it('closes on Escape, giving focus back to the map', async () => {
+      vi.useRealTimers()
+      renderWithExplorer(<BaseMap />, { storyId: 'fire', metricId: 'structural-fires' })
+      load()
+      tapQueens()
+      await userEvent.keyboard('{Escape}')
+      expect(screen.queryByRole('region', { name: 'Queens' })).not.toBeInTheDocument()
+      expect(map().canvas.focus).toHaveBeenCalled()
+    })
+
+    it('gives focus back to the map when closed with its button', async () => {
+      vi.useRealTimers()
+      renderWithExplorer(<BaseMap />, { storyId: 'fire', metricId: 'structural-fires' })
+      load()
+      tapQueens()
+      await userEvent.click(screen.getByRole('button', { name: 'Close' }))
+      expect(map().canvas.focus).toHaveBeenCalled()
+    })
+
+    it('opens on the side of the map away from the tap, so the place tapped stays in view', () => {
+      vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(800)
+      renderWithExplorer(<BaseMap />, { storyId: 'fire', metricId: 'structural-fires' })
+      load()
+      const tapAt = (x: number) => {
+        fingerDown()
+        map().queryRenderedFeatures.mockReturnValueOnce([feature(boroughLayers('Queens').boroughFill, { borough: 'Queens' })])
+        act(() => map().fire('click', { point: { x, y: 100 } }))
+      }
+      tapAt(100)
+      expect(screen.getByRole('region', { name: 'Queens' }).parentElement).toHaveClass('map-sheet--right')
+      act(() => map().fire('click', { point: { x: 5, y: 5 } }))
+      tapAt(700)
+      expect(screen.getByRole('region', { name: 'Queens' }).parentElement).toHaveClass('map-sheet--left')
+      vi.restoreAllMocks()
+    })
+
+    it('keeps the card when the finger leaves the map to reach its button', () => {
+      renderWithExplorer(<BaseMap />, { storyId: 'fire', metricId: 'structural-fires' })
+      load()
+      tapQueens()
+      act(() => map().fire('mouseout'))
+      expect(screen.getByRole('region', { name: 'Queens' })).toBeInTheDocument()
+    })
+
+    it('closes the card on a tap on the water', () => {
+      renderWithExplorer(<BaseMap />, { storyId: 'fire', metricId: 'structural-fires' })
+      load()
+      tapQueens()
+      act(() => map().fire('click', { point: { x: 5, y: 5 } }))
+      expect(screen.queryByRole('region', { name: 'Queens' })).not.toBeInTheDocument()
+    })
+
+    it('reaches further for firehouse markers than a mouse does, since a fingertip is wide', () => {
+      renderWithExplorer(<BaseMap />, { showFirehouses: true })
+      load()
+      fingerDown()
+      act(() => map().fire('click', { point: { x: 100, y: 100 } }))
+      const boxes = map().queryRenderedFeatures.mock.calls.map(([where]) => where).filter(Array.isArray) as [[number, number], [number, number]][]
+      expect(boxes.at(-1)![1][0] - 100).toBeGreaterThanOrEqual(16)
+    })
   })
 
   it('clears the hover card and outline when the pointer leaves the map', () => {

@@ -60,11 +60,15 @@
 
   .explorer__rail {
     border-right: none;
-    border-bottom: 1px solid var(--color-line);
+    border-top: 1px solid var(--color-line);
   }
 
+  /* The map first, then its controls. The legend and a tapped card follow it on the page. */
   .explorer__map {
-    height: 520px;
+    order: -1;
+    overflow: visible;
+    padding-bottom: 16px;
+    background: var(--color-background);
   }
 
   .explorer__panel {

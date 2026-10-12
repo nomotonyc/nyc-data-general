@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { initialExplorerState } from '../explorer/state'
 import { LAYERS, boroughLayers } from './config'
-import { clickAction, hitKind, hoverTarget, liveTarget, nearestFirst } from './interaction'
+import { clickAction, hitKind, hoverTarget, liveTarget, nearestFirst, placeAction, tapResult } from './interaction'
 
 const borough = (name: string) => ({ kind: 'borough' as const, properties: { borough: name } })
 const precinct = (n: number, b: string) => ({ kind: 'precincts' as const, properties: { precinct: n, borough: b } })
@@ -52,6 +52,50 @@ describe('clickAction', () => {
     expect(clickAction(city, [borough('Atlantis')])).toBeNull()
     expect(clickAction({ ...city, detail: 'area' }, [precinct(2, 'Manhattan')])).toBeNull()
     expect(clickAction({ ...battalions, detail: 'area' }, [battalion(5, 'Manhattan')])).toBeNull()
+  })
+})
+
+describe('tapResult', () => {
+  it('selects the borough tapped, instead of focusing it straight away', () => {
+    expect(tapResult(city, [borough('Queens')])).toEqual({ select: { kind: 'borough', borough: 'Queens' }, action: null })
+  })
+
+  it('selects the area tapped, instead of pinning it straight away', () => {
+    expect(tapResult({ ...city, borough: 'Bronx' }, [precinct(44, 'Bronx'), borough('Bronx')])).toEqual({ select: { kind: 'area', id: '44' }, action: null })
+  })
+
+  it('selects a firehouse, which a click passes through', () => {
+    const firehouse = { kind: 'firehouse' as const, properties: { id: 7, name: 'Engine 1', address: '142 West 31st Street', neighbourhood: 'Midtown', borough: 'Manhattan' } }
+    expect(tapResult({ ...city, showFirehouses: true }, [firehouse, borough('Manhattan')]).select).toMatchObject({ kind: 'firehouse', id: 7 })
+  })
+
+  it('acts on a place tapped again while selected, as a click does: a double tap', () => {
+    const queens = { kind: 'borough' as const, borough: 'Queens' as const }
+    expect(tapResult(city, [borough('Queens')], queens)).toEqual({ select: null, action: { type: 'focusBorough', borough: 'Queens' } })
+    expect(tapResult({ ...city, borough: 'Bronx' }, [precinct(44, 'Bronx')], { kind: 'area', id: '44' })).toEqual({ select: null, action: { type: 'pinArea', id: '44' } })
+  })
+
+  it('selects another place tapped while one is selected', () => {
+    expect(tapResult(city, [borough('Bronx')], { kind: 'borough', borough: 'Queens' }).select).toEqual({ kind: 'borough', borough: 'Bronx' })
+  })
+
+  it('acts on the place beneath a firehouse tapped again, since a firehouse has no action of its own', () => {
+    const firehouse = { kind: 'firehouse' as const, properties: { id: 7, name: 'Engine 1', address: '142 West 31st Street', neighbourhood: 'Midtown', borough: 'Manhattan' } }
+    const shown = { ...city, showFirehouses: true }
+    const selected = tapResult(shown, [firehouse, borough('Manhattan')]).select
+    expect(tapResult(shown, [firehouse, borough('Manhattan')], selected)).toEqual({ select: null, action: { type: 'focusBorough', borough: 'Manhattan' } })
+  })
+
+  it('drops the pin on a tap on nothing, as a click does', () => {
+    expect(tapResult({ ...city, borough: 'Brooklyn', pinnedArea: '75' }, [])).toEqual({ select: null, action: { type: 'unpinArea' } })
+    expect(tapResult(city, [])).toEqual({ select: null, action: null })
+  })
+})
+
+describe('placeAction', () => {
+  it('focuses a borough and pins an area', () => {
+    expect(placeAction({ kind: 'borough', borough: 'Bronx' })).toEqual({ type: 'focusBorough', borough: 'Bronx' })
+    expect(placeAction({ kind: 'area', id: 'bn14' })).toEqual({ type: 'pinArea', id: 'bn14' })
   })
 })
 

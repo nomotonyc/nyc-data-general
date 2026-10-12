@@ -20,7 +20,20 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
+  /* The breadcrumb on its own line; the stories and the years centred under it. */
   .toolbar > * {
+    justify-self: center;
+  }
+
+  .toolbar > .breadcrumb {
     justify-self: start;
+  }
+}
+
+/* On a phone the stories and the years fill the width instead, so neither runs off the screen. */
+@media (max-width: 640px) {
+  .toolbar > .story-tabs,
+  .toolbar > .toolbar__end {
+    justify-self: stretch;
   }
 }

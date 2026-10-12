@@ -1,16 +1,17 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Map as MapLibreMap, type MapMouseEvent, type PointLike } from 'maplibre-gl'
 import './BaseMap.css'
+import './MapControl.css'
 import { BOROUGHS, GEOGRAPHIES, areaById } from '../domain/geography'
 import { useDataset, useExplorerDispatch, useExplorerState } from '../explorer/context'
 import { activeMetric } from '../explorer/state'
 import { cameraPadding, cameraTarget } from '../map/camera'
 import { choropleth } from '../map/choropleth'
-import { FADE_DURATION, FIXED_VIEW, FLY_DURATION, HOVER_DELAY, NYC_BOUNDS, areaLayers, boroughLayers } from '../map/config'
+import { FADE_DURATION, FIXED_VIEW, FLY_DURATION, HOVER_DELAY, NYC_BOUNDS, STACKED_LAYOUT, areaLayers, boroughLayers } from '../map/config'
 import { cameraEasing } from '../map/easing'
 import { hoverDetails } from '../map/hover'
 import { legendDetails } from '../map/legend'
-import { clickAction, hitKind, hoverTarget, liveTarget, nearestFirst, type Hit, type Target } from '../map/interaction'
+import { clickAction, hitKind, hoverTarget, liveTarget, nearestFirst, placeAction, sameTarget, tapResult, type Hit, type Target } from '../map/interaction'
 import { mapLayers, mapSources } from '../map/layers'
 import { fillsAt, planFills } from '../map/fillTween'
 import { paintHover, paintMap } from '../map/paint'
@@ -21,20 +22,15 @@ import { FirehouseTooltip } from './FirehouseTooltip'
 import { MapLegend } from './MapLegend'
 import { MapTooltip } from './MapTooltip'
 
-const sameTarget = (a: Target | null, b: Target | null) =>
-  a === b ||
-  (a !== null &&
-    b !== null &&
-    (a.kind === 'borough'
-      ? b.kind === 'borough' && a.borough === b.borough
-      : a.kind === 'area'
-        ? b.kind === 'area' && a.id === b.id
-        : b.kind === 'firehouse' && a.id === b.id))
-
 const CLICKABLE = BOROUGHS.flatMap((b) => [boroughLayers(b).boroughFill, ...GEOGRAPHIES.map((g) => areaLayers(b, g).fill)])
 const FIREHOUSES = BOROUGHS.map((b) => boroughLayers(b).firehouse)
-/** How far beyond a marker's edge the pointer still counts as over it, in pixels: markers are small. */
-const MARKER_REACH = 6
+/** How far beyond a marker's edge the pointer still counts as over it, in pixels: markers are small, a fingertip is not. */
+const MARKER_REACH = { mouse: 6, touch: 20 }
+
+/** The camera's margin for what's in view, given whether the columns are stacked now. */
+function padding(borough: Parameters<typeof cameraPadding>[0]) {
+  return cameraPadding(borough, { stacked: window.matchMedia?.(STACKED_LAYOUT).matches ?? false })
+}
 
 /** Respect a request for less motion: jump instead of flying. */
 function flyDuration() {
@@ -50,6 +46,12 @@ export default function BaseMap() {
   const [pointer, setPointer] = useState({ x: 0, y: 0, width: 0, height: 0 })
   // The card waits HOVER_DELAY after the pointer settles on a place.
   const [carded, setCarded] = useState<Target | null>(null)
+  // Touch has no hover: a tap selects a place, and its card opens at once as a sheet.
+  const [tapped, setTapped] = useState(false)
+  // The place under the pointer, as last seen by the map's handlers.
+  const lastTarget = useRef<Target | null>(null)
+  // The place a tap selected, which a second tap acts on.
+  const selected = useRef<Target | null>(null)
   const theme = useTheme()
   const state = useExplorerState()
   const dispatch = useExplorerDispatch()
@@ -63,6 +65,19 @@ export default function BaseMap() {
     stateRef.current = state
   })
 
+  // Forget the hover or selection: the pointer is over something new once the view moves.
+  // Focus in a tapped card goes back to the map, rather than to the top of the page.
+  const clearHover = useCallback(() => {
+    if (document.activeElement?.closest('.map-sheet')) mapRef.current?.getCanvas().focus({ preventScroll: true })
+    lastTarget.current = null
+    selected.current = null
+    const canvas = mapRef.current?.getCanvas()
+    if (canvas) canvas.style.cursor = ''
+    setHovered(null)
+    setCarded(null)
+    setTapped(false)
+  }, [])
+
   useEffect(() => {
     if (!container.current) return
 
@@ -70,7 +85,7 @@ export default function BaseMap() {
       container: container.current,
       style: buildStyle(themeRef.current),
       bounds: NYC_BOUNDS,
-      fitBoundsOptions: { padding: cameraPadding(null) },
+      fitBoundsOptions: { padding: padding(null) },
       ...FIXED_VIEW,
       // The legend takes this corner; sources are credited in the panel.
       attributionControl: false,
@@ -83,12 +98,22 @@ export default function BaseMap() {
     })
     map.once('load', () => setReady(true))
 
+    // Which input the last pointer event came from, per event, so a touchscreen laptop gets both:
+    // a tap's emulated mouse events must not act as hovers. A pen counts as a finger: most can't hover.
+    let touch = false
+    const notePointer = (e: PointerEvent) => {
+      touch = e.pointerType !== 'mouse'
+    }
+    window.addEventListener('pointerdown', notePointer, { capture: true, passive: true })
+    window.addEventListener('pointermove', notePointer, { capture: true, passive: true })
+
     const hitsAt = (e: MapMouseEvent): Hit[] => {
       const places = map.queryRenderedFeatures(e.point, { layers: CLICKABLE })
       const { x, y } = e.point
+      const r = touch ? MARKER_REACH.touch : MARKER_REACH.mouse
       const reach: [PointLike, PointLike] = [
-        [x - MARKER_REACH, y - MARKER_REACH],
-        [x + MARKER_REACH, y + MARKER_REACH],
+        [x - r, y - r],
+        [x + r, y + r],
       ]
       const markers = stateRef.current.showFirehouses
         ? nearestFirst(map.queryRenderedFeatures(reach, { layers: FIREHOUSES }), e.point, (lngLat) => map.project(lngLat))
@@ -98,34 +123,53 @@ export default function BaseMap() {
         return kind ? [{ kind, properties: f.properties }] : []
       })
     }
-    // The place under the pointer, as last seen by these handlers.
-    let lastTarget: Target | null = null
-    // Forget the hover: the pointer is over something new once the view moves.
-    const clearHover = () => {
-      lastTarget = null
-      map.getCanvas().style.cursor = ''
-      setHovered(null)
-      setCarded(null)
+    const onTap = (e: MapMouseEvent) => {
+      const { select, action } = tapResult(stateRef.current, hitsAt(e), selected.current)
+      if (!select) {
+        clearHover()
+        if (action) dispatch(action)
+        return
+      }
+      selected.current = select
+      lastTarget.current = select
+      // Where the tap was, so the card can open on the other side of the map.
+      const el = container.current
+      setPointer({ x: e.point.x, y: e.point.y, width: el?.clientWidth ?? 0, height: el?.clientHeight ?? 0 })
+      setHovered(select)
+      setCarded(select)
+      setTapped(true)
     }
     const onClick = (e: MapMouseEvent) => {
+      if (touch) return onTap(e)
       const action = clickAction(stateRef.current, hitsAt(e))
       if (!action) return
       clearHover()
       dispatch(action)
     }
     const onMove = (e: MapMouseEvent) => {
+      if (touch) return
+      // A mouse moving ends a tap's selection: the place under it waits for its hover card.
+      if (selected.current) {
+        selected.current = null
+        lastTarget.current = null
+        setTapped(false)
+      }
       const target = hoverTarget(stateRef.current, hitsAt(e))
       map.getCanvas().style.cursor = target ? 'pointer' : ''
-      if (!sameTarget(lastTarget, target)) {
-        lastTarget = target
+      if (!sameTarget(lastTarget.current, target)) {
+        lastTarget.current = target
         setHovered(target)
         setCarded(null) // a new place waits its own pause
+        setTapped(false)
       }
       // The map's size too, so the card can keep inside it.
       const el = container.current
       setPointer({ x: e.point.x, y: e.point.y, width: el?.clientWidth ?? 0, height: el?.clientHeight ?? 0 })
     }
-    const onLeave = clearHover
+    // A finger leaving the map is on its way to the sheet's buttons, so a tapped card stays.
+    const onLeave = () => {
+      if (!touch) clearHover()
+    }
     map.on('click', onClick)
     map.on('mousemove', onMove)
     map.on('mouseout', onLeave)
@@ -133,11 +177,13 @@ export default function BaseMap() {
     // Whatever is in view (the city or a focused borough) keeps filling the area.
     const refit = () => {
       const { borough } = stateRef.current
-      map.fitBounds(cameraTarget(borough), { padding: cameraPadding(borough), animate: false })
+      map.fitBounds(cameraTarget(borough), { padding: padding(borough), animate: false })
     }
     map.on('resize', refit)
 
     return () => {
+      window.removeEventListener('pointerdown', notePointer, { capture: true })
+      window.removeEventListener('pointermove', notePointer, { capture: true })
       map.off('click', onClick)
       map.off('mousemove', onMove)
       map.off('mouseout', onLeave)
@@ -146,7 +192,7 @@ export default function BaseMap() {
       mapRef.current = null
       setReady(false)
     }
-  }, [dispatch])
+  }, [dispatch, clearHover])
 
   const { storyId, metricId, borough, detail, yearFrom, yearTo, pinnedArea, geography, showOutlines, showLabels, showFirehouses } = state
   const ramp = theme.story[storyId].ramp
@@ -199,39 +245,69 @@ export default function BaseMap() {
     return () => clearTimeout(timer)
   }, [ready, live, geography])
 
+  // A tapped card describes the view it was opened in; one changed from outside the map (the
+  // rail, the panel, the breadcrumb) closes it. A mouse's next move would; a finger never moves.
+  const view = `${storyId}|${metricId}|${borough}|${detail}|${geography}|${showFirehouses}`
+  const shownIn = useRef(view)
+  useEffect(() => {
+    if (shownIn.current === view) return
+    shownIn.current = view
+    if (selected.current) clearHover()
+  }, [view, clearHover])
+
   // Fly to the focused borough, or back out to the city.
   const flownTo = useRef(borough)
   useEffect(() => {
     if (!ready || !mapRef.current || flownTo.current === borough) return
     flownTo.current = borough
     // linear: a straight glide. MapLibre's default "fly" arcs out and back in, which jolts on short moves.
-    mapRef.current.fitBounds(cameraTarget(borough), { padding: cameraPadding(borough), duration: flyDuration(), easing: cameraEasing, linear: true })
+    mapRef.current.fitBounds(cameraTarget(borough), { padding: padding(borough), duration: flyDuration(), easing: cameraEasing, linear: true })
   }, [ready, borough])
 
   // Only once the pause is over for the place the pointer is still on.
   const settled = carded && live && sameTarget(carded, live) ? carded : null
 
+  // The card for the settled place: beside the pointer, or opened by a tap as a sheet whose
+  // button does what a click on the place would. One per place, so a new place's card opens afresh.
+  const at = { pointer, area: pointer }
+  let card = null
+  if (settled?.kind === 'firehouse') {
+    const props = { key: `firehouse-${settled.id}`, details: firehouseDetails(settled.firehouse), palette: theme.story[storyId] }
+    card = tapped ? <FirehouseTooltip {...props} sheet={{ onClose: clearHover }} /> : <FirehouseTooltip {...props} {...at} />
+  } else if (settled) {
+    const props = { key: settled.kind === 'borough' ? settled.borough : settled.id, details: hoverDetails(state, ds, settled), dotColor: ramp[1] }
+    const onAction = () => {
+      clearHover()
+      dispatch(placeAction(settled))
+    }
+    card = tapped ? <MapTooltip {...props} sheet={{ onAction, onClose: clearHover }} /> : <MapTooltip {...props} {...at} />
+  }
+
   return (
     <>
-      <div ref={container} className="map" />
+      <div className="map-frame">
+        <div ref={container} className="map" />
+        {!tapped && card}
+        {borough && (
+          <button type="button" className="map-control map__back" onClick={() => dispatch({ type: 'focusBorough', borough: null })}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+              <path d="M10 3L5 8l5 5" />
+            </svg>
+            <span>
+              <span className="map__back-all">All of</span> New York City
+            </span>
+          </button>
+        )}
+      </div>
+      {/* Opened by a tap: beside the columns, over the map on the side away from the tap, so the
+          place tapped stays in view; under the map once they stack. */}
+      {tapped && card && <div className={`map-sheet map-sheet--${pointer.x < pointer.width / 2 ? 'right' : 'left'}`}>{card}</div>}
       <MapLegend
         details={legendDetails(plan, activeMetric(state), ramp, { from: yearFrom, to: yearTo }, {
           from: ds.periods[0].year,
           to: ds.periods[ds.periods.length - 1].year,
         }, ds.placement)}
       />
-      {settled?.kind === 'firehouse' && <FirehouseTooltip details={firehouseDetails(settled.firehouse)} palette={theme.story[storyId]} pointer={pointer} area={pointer} />}
-      {settled && settled.kind !== 'firehouse' && (
-        <MapTooltip details={hoverDetails(state, ds, settled)} dotColor={ramp[1]} pointer={pointer} area={pointer} />
-      )}
-      {borough && (
-        <button type="button" className="map__back" onClick={() => dispatch({ type: 'focusBorough', borough: null })}>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-            <path d="M10 3L5 8l5 5" />
-          </svg>
-          All of New York City
-        </button>
-      )}
     </>
   )
 }

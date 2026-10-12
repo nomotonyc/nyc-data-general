@@ -10,5 +10,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
+    // Stylesheets imported ?raw keep their text, so breakpoints.test.ts can read them.
+    css: { include: [/\.css\?raw$/] },
   },
 })

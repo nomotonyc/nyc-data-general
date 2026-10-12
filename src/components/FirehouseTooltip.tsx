@@ -2,6 +2,8 @@ import type { FirehouseDetails } from '../map/firehouseHover'
 import { unitChip } from '../map/unitColours'
 import { useTheme } from '../theme/context'
 import type { StoryPalette } from '../theme/tokens'
+import { CardClose } from './CardClose'
+import { useSheet } from './dialog'
 import { useCardPosition } from './useCardPosition'
 import './MapTooltip.css'
 import './FirehouseTooltip.css'
@@ -10,20 +12,38 @@ type Props = {
   details: FirehouseDetails
   /** The current story's colours, which the companies take. */
   palette: StoryPalette
-  /** Pointer position within the map, in pixels. */
-  pointer: { x: number; y: number }
-  /** The map's size, which the card must stay inside. */
-  area: { width: number; height: number }
-}
+} & (
+  | {
+      /** Pointer position within the map, in pixels. */
+      pointer: { x: number; y: number }
+      /** The map's size, which the card must stay inside. */
+      area: { width: number; height: number }
+      sheet?: never
+    }
+  | {
+      /** Opened by a tap: placed by the stylesheet and closable. */
+      sheet: { onClose: () => void }
+      pointer?: never
+      area?: never
+    }
+)
 
 /** The hover card for a firehouse: the same dark card as for places, listing the units based there. */
-export function FirehouseTooltip({ details, palette, pointer, area }: Props) {
+export function FirehouseTooltip({ details, palette, pointer, area, sheet }: Props) {
   const ref = useCardPosition(pointer, area)
+  useSheet(ref, sheet?.onClose)
   const { color } = useTheme()
   return (
-    <div ref={ref} className="map-tooltip firehouse-card" aria-hidden="true">
+    <div
+      ref={ref}
+      className={sheet ? 'map-tooltip map-tooltip--sheet firehouse-card' : 'map-tooltip firehouse-card'}
+      {...(sheet ? { role: 'region', tabIndex: -1, 'aria-label': `Firehouse, ${details.address}` } : { 'aria-hidden': true })}
+    >
       <div className="firehouse-card__head">
-        <span className="map-tooltip__metric">Firehouse</span>
+        <span className="map-tooltip__metric firehouse-card__kicker">
+          Firehouse
+          {sheet && <CardClose onClose={sheet.onClose} />}
+        </span>
         <span className="map-tooltip__title">{details.address}</span>
         <span className="map-tooltip__subtitle">{details.place}</span>
       </div>

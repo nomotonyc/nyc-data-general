@@ -155,6 +155,8 @@
   width: 100%;
   height: auto;
   border-radius: 8px;
+  /* A finger dragged sideways reads the periods; up and down still scrolls the dialog. */
+  touch-action: pan-y;
 }
 
 .trend-dialog__grid {

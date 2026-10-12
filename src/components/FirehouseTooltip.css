@@ -3,6 +3,13 @@
   width: 264px;
 }
 
+/* Opened by a tap once the columns stack: the full width under the map, as the place card. */
+@media (max-width: 1099px) {
+  .firehouse-card.map-tooltip--sheet {
+    width: auto;
+  }
+}
+
 .firehouse-card__head,
 .firehouse-card__group {
   display: flex;
@@ -12,6 +19,12 @@
 
 .firehouse-card__group {
   gap: 6px;
+}
+
+/* "Firehouse", with the close button on a tapped card. */
+.firehouse-card__kicker {
+  display: flex;
+  align-items: center;
 }
 
 .firehouse-card__label {

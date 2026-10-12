@@ -1,0 +1,78 @@
+/* Top-right of the map, opposite the back button (MapControl.css). */
+.map-settings__open {
+  right: 16px;
+}
+
+/* A sheet from the bottom of the screen, over a dimmed page, as the expanded trend's backdrop. */
+.map-settings {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.map-settings__backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--color-scrim);
+  opacity: 0.45;
+}
+
+.map-settings__sheet {
+  position: relative;
+  max-height: 85dvh;
+  overflow-y: auto;
+  padding-bottom: env(safe-area-inset-bottom);
+  border-radius: 16px 16px 0 0;
+  background: var(--color-background);
+  color: var(--color-ink);
+  animation: map-settings-in 200ms ease-out;
+}
+
+@keyframes map-settings-in {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+}
+
+.map-settings__head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px 4px 22px;
+  background: var(--color-background);
+}
+
+.map-settings__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.map-settings__done {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--story-accent);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.map-settings__done:hover {
+  background: var(--color-surface-sunken);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-settings__sheet {
+    animation: none;
+  }
+}

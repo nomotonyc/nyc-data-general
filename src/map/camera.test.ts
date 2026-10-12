@@ -44,4 +44,20 @@ describe('cameraPadding', () => {
     // The legend with its note row is about 73px tall, 16px up from the edge.
     expect(cameraPadding('Queens').bottom).toBeGreaterThanOrEqual(96)
   })
+
+  describe('once the columns stack', () => {
+    // The back button and Map settings: 16px down, 40px tall.
+    const BUTTONS = 56
+
+    it('keeps the land below the buttons on the map, for the city and a focused borough', () => {
+      expect(cameraPadding(null, { stacked: true }).top).toBeGreaterThan(BUTTONS)
+      expect(cameraPadding('Queens', { stacked: true }).top).toBeGreaterThan(BUTTONS)
+    })
+
+    it('keeps no room at the bottom for the legend, which sits under the map', () => {
+      const p = cameraPadding('Queens', { stacked: true })
+      expect(p.bottom).toBe(p.left)
+      expect(p.bottom).toBeLessThan(cameraPadding('Queens').bottom)
+    })
+  })
 })

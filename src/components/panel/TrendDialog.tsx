@@ -1,14 +1,16 @@
-import { useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react'
+import { useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent } from 'react'
+import { trapTab, useEscape } from '../dialog'
 import { createPortal } from 'react-dom'
 import { useDataset, useExplorerState } from '../../explorer/context'
-import { BIG, expandedTrend } from '../../panel/expandedTrend'
+import { BIG, expandedTrend, periodAt } from '../../panel/expandedTrend'
 import { trend } from '../../panel/trend'
 import { useTheme } from '../../theme/context'
 import './TrendDialog.css'
 
-const FOCUSABLE = 'button:not([tabindex="-1"]), [tabindex="0"]'
-
-/** The larger trend: stats, gridlines and a readout for the hovered period. Escape, Close or the backdrop close it. */
+/**
+ * The larger trend: stats, gridlines and a readout for the period pointed at (a mouse over it,
+ * a finger dragged across it, or the arrow keys). Escape, Close or the backdrop close it.
+ */
 export function TrendDialog({ onClose }: { onClose: () => void }) {
   const titleId = useId()
   const state = useExplorerState()
@@ -28,29 +30,19 @@ export function TrendDialog({ onClose }: { onClose: () => void }) {
     return () => opener?.focus()
   }, [])
 
-  useEffect(() => {
-    const onKey = (e: globalThis.KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [onClose])
+  useEscape(onClose)
 
   if (!big) return null
   const last = big.columns.length - 1
 
-  const trapTab = (e: KeyboardEvent) => {
-    if (e.key !== 'Tab' || !dialogRef.current) return
-    const items = [...dialogRef.current.querySelectorAll<HTMLElement>(FOCUSABLE)]
-    const first = items[0]
-    const end = items[items.length - 1]
-    if (e.shiftKey && document.activeElement === first) {
-      e.preventDefault()
-      end.focus()
-    } else if (!e.shiftKey && document.activeElement === end) {
-      e.preventDefault()
-      first.focus()
-    }
+  // The period under the pointer, from where the chart is drawn on screen.
+  const point = (e: PointerEvent<SVGSVGElement>) => {
+    const box = e.currentTarget.getBoundingClientRect()
+    if (box.width > 0) setHover(periodAt(big.columns, ((e.clientX - box.left) / box.width) * BIG.width))
+  }
+  // A mouse leaving goes back to the latest period; a lifted finger leaves its period read.
+  const leave = (e: PointerEvent) => {
+    if (e.pointerType === 'mouse') setHover(null)
   }
 
   const step = (e: KeyboardEvent) => {
@@ -63,7 +55,7 @@ export function TrendDialog({ onClose }: { onClose: () => void }) {
   return createPortal(
     <div className="trend-dialog" style={{ '--story-accent': palette.accent } as CSSProperties}>
       <div className="trend-dialog__backdrop" data-testid="trend-backdrop" onClick={onClose} aria-hidden="true" />
-      <div ref={dialogRef} className="trend-dialog__box" role="dialog" aria-modal="true" aria-labelledby={titleId} onKeyDown={trapTab}>
+      <div ref={dialogRef} className="trend-dialog__box" role="dialog" aria-modal="true" aria-labelledby={titleId} onKeyDown={(e) => trapTab(e, dialogRef.current)}>
         <div className="trend-dialog__head">
           <div className="trend-dialog__heading">
             <div className="trend-dialog__kicker">{big.kicker}</div>
@@ -107,7 +99,9 @@ export function TrendDialog({ onClose }: { onClose: () => void }) {
           aria-label={`${aria}. Use the arrow keys to read each period.`}
           tabIndex={0}
           onKeyDown={step}
-          onMouseLeave={() => setHover(null)}
+          onPointerDown={point}
+          onPointerMove={point}
+          onPointerLeave={leave}
         >
           {big.grid.map((g) => (
             <g key={g.y}>
@@ -145,9 +139,6 @@ export function TrendDialog({ onClose }: { onClose: () => void }) {
                 />
               ))}
             </g>
-          ))}
-          {big.columns.map((c, i) => (
-            <rect key={c.x} data-period={i} x={c.x} y={16} width={c.width} height={BIG.baseline - 16} fill="transparent" onMouseEnter={() => setHover(i)} />
           ))}
         </svg>
         {note && <p className="trend-dialog__note">{note}</p>}

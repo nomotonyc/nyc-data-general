@@ -1,0 +1,22 @@
+/* A button on the map (back to the city, Map settings), as in the design. */
+.map-control {
+  position: absolute;
+  top: 16px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 10px;
+  background: var(--color-background);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-ink) 8%, transparent);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.map-control:hover {
+  background: var(--color-surface-sunken);
+}

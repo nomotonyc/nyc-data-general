@@ -61,3 +61,13 @@
 .map-legend__step {
   transition: background-color 450ms ease-in-out;
 }
+
+/* Stacked: under the map, so it covers none of it. */
+@media (max-width: 1099px) {
+  .map-legend {
+    position: static;
+    width: auto;
+    max-width: none;
+    margin: 12px 16px 0;
+  }
+}

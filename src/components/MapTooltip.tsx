@@ -16,7 +16,7 @@ type Props = {
       sheet?: never
     }
   | {
-      /** Opened by a tap: placed by the stylesheet, closable, with the click's action as a button. */
+      /** Opened by a tap: placed by the stylesheet, closable, with its action as a button. */
       sheet: { onAction: () => void; onClose: () => void }
       pointer?: never
       area?: never
@@ -78,7 +78,7 @@ export function MapTooltip({ details, dotColor, pointer, area, sheet }: Props) {
           </span>
         ))}
       </div>
-      {sheet && details.action ? (
+      {sheet ? (
         <button type="button" className="map-tooltip__action" onClick={sheet.onAction}>
           {details.action}
         </button>

@@ -11,7 +11,7 @@ import { FADE_DURATION, FIXED_VIEW, FLY_DURATION, HOVER_DELAY, NYC_BOUNDS, STACK
 import { cameraEasing } from '../map/easing'
 import { hoverDetails } from '../map/hover'
 import { legendDetails } from '../map/legend'
-import { clickAction, hitKind, hoverTarget, liveTarget, nearestFirst, placeAction, sameTarget, tapResult, type Hit, type Target } from '../map/interaction'
+import { cardAction, clickAction, hitKind, hoverTarget, liveTarget, nearestFirst, sameTarget, tapResult, type Hit, type Target } from '../map/interaction'
 import { mapLayers, mapSources } from '../map/layers'
 import { fillsAt, planFills } from '../map/fillTween'
 import { paintHover, paintMap } from '../map/paint'
@@ -125,11 +125,8 @@ export default function BaseMap() {
     }
     const onTap = (e: MapMouseEvent) => {
       const { select, action } = tapResult(stateRef.current, hitsAt(e), selected.current)
-      if (!select) {
-        clearHover()
-        if (action) dispatch(action)
-        return
-      }
+      if (action) dispatch(action)
+      if (!select) return clearHover()
       selected.current = select
       lastTarget.current = select
       // Where the tap was, so the card can open on the other side of the map.
@@ -247,12 +244,14 @@ export default function BaseMap() {
 
   // A tapped card describes the view it was opened in; one changed from outside the map (the
   // rail, the panel, the breadcrumb) closes it. A mouse's next move would; a finger never moves.
+  // Pinning from the city view zooms into the area's borough, but the pinned area's card stays.
   const view = `${storyId}|${metricId}|${borough}|${detail}|${geography}|${showFirehouses}`
   const shownIn = useRef(view)
   useEffect(() => {
     if (shownIn.current === view) return
     shownIn.current = view
-    if (selected.current) clearHover()
+    const pinnedHere = selected.current?.kind === 'area' && selected.current.id === stateRef.current.pinnedArea
+    if (selected.current && !pinnedHere) clearHover()
   }, [view, clearHover])
 
   // Fly to the focused borough, or back out to the city.
@@ -276,9 +275,11 @@ export default function BaseMap() {
     card = tapped ? <FirehouseTooltip {...props} sheet={{ onClose: clearHover }} /> : <FirehouseTooltip {...props} {...at} />
   } else if (settled) {
     const props = { key: settled.kind === 'borough' ? settled.borough : settled.id, details: hoverDetails(state, ds, settled), dotColor: ramp[1] }
+    // Focusing a borough goes into it and closes the card; a pin or unpin keeps it open.
     const onAction = () => {
-      clearHover()
-      dispatch(placeAction(settled))
+      const action = cardAction(settled, state.pinnedArea)
+      if (action.type === 'focusBorough') clearHover()
+      dispatch(action)
     }
     card = tapped ? <MapTooltip {...props} sheet={{ onAction, onClose: clearHover }} /> : <MapTooltip {...props} {...at} />
   }

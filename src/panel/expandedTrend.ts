@@ -9,6 +9,8 @@ type Input = Pick<ExplorerState, 'storyId' | 'metricId' | 'borough' | 'pinnedAre
 export type ExpandedTrend = {
   kicker: string
   title: string
+  /** The first and last years the chart shows: those picked, cut to the data's. */
+  years: { from: number; to: number }
   sub: string
   stats: { label: string; value: string; note: string }[]
   /** Index of the period the readout, guide and highlighted dots show. */
@@ -22,8 +24,24 @@ export type ExpandedTrend = {
   columns: { x: number; width: number }[]
 }
 
-/** Chart area in SVG units, as in the design: 900 × 360, values between y 28 and 300. */
-export const BIG = { width: 900, height: 360, left: 64, right: 884, plotLeft: 80, plotWidth: 788, top: 28, bottom: 300, baseline: 316 }
+/** Where the chart draws, in SVG units: the gridlines from left to right, the values from top to bottom. */
+export type ChartSize = { width: number; height: number; left: number; right: number; plotLeft: number; plotWidth: number; top: number; bottom: number; baseline: number }
+
+/**
+ * The chart for a width in pixels. It's drawn at its real size, not scaled down, so its labels
+ * stay readable on a phone: the margins stay put and the plot takes what's left, 40% as tall as
+ * wide, between 300 and 360. At the design's 900 it's the design's chart.
+ */
+export function chartSize(width: number): ChartSize {
+  const height = Math.round(Math.min(360, Math.max(300, width * 0.4)))
+  return { width, height, left: 64, right: width - 16, plotLeft: 80, plotWidth: width - 112, top: 28, bottom: height - 60, baseline: height - 44 }
+}
+
+/** The design's chart (900 × 360): what's drawn until the dialog has measured its width. */
+export const BIG = chartSize(900)
+
+/** The least room between the period labels along the bottom, in pixels. */
+const TICK_GAP = 36
 
 /** The period under a point on the chart, in SVG units; the nearest end for a point beyond either. */
 export function periodAt(columns: readonly { x: number; width: number }[], x: number): number {
@@ -32,7 +50,7 @@ export function periodAt(columns: readonly { x: number; width: number }[], x: nu
 }
 
 /** The larger trend view: the panel's lines with stats, gridlines and a readout for one period. */
-export function expandedTrend(state: Input, ds: LayerDataset, palette: TrendPalette, hover: number | null): ExpandedTrend | null {
+export function expandedTrend(state: Input, ds: LayerDataset, palette: TrendPalette, hover: number | null, size: ChartSize = BIG): ExpandedTrend | null {
   const data = trendSeries(state, ds, palette)
   const { metric, periods, monthly, places, values, perArea, noun } = data
   if (periods.length < 2) return null
@@ -44,9 +62,9 @@ export function expandedTrend(state: Input, ds: LayerDataset, palette: TrendPale
   const all = values.flat()
   const lo = Math.min(...all)
   const span = Math.max(...all) - lo
-  const step = BIG.plotWidth / last
-  const x = (i: number) => BIG.plotLeft + i * step
-  const y = (v: number) => (span === 0 ? (BIG.top + BIG.bottom) / 2 : BIG.bottom - ((v - lo) / span) * (BIG.bottom - BIG.top))
+  const step = size.plotWidth / last
+  const x = (i: number) => size.plotLeft + i * step
+  const y = (v: number) => (span === 0 ? (size.top + size.bottom) / 2 : size.bottom - ((v - lo) / span) * (size.bottom - size.top))
 
   const focus = places[places.length - 1]
   const main = values[values.length - 1]
@@ -76,17 +94,23 @@ export function expandedTrend(state: Input, ds: LayerDataset, palette: TrendPale
   }
 
   // One year: every month. A range: each year, plus quarters (or half-years beyond three years).
+  // Too crowded for the width: a range keeps only its years; then every second (or third…) label.
   const years = new Set(periods.map((p) => p.year)).size
   const every = years > 3 ? 6 : 3
-  const ticks = periods
-    .map((p, i) => ({ p, i }))
-    .filter(({ p }) => p.month === null || years === 1 || p.month % every === 0)
+  const indexed = periods.map((p, i) => ({ p, i }))
+  const spacing = (ls: typeof indexed) => (ls.length > 1 ? (ls[1].i - ls[0].i) * step : Infinity)
+  let labelled = indexed.filter(({ p }) => p.month === null || years === 1 || p.month % every === 0)
+  if (years > 1 && spacing(labelled) < TICK_GAP) labelled = indexed.filter(({ p }) => p.month === null || p.month === 0)
+  const stride = Math.max(1, Math.ceil(TICK_GAP / spacing(labelled)))
+  const ticks = labelled
+    .filter((_, k) => k % stride === 0)
     .map(({ p, i }) => ({ x: x(i), text: p.month === null || (years > 1 && p.month === 0) ? String(p.year) : MONTHS[p.month], current: i === hovered }))
 
   const against = places.slice(0, -1).map((p) => p.name).reverse()
   return {
     kicker: `${getStory(state.storyId).name} · ${monthly ? 'Monthly' : 'Yearly'} trend`,
     title: `${metric.label} · ${focus.name}`,
+    years: { from: periods[0].year, to: periods[last].year },
     sub: `${monthly ? 'Month by month' : 'Year by year'}, ${periodLabel(periods[0])} to ${periodLabel(periods[last])}${against.length ? `, against ${against.join(' and ')}` : ''}`,
     stats: [
       first,

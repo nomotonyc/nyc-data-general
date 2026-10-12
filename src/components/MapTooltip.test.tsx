@@ -51,12 +51,6 @@ describe('MapTooltip', () => {
       expect(onClose).toHaveBeenCalled()
     })
 
-    it('shows the hint, with no button, when there is nothing to do', () => {
-      render(<MapTooltip details={{ ...details, hint: 'Pinned', action: null }} dotColor="#f7b48c" sheet={{ onAction: () => {}, onClose: () => {} }} />)
-      expect(screen.getByText('Pinned')).toBeInTheDocument()
-      expect(screen.getAllByRole('button')).toHaveLength(1)
-    })
-
     it('is not placed by the pointer', () => {
       const { container } = render(<MapTooltip details={details} dotColor="#f7b48c" sheet={{ onAction: () => {}, onClose: () => {} }} />)
       expect((container.firstElementChild as HTMLElement).style.left).toBe('')

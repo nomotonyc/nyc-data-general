@@ -6,7 +6,7 @@ import { formatValue } from '../domain/format'
 import { initialExplorerState, type ExplorerState } from '../explorer/state'
 import { getLayer } from '../layers'
 import { lightTheme } from '../theme/tokens'
-import { expandedTrend, periodAt } from './expandedTrend'
+import { BIG, chartSize, expandedTrend, periodAt } from './expandedTrend'
 
 const fire: ExplorerState = { ...initialExplorerState, storyId: 'fire', metricId: 'structural-fires' }
 const ds = getDataset('structural-fires')
@@ -98,6 +98,57 @@ describe('expandedTrend chart', () => {
     const t = expandedTrend({ ...fire, yearFrom: 2019, yearTo: 2026 }, ds, palette, null)!
     expect(t.columns).toHaveLength(8 * 12 - 6)
     for (let i = 1; i < t.columns.length; i++) expect(t.columns[i].x).toBeCloseTo(t.columns[i - 1].x + t.columns[i - 1].width)
+  })
+})
+
+describe('expandedTrend years', () => {
+  it('are the years the chart shows, which a range reaching past the data is cut to', () => {
+    expect(expandedTrend(fire, ds, palette, null)!.years).toEqual({ from: 2025, to: 2025 })
+    // Population density starts in 2021.
+    const density = expandedTrend({ ...initialExplorerState, yearFrom: 2019, yearTo: 2024 }, getDataset('population-density'), palette, null)!
+    expect(density.years).toEqual({ from: 2021, to: 2024 })
+  })
+})
+
+describe('chartSize', () => {
+  it('is the design’s chart at the design’s width', () => {
+    expect(chartSize(900)).toEqual({ width: 900, height: 360, left: 64, right: 884, plotLeft: 80, plotWidth: 788, top: 28, bottom: 300, baseline: 316 })
+    expect(BIG).toEqual(chartSize(900))
+  })
+
+  it('keeps the same margins at a phone’s width, and a shorter but usable height', () => {
+    const size = chartSize(340)
+    expect(size).toMatchObject({ width: 340, left: 64, plotLeft: 80, right: 324, plotWidth: 228, top: 28 })
+    expect(size.height).toBe(300)
+    expect(size.baseline).toBe(size.height - 44)
+  })
+})
+
+describe('expandedTrend drawn at a phone’s width', () => {
+  const narrow = chartSize(340)
+
+  it('spans its plot with the periods’ columns', () => {
+    const t = expandedTrend(fire, ds, palette, null, narrow)!
+    expect(t.columns[0].x + t.columns[0].width / 2).toBeCloseTo(narrow.plotLeft)
+    expect(t.columns[11].x + t.columns[11].width / 2).toBeCloseTo(narrow.plotLeft + narrow.plotWidth)
+  })
+
+  it('labels fewer months, spaced so they never run into each other', () => {
+    const ticks = expandedTrend(fire, ds, palette, null, narrow)!.ticks
+    expect(ticks.length).toBeLessThan(12)
+    expect(ticks[0].text).toBe('Jan')
+    for (let i = 1; i < ticks.length; i++) expect(ticks[i].x - ticks[i - 1].x).toBeGreaterThanOrEqual(36)
+  })
+
+  it('labels only the years of a crowded range, so none of them is dropped', () => {
+    const ticks = expandedTrend({ ...fire, yearFrom: 2019, yearTo: 2026 }, ds, palette, null, narrow)!.ticks
+    expect(ticks.every((k) => /^\d{4}$/.test(k.text))).toBe(true)
+    expect(ticks[0].text).toBe('2019')
+    for (let i = 1; i < ticks.length; i++) expect(ticks[i].x - ticks[i - 1].x).toBeGreaterThanOrEqual(36)
+  })
+
+  it('marks the hovered month among the labels it keeps', () => {
+    expect(expandedTrend(fire, ds, palette, 2, narrow)!.ticks.find((k) => k.current)?.text).toBe('Mar')
   })
 })
 

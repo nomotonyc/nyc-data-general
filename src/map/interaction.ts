@@ -77,11 +77,17 @@ export function placeAction(target: PlaceTarget): ExplorerAction {
   return target.kind === 'borough' ? { type: 'focusBorough', borough: target.borough } : { type: 'pinArea', id: target.id }
 }
 
+/** What a tapped card's button does: as a click, except that a pinned area's button unpins it. */
+export function cardAction(target: PlaceTarget, pinnedArea: string | null): ExplorerAction {
+  return target.kind === 'area' && target.id === pinnedArea ? { type: 'unpinArea' } : placeAction(target)
+}
+
 /**
  * Touch has no hover, so a tap selects what a pointer would be over (a firehouse included),
  * whose card then offers the click's action as a button. Tapping the selected place again (a
- * double tap) does what a click does: through a firehouse, to the place beneath. A tap on
- * nothing does what a click does too.
+ * double tap) does what a click does: through a firehouse, to the place beneath. A pin selects
+ * the area pinned, its card open; focusing a borough goes into it, and closes the card. A tap on
+ * nothing does what a click does too. `select` is what's selected after the tap.
  */
 export function tapResult(
   state: Pick<ExplorerState, 'borough' | 'detail' | 'geography' | 'pinnedArea'> & Partial<Pick<ExplorerState, 'showFirehouses'>>,
@@ -90,7 +96,8 @@ export function tapResult(
 ): { select: Target | null; action: ExplorerAction | null } {
   const target = hoverTarget(state, hits)
   if (target && !sameTarget(target, selected)) return { select: target, action: null }
-  return { select: null, action: clickAction(state, hits) }
+  const action = clickAction(state, hits)
+  return { select: target && action?.type === 'pinArea' ? { kind: 'area', id: action.id } : null, action }
 }
 
 /** Whether two targets name the same place or firehouse. */

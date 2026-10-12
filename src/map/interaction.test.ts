@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { initialExplorerState } from '../explorer/state'
 import { LAYERS, boroughLayers } from './config'
-import { clickAction, hitKind, hoverTarget, liveTarget, nearestFirst, placeAction, tapResult } from './interaction'
+import { cardAction, clickAction, hitKind, hoverTarget, liveTarget, nearestFirst, placeAction, tapResult } from './interaction'
 
 const borough = (name: string) => ({ kind: 'borough' as const, properties: { borough: name } })
 const precinct = (n: number, b: string) => ({ kind: 'precincts' as const, properties: { precinct: n, borough: b } })
@@ -72,7 +72,19 @@ describe('tapResult', () => {
   it('acts on a place tapped again while selected, as a click does: a double tap', () => {
     const queens = { kind: 'borough' as const, borough: 'Queens' as const }
     expect(tapResult(city, [borough('Queens')], queens)).toEqual({ select: null, action: { type: 'focusBorough', borough: 'Queens' } })
-    expect(tapResult({ ...city, borough: 'Bronx' }, [precinct(44, 'Bronx')], { kind: 'area', id: '44' })).toEqual({ select: null, action: { type: 'pinArea', id: '44' } })
+  })
+
+  it('keeps an area selected once a double tap pins it, since the view stays put', () => {
+    const p44 = { kind: 'area' as const, id: '44' }
+    expect(tapResult({ ...city, borough: 'Bronx' }, [precinct(44, 'Bronx')], p44)).toEqual({ select: p44, action: { type: 'pinArea', id: '44' } })
+  })
+
+  it('selects the area a double tap on a firehouse pins, so its card follows the pin', () => {
+    const firehouse = { kind: 'firehouse' as const, properties: { id: 7, name: 'Engine 1', address: '142 West 31st Street', neighbourhood: 'Midtown', borough: 'Manhattan' } }
+    const inManhattan = { ...city, borough: 'Manhattan' as const, showFirehouses: true }
+    const hits = [firehouse, precinct(14, 'Manhattan')]
+    const selected = tapResult(inManhattan, hits).select
+    expect(tapResult(inManhattan, hits, selected)).toEqual({ select: { kind: 'area', id: '14' }, action: { type: 'pinArea', id: '14' } })
   })
 
   it('selects another place tapped while one is selected', () => {
@@ -89,6 +101,15 @@ describe('tapResult', () => {
   it('drops the pin on a tap on nothing, as a click does', () => {
     expect(tapResult({ ...city, borough: 'Brooklyn', pinnedArea: '75' }, [])).toEqual({ select: null, action: { type: 'unpinArea' } })
     expect(tapResult(city, [])).toEqual({ select: null, action: null })
+  })
+})
+
+describe('cardAction', () => {
+  it('focuses a borough, pins an area, and unpins the area once it is pinned', () => {
+    expect(cardAction({ kind: 'borough', borough: 'Bronx' }, null)).toEqual({ type: 'focusBorough', borough: 'Bronx' })
+    expect(cardAction({ kind: 'area', id: '44' }, null)).toEqual({ type: 'pinArea', id: '44' })
+    expect(cardAction({ kind: 'area', id: '44' }, '75')).toEqual({ type: 'pinArea', id: '44' })
+    expect(cardAction({ kind: 'area', id: '44' }, '44')).toEqual({ type: 'unpinArea' })
   })
 })
 

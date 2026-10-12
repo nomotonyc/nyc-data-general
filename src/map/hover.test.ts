@@ -78,9 +78,9 @@ describe('hoverDetails for a precinct', () => {
     expect(hoverDetails({ ...state, pinnedArea: '44' }, ds, { kind: 'area', id: '44' }).hint).toBe('Pinned')
   })
 
-  it('names the action for a tapped card’s button, and has none once pinned', () => {
+  it('names the action for a tapped card’s button: pin, or unpin once pinned', () => {
     expect(details.action).toBe('Pin this precinct')
-    expect(hoverDetails({ ...state, pinnedArea: '44' }, ds, { kind: 'area', id: '44' }).action).toBeNull()
+    expect(hoverDetails({ ...state, pinnedArea: '44' }, ds, { kind: 'area', id: '44' }).action).toBe('Unpin this precinct')
   })
 
   it('names precinct 116 on its own, under its borough', () => {

@@ -509,6 +509,46 @@ describe('BaseMap', () => {
       vi.restoreAllMocks()
     })
 
+    describe('on an area', () => {
+      const tapPrecinct = () => {
+        fingerDown()
+        map().queryRenderedFeatures.mockReturnValueOnce([feature(boroughLayers('Queens').precinctFill, { precinct: 114, borough: 'Queens' })])
+        act(() => map().fire('click', { point: { x: 100, y: 100 } }))
+      }
+      const inQueens = { geography: 'precincts' as const, storyId: 'fire' as const, metricId: 'structural-fires', borough: 'Queens' as const }
+
+      it('keeps the card open when its button pins the area, offering to unpin it, with focus on the button', async () => {
+        vi.useRealTimers()
+        renderWithExplorer(<BaseMap />, inQueens)
+        load()
+        tapPrecinct()
+        await userEvent.click(screen.getByRole('button', { name: 'Pin this precinct' }))
+        expect(screen.getByRole('region', { name: 'Precinct 114' })).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: 'Unpin this precinct' })).toHaveFocus()
+        await userEvent.click(screen.getByRole('button', { name: 'Unpin this precinct' }))
+        expect(screen.getByRole('button', { name: 'Pin this precinct' })).toBeInTheDocument()
+      })
+
+      it('keeps the card open when pinning from the city view zooms into the area’s borough', async () => {
+        vi.useRealTimers()
+        renderWithExplorer(<BaseMap />, { ...inQueens, borough: null, detail: 'area' })
+        load()
+        tapPrecinct()
+        await userEvent.click(screen.getByRole('button', { name: 'Pin this precinct' }))
+        expect(map().fitBounds).toHaveBeenLastCalledWith(BOROUGH_BOUNDS.Queens, expect.anything())
+        expect(screen.getByRole('button', { name: 'Unpin this precinct' })).toBeInTheDocument()
+      })
+
+      it('keeps the card open when a double tap pins the area', () => {
+        renderWithExplorer(<BaseMap />, inQueens)
+        load()
+        tapPrecinct()
+        tapPrecinct()
+        expect(screen.getByRole('region', { name: 'Precinct 114' })).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: 'Unpin this precinct' })).toBeInTheDocument()
+      })
+    })
+
     it('keeps the card when the finger leaves the map to reach its button', () => {
       renderWithExplorer(<BaseMap />, { storyId: 'fire', metricId: 'structural-fires' })
       load()

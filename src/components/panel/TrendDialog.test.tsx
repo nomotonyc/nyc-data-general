@@ -1,4 +1,4 @@
-import { fireEvent, screen, within } from '@testing-library/react'
+import { act, fireEvent, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { getDataset } from '../../data/load'
@@ -7,6 +7,9 @@ import { BIG, expandedTrend } from '../../panel/expandedTrend'
 import { renderWithExplorer } from '../../test/renderWithExplorer'
 import { lightTheme } from '../../theme/tokens'
 import { Trend } from './Trend'
+import { saveImage } from './saveImage'
+
+vi.mock('./saveImage', () => ({ saveImage: vi.fn(async () => 'done') }))
 
 const fire = { storyId: 'fire' as const, metricId: 'structural-fires' }
 const dialog = () => screen.getByRole('dialog', { name: 'Structural fires · Queens' })
@@ -113,6 +116,78 @@ describe('expanded trend', () => {
     expect(within(dialog()).getByRole('status')).toHaveTextContent('Oct 2025')
     await userEvent.keyboard('{Home}')
     expect(within(dialog()).getByRole('status')).toHaveTextContent('Jan 2025')
+  })
+
+  it('draws its chart at the width it has, so a phone’s keeps readable labels', async () => {
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(340)
+    await open()
+    expect(within(dialog()).getByRole('img').getAttribute('viewBox')).toMatch(/^0 0 340 /)
+    vi.restoreAllMocks()
+  })
+
+  it('saves itself as a picture, named for the layer, place and years, without its buttons', async () => {
+    await open()
+    await userEvent.click(within(dialog()).getByRole('button', { name: 'Save image' }))
+    const [node, options] = vi.mocked(saveImage).mock.calls.at(-1)!
+    expect(node).toBe(dialog())
+    expect(options).toEqual({ name: 'structural-fires-queens-2025', background: lightTheme.color.background })
+    for (const button of within(dialog()).getAllByRole('button')) expect(button.dataset.export).toBe('skip')
+  })
+
+  it('keeps focus on Save image while it saves, so Tab stays in the dialog', async () => {
+    await open()
+    let release = () => {}
+    vi.mocked(saveImage).mockImplementationOnce(() => new Promise<'done'>((r) => (release = () => r('done'))))
+    const button = within(dialog()).getByRole('button', { name: 'Save image' })
+    await userEvent.click(button)
+    expect(within(dialog()).getByRole('button', { name: 'Saving…' })).toHaveFocus()
+    expect(within(dialog()).getByRole('button', { name: 'Saving…' })).toHaveAttribute('aria-disabled', 'true')
+    await act(async () => release())
+    expect(within(dialog()).getByRole('button', { name: 'Save image' })).toHaveFocus()
+  })
+
+  it('says when saving fails, and can try again', async () => {
+    await open()
+    vi.mocked(saveImage).mockRejectedValueOnce(new Error('canvas too large'))
+    await userEvent.click(within(dialog()).getByRole('button', { name: 'Save image' }))
+    expect(within(dialog()).getByRole('button', { name: 'Couldn’t save, try again' })).toBeInTheDocument()
+  })
+
+  it('asks for another tap when a phone needs one to open its share sheet', async () => {
+    await open()
+    const share = vi.fn(async () => 'done' as const)
+    vi.mocked(saveImage).mockResolvedValueOnce({ tapToSave: share })
+    await userEvent.click(within(dialog()).getByRole('button', { name: 'Save image' }))
+    await userEvent.click(within(dialog()).getByRole('button', { name: 'Tap to save' }))
+    expect(share).toHaveBeenCalled()
+    expect(within(dialog()).getByRole('button', { name: 'Save image' })).toBeInTheDocument()
+  })
+
+  it('leaves the month pointed at out of the picture (its month, values, guide, dots and label), keeping the key to the lines', async () => {
+    await open()
+    const skipped = (el: Element | null) => (el as HTMLElement).dataset.export === 'skip'
+    let during: Record<string, unknown> | null = null
+    vi.mocked(saveImage).mockImplementationOnce(async (node) => {
+      const readout = node.querySelector('[role="status"]')!
+      during = {
+        guide: !!node.querySelector('.trend-dialog__guide'),
+        dots: node.querySelectorAll('.trend-dialog__marker').length,
+        current: !!node.querySelector('.trend-dialog__tick--current'),
+        readout: skipped(readout),
+        month: !!readout.querySelector('.trend-dialog__readout-period'),
+        values: readout.querySelectorAll('.trend-dialog__readout-value').length,
+        key: [...readout.querySelectorAll('.trend-dialog__readout-item')].map((i) => i.textContent?.replace(/[\d,.]+/g, '').trim()),
+        oneLine: readout.classList.contains('trend-dialog__readout--key'),
+      }
+      return 'done'
+    })
+    await userEvent.click(within(dialog()).getByRole('button', { name: 'Save image' }))
+    expect(during).toEqual({ guide: false, dots: 0, current: false, readout: false, month: false, values: 0, key: ['Queens', 'New York City'], oneLine: true })
+    expect(within(dialog()).getByRole('status')).not.toHaveClass('trend-dialog__readout--key')
+    // and back on screen once saved
+    expect(dialog().querySelector('.trend-dialog__guide')).toBeInTheDocument()
+    expect(dialog().querySelectorAll('.trend-dialog__readout-value')).toHaveLength(2)
+    expect(dialog().querySelectorAll('.trend-dialog__marker').length).toBeGreaterThan(0)
   })
 
   it('offers no larger view when there is no trend', () => {

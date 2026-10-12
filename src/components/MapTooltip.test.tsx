@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { HoverDetails } from '../map/hover'
 import { MapTooltip } from './MapTooltip'
@@ -15,6 +16,7 @@ const details: HoverDetails = {
   strip: { dot: 13.5, cityAverage: 42.9, boroughAverage: 21.6, caption: 'Among all 77 precincts', lo: '12', hi: '412' },
   comparisons: ['54% below the city average', '24% below the Bronx average'],
   hint: 'Click to pin this precinct',
+  action: 'Pin this precinct',
 }
 
 describe('MapTooltip', () => {
@@ -30,6 +32,35 @@ describe('MapTooltip', () => {
     expect(screen.getByText('Among all 77 precincts')).toBeInTheDocument()
     expect(screen.getByText('Lowest 12')).toBeInTheDocument()
     expect(screen.getByText('Highest 412')).toBeInTheDocument()
+  })
+
+  describe('as a sheet, for a tap', () => {
+    it('is read out, and offers the action as a button in place of the hint', async () => {
+      const onAction = vi.fn()
+      render(<MapTooltip details={details} dotColor="#f7b48c" sheet={{ onAction, onClose: () => {} }} />)
+      expect(screen.getByRole('region', { name: 'Precinct 44' })).toBeInTheDocument()
+      expect(screen.queryByText('Click to pin this precinct')).not.toBeInTheDocument()
+      await userEvent.click(screen.getByRole('button', { name: 'Pin this precinct' }))
+      expect(onAction).toHaveBeenCalled()
+    })
+
+    it('closes', async () => {
+      const onClose = vi.fn()
+      render(<MapTooltip details={details} dotColor="#f7b48c" sheet={{ onAction: () => {}, onClose }} />)
+      await userEvent.click(screen.getByRole('button', { name: 'Close' }))
+      expect(onClose).toHaveBeenCalled()
+    })
+
+    it('shows the hint, with no button, when there is nothing to do', () => {
+      render(<MapTooltip details={{ ...details, hint: 'Pinned', action: null }} dotColor="#f7b48c" sheet={{ onAction: () => {}, onClose: () => {} }} />)
+      expect(screen.getByText('Pinned')).toBeInTheDocument()
+      expect(screen.getAllByRole('button')).toHaveLength(1)
+    })
+
+    it('is not placed by the pointer', () => {
+      const { container } = render(<MapTooltip details={details} dotColor="#f7b48c" sheet={{ onAction: () => {}, onClose: () => {} }} />)
+      expect((container.firstElementChild as HTMLElement).style.left).toBe('')
+    })
   })
 
   describe('placement', () => {

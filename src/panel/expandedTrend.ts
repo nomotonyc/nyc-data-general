@@ -18,12 +18,18 @@ export type ExpandedTrend = {
   grid: { y: number; text: string }[]
   ticks: { x: number; text: string; current: boolean }[]
   guideX: number
-  /** Invisible hover targets, one per period, edge to edge. */
+  /** Each period's column, edge to edge: where pointing reads that period (periodAt). */
   columns: { x: number; width: number }[]
 }
 
 /** Chart area in SVG units, as in the design: 900 × 360, values between y 28 and 300. */
 export const BIG = { width: 900, height: 360, left: 64, right: 884, plotLeft: 80, plotWidth: 788, top: 28, bottom: 300, baseline: 316 }
+
+/** The period under a point on the chart, in SVG units; the nearest end for a point beyond either. */
+export function periodAt(columns: readonly { x: number; width: number }[], x: number): number {
+  const i = columns.findIndex((c) => x < c.x + c.width)
+  return i === -1 ? columns.length - 1 : i
+}
 
 /** The larger trend view: the panel's lines with stats, gridlines and a readout for one period. */
 export function expandedTrend(state: Input, ds: LayerDataset, palette: TrendPalette, hover: number | null): ExpandedTrend | null {

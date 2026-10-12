@@ -155,3 +155,68 @@
   color: var(--color-tooltip-ink-faint);
   font-size: 12px;
 }
+
+/* Opened by a tap: stays put instead of following a pointer, inside .map-sheet (BaseMap.css). */
+.map-tooltip--sheet {
+  position: static;
+  pointer-events: auto;
+}
+
+@media (max-width: 1099px) {
+  .map-tooltip--sheet {
+    width: auto;
+    box-shadow: none;
+  }
+}
+
+/* Focus arrives by script when a tap opens the card; it shows only for a keyboard. */
+.map-tooltip--sheet:focus {
+  outline: none;
+}
+
+.map-tooltip--sheet:focus-visible {
+  outline: 2px solid var(--color-tooltip-ink);
+  outline-offset: 2px;
+}
+
+.map-tooltip__close {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  /* A fingertip's worth, drawn small. */
+  width: 32px;
+  height: 32px;
+  margin: -8px -10px -8px auto;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--color-tooltip-ink-muted);
+  cursor: pointer;
+}
+
+.map-tooltip__close:hover {
+  background: var(--color-tooltip-raised);
+  color: var(--color-tooltip-ink);
+}
+
+.map-tooltip__close:focus-visible,
+.map-tooltip__action:focus-visible {
+  outline: 2px solid var(--color-tooltip-ink);
+  outline-offset: 2px;
+}
+
+/* The hint's place, as a button. */
+.map-tooltip__action {
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--color-tooltip-raised);
+  color: var(--color-tooltip-ink);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.map-tooltip__action:hover {
+  background: var(--color-tooltip-track);
+}

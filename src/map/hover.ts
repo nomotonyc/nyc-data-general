@@ -23,6 +23,8 @@ export type HoverDetails = {
   /** "34% above the city average", and for a precinct, its borough's average. */
   comparisons: string[]
   hint: string
+  /** The click's action, as a button on a card opened by a tap; none once there is nothing to do. */
+  action: string | null
 }
 
 const mean = (xs: readonly number[]) => xs.reduce((a, b) => a + b, 0) / xs.length
@@ -79,6 +81,7 @@ export function hoverDetails(
         compareToAverage(own, boroughAverage, `the ${area.borough} average`),
       ],
       hint: pinned ? 'Pinned' : `Click to pin this ${noun.one}`,
+      action: pinned ? null : `Pin this ${noun.one}`,
     }
   }
 
@@ -114,6 +117,7 @@ export function hoverDetails(
     },
     comparisons: [compareToAverage(own, cityAverage, metric.aggregation === 'sum' ? 'the average borough' : 'the city as a whole')],
     hint: `Click to focus on ${borough}`,
+    action: `Focus on ${borough}`,
   }
 }
 

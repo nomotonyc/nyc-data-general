@@ -1,6 +1,9 @@
 import { fireEvent, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { getDataset } from '../../data/load'
+import { initialExplorerState } from '../../explorer/state'
+import { BIG, expandedTrend } from '../../panel/expandedTrend'
 import { renderWithExplorer } from '../../test/renderWithExplorer'
 import { lightTheme } from '../../theme/tokens'
 import { Trend } from './Trend'
@@ -60,13 +63,46 @@ describe('expanded trend', () => {
     expect(dialog()).toContainElement(document.activeElement as HTMLElement)
   })
 
-  it('reads out the last month, then whichever month is hovered', async () => {
-    await open()
-    const readout = within(dialog()).getByRole('status')
-    expect(readout).toHaveTextContent('Dec 2025')
-    fireEvent.mouseEnter(dialog().querySelectorAll('[data-period]')[3])
-    expect(readout).toHaveTextContent('Apr 2025')
-    expect(readout).toHaveTextContent(/Queens.*New York City/)
+  describe('pointing at the chart', () => {
+    // jsdom lays nothing out: the chart is drawn at its own size, so a screen x is an SVG x.
+    const drawnAtOwnSize = () =>
+      vi.spyOn(SVGElement.prototype, 'getBoundingClientRect').mockReturnValue({ left: 0, top: 0, width: BIG.width, height: BIG.height } as DOMRect)
+    const columns = expandedTrend({ ...initialExplorerState, ...fire, borough: 'Queens' }, getDataset('structural-fires'), { accent: '', ramp: [], city: '' }, null)!.columns
+    /** The middle of a period's column, on screen. */
+    const at = (i: number) => columns[i].x + columns[i].width / 2
+    afterEach(() => vi.restoreAllMocks())
+
+    it('reads out the last month, then whichever month the mouse is over', async () => {
+      await open()
+      drawnAtOwnSize()
+      const readout = within(dialog()).getByRole('status')
+      expect(readout).toHaveTextContent('Dec 2025')
+      fireEvent.pointerMove(within(dialog()).getByRole('img'), { clientX: at(3), pointerType: 'mouse' })
+      expect(readout).toHaveTextContent('Apr 2025')
+      expect(readout).toHaveTextContent(/Queens.*New York City/)
+    })
+
+    it('follows a finger dragged across it, and keeps the last month read once it lifts', async () => {
+      await open()
+      drawnAtOwnSize()
+      const chart = within(dialog()).getByRole('img')
+      const readout = within(dialog()).getByRole('status')
+      fireEvent.pointerDown(chart, { clientX: at(1), pointerType: 'touch' })
+      expect(readout).toHaveTextContent('Feb 2025')
+      fireEvent.pointerMove(chart, { clientX: at(5), pointerType: 'touch' })
+      expect(readout).toHaveTextContent('Jun 2025')
+      fireEvent.pointerLeave(chart, { pointerType: 'touch' })
+      expect(readout).toHaveTextContent('Jun 2025')
+    })
+
+    it('goes back to the last month when the mouse leaves', async () => {
+      await open()
+      drawnAtOwnSize()
+      const chart = within(dialog()).getByRole('img')
+      fireEvent.pointerMove(chart, { clientX: at(3), pointerType: 'mouse' })
+      fireEvent.pointerLeave(chart, { pointerType: 'mouse' })
+      expect(within(dialog()).getByRole('status')).toHaveTextContent('Dec 2025')
+    })
   })
 
   it('steps through months with the arrow keys', async () => {

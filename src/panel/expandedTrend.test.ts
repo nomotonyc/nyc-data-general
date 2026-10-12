@@ -6,7 +6,7 @@ import { formatValue } from '../domain/format'
 import { initialExplorerState, type ExplorerState } from '../explorer/state'
 import { getLayer } from '../layers'
 import { lightTheme } from '../theme/tokens'
-import { expandedTrend } from './expandedTrend'
+import { expandedTrend, periodAt } from './expandedTrend'
 
 const fire: ExplorerState = { ...initialExplorerState, storyId: 'fire', metricId: 'structural-fires' }
 const ds = getDataset('structural-fires')
@@ -113,5 +113,21 @@ describe('expandedTrend for yearly estimates', () => {
     expect(t.stats[0].note).toBe('people per sq mi')
     expect(t.readout.period).toBe('2024')
     expect(t.ticks.map((k) => k.text)).toEqual(['2021', '2022', '2023', '2024'])
+  })
+})
+
+describe('periodAt', () => {
+  const columns = [0, 1, 2, 3].map((i) => ({ x: 100 + i * 50, width: 50 }))
+
+  it('finds the period whose column holds the point', () => {
+    expect(periodAt(columns, 100)).toBe(0)
+    expect(periodAt(columns, 149)).toBe(0)
+    expect(periodAt(columns, 150)).toBe(1)
+    expect(periodAt(columns, 299)).toBe(3)
+  })
+
+  it('takes the nearest end for a point beyond either one, as a finger dragged off the chart', () => {
+    expect(periodAt(columns, 10)).toBe(0)
+    expect(periodAt(columns, 800)).toBe(3)
   })
 })

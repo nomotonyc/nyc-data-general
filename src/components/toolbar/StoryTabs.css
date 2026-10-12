@@ -32,3 +32,17 @@
   font-size: 12px;
   font-weight: 500;
 }
+
+/* On a phone the stories share the full width; the numbers go, so all three fit at 320px. */
+@media (max-width: 640px) {
+  .story-tabs__tab {
+    flex: 1 1 auto;
+    justify-content: center;
+    min-width: 0;
+    padding: 0 10px;
+  }
+
+  .story-tabs__number {
+    display: none;
+  }
+}

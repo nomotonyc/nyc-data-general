@@ -16,6 +16,7 @@ function Explorer() {
       accent={theme.story[storyId].accent}
       toolbar={<Toolbar />}
       rail={<Rail />}
+      settings={<Rail places={false} />}
       map={<BaseMap />}
       panel={<FocusPanel />}
     />

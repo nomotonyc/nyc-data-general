@@ -69,7 +69,36 @@ export function clickAction(
   // Firehouses are only hovered: a click goes to the place beneath.
   const target = placeTarget(state, hits)
   if (!target) return state.pinnedArea === null ? null : { type: 'unpinArea' }
+  return placeAction(target)
+}
+
+/** What acting on a place does: focus a borough, or pin an area. */
+export function placeAction(target: PlaceTarget): ExplorerAction {
   return target.kind === 'borough' ? { type: 'focusBorough', borough: target.borough } : { type: 'pinArea', id: target.id }
+}
+
+/**
+ * Touch has no hover, so a tap selects what a pointer would be over (a firehouse included),
+ * whose card then offers the click's action as a button. Tapping the selected place again (a
+ * double tap) does what a click does: through a firehouse, to the place beneath. A tap on
+ * nothing does what a click does too.
+ */
+export function tapResult(
+  state: Pick<ExplorerState, 'borough' | 'detail' | 'geography' | 'pinnedArea'> & Partial<Pick<ExplorerState, 'showFirehouses'>>,
+  hits: readonly Hit[],
+  selected: Target | null = null,
+): { select: Target | null; action: ExplorerAction | null } {
+  const target = hoverTarget(state, hits)
+  if (target && !sameTarget(target, selected)) return { select: target, action: null }
+  return { select: null, action: clickAction(state, hits) }
+}
+
+/** Whether two targets name the same place or firehouse. */
+export function sameTarget(a: Target | null, b: Target | null): boolean {
+  if (a === null || b === null) return a === b
+  if (a.kind === 'borough') return b.kind === 'borough' && a.borough === b.borough
+  if (a.kind === 'area') return b.kind === 'area' && a.id === b.id
+  return b.kind === 'firehouse' && a.id === b.id
 }
 
 function isBorough(value: unknown): value is Borough {

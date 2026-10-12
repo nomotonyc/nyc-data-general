@@ -1,6 +1,6 @@
 import type { LngLatBoundsLike } from 'maplibre-gl'
 import type { Borough } from '../domain/geography'
-import { BOROUGH_PADDING, CITY_PADDING, NYC_BOUNDS } from './config'
+import { BOROUGH_PADDING, CITY_PADDING, NYC_BOUNDS, STACKED_PADDING } from './config'
 
 type Bounds = [[number, number], [number, number]]
 
@@ -18,7 +18,11 @@ export function cameraTarget(borough: Borough | null): LngLatBoundsLike {
   return borough ? BOROUGH_BOUNDS[borough] : NYC_BOUNDS
 }
 
-/** The margin around what the camera fits (checked in the browser to clear the legend). */
-export function cameraPadding(borough: Borough | null) {
+/**
+ * The margin around what the camera fits (checked in the browser to clear the legend).
+ * Once the columns stack, the legend sits under the map and the buttons on it need the top.
+ */
+export function cameraPadding(borough: Borough | null, { stacked = false } = {}) {
+  if (stacked) return STACKED_PADDING
   return borough ? BOROUGH_PADDING : CITY_PADDING
 }

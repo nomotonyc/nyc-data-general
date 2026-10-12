@@ -1,5 +1,48 @@
-/* Fills its layout slot (.explorer__map). Ties with MapLibre's .maplibregl-map
-   on the same element, so main.tsx imports maplibre-gl.css first. */
+/* The map and what sits on it (the back button, the pointer's card). Fills its layout slot
+   (.explorer__map) beside the columns; once they stack, the legend and a tapped card follow it
+   down the page instead of covering it. */
+.map-frame {
+  position: absolute;
+  inset: 0;
+  /* A double tap acts on a place; it must not zoom the page. */
+  touch-action: manipulation;
+}
+
+@media (max-width: 1099px) {
+  .map-frame {
+    position: relative;
+    /* About as tall as the city is at this width, so it draws as large as it can, plus a strip
+       of water at the top for the buttons (STACKED_PADDING), so they cover none of it. */
+    height: clamp(388px, calc(100vw + 48px), 568px);
+  }
+}
+
+/* Where a tapped card sits. Beside the columns: over the map, on the side away from the tap,
+   at the top, clear of the legend (bottom-right) and, on the left, of the back button. */
+.map-sheet {
+  position: absolute;
+  top: 16px;
+  z-index: 2;
+}
+
+.map-sheet--right {
+  right: 16px;
+}
+
+.map-sheet--left {
+  top: 72px;
+  left: 16px;
+}
+
+/* Stacked: under the map, so it covers none of it. */
+@media (max-width: 1099px) {
+  .map-sheet {
+    position: static;
+    margin: 12px 16px 0;
+  }
+}
+
+/* Ties with MapLibre's .maplibregl-map on the same element, so main.tsx imports maplibre-gl.css first. */
 .map .maplibregl-canvas:focus-visible {
   outline-offset: -2px;
 }
@@ -10,26 +53,14 @@
   background: var(--color-map-water);
 }
 
-
-/* Top-left of the map when a borough is focused, as in the design. */
+/* Top-left of the map when a borough is focused, as in the design (MapControl.css). */
 .map__back {
-  position: absolute;
-  top: 16px;
   left: 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 40px;
-  padding: 0 14px;
-  border: 1px solid var(--color-line-strong);
-  border-radius: 10px;
-  background: var(--color-background);
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-ink) 8%, transparent);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
 }
 
-.map__back:hover {
-  background: var(--color-surface-sunken);
+/* On a phone, "New York City" alone, so it fits beside Settings. */
+@media (max-width: 640px) {
+  .map__back-all {
+    display: none;
+  }
 }

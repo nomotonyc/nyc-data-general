@@ -14,6 +14,12 @@ export const CITY_PADDING = { top: 24, right: 24, bottom: 24, left: 24 }
 export const BOROUGH_PADDING = { top: 24, right: 24, bottom: 100, left: 24 }
 
 /**
+ * Room once the columns stack, for the city and a focused borough alike: the top clears the
+ * buttons on the map (back, Map settings), so they sit on water; the legend is under the map.
+ */
+export const STACKED_PADDING = { top: 72, right: 16, bottom: 16, left: 16 }
+
+/**
  * The map never moves on its own: no scroll, drag, keyboard or gesture zoom.
  * The explorer moves it (fit the city, focus a borough).
  */
@@ -110,6 +116,12 @@ export function areaLayers(borough: string, geography: Geography) {
     ? { fill: layers.battalionFill, line: layers.battalionLine }
     : { fill: layers.precinctFill, line: layers.precinctLine }
 }
+
+/** Narrow screens, where the explorer's columns stack (ExplorerLayout.css) and the legend sits under the map. */
+export const STACKED_LAYOUT = '(max-width: 1099px)'
+
+/** Phone-width screens, where the rail leaves the page for a settings sheet on the map (ExplorerLayout). */
+export const PHONE_LAYOUT = '(max-width: 640px)'
 
 /** How long the camera takes to glide between the city and a borough. */
 export const FLY_DURATION = 1000

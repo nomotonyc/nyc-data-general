@@ -19,3 +19,17 @@
 .year-range select + label {
   margin-left: 4px;
 }
+
+/* On a phone the years share the full width, however long an option's label. */
+@media (max-width: 640px) {
+  .year-range {
+    flex-grow: 1;
+    min-width: 0;
+  }
+
+  .year-range select {
+    flex: 1 1 0;
+    width: 0;
+    min-width: 0;
+  }
+}

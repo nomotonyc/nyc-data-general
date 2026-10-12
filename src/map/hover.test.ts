@@ -78,6 +78,11 @@ describe('hoverDetails for a precinct', () => {
     expect(hoverDetails({ ...state, pinnedArea: '44' }, ds, { kind: 'area', id: '44' }).hint).toBe('Pinned')
   })
 
+  it('names the action for a tapped card’s button, and has none once pinned', () => {
+    expect(details.action).toBe('Pin this precinct')
+    expect(hoverDetails({ ...state, pinnedArea: '44' }, ds, { kind: 'area', id: '44' }).action).toBeNull()
+  })
+
   it('names precinct 116 on its own, under its borough', () => {
     expect(hoverDetails(state, ds, { kind: 'area', id: '116' })).toMatchObject({ title: 'Precinct 116', subtitle: 'Queens' })
   })
@@ -114,6 +119,7 @@ describe('hoverDetails for a borough', () => {
 
   it('invites a click to focus', () => {
     expect(details.hint).toBe('Click to focus on Queens')
+    expect(details.action).toBe('Focus on Queens')
   })
 
   it('names its highest precinct instead of a share for density', () => {

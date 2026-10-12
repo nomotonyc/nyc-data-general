@@ -1,5 +1,6 @@
 import { render, screen, within } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import userEvent from '@testing-library/user-event'
+import { describe, expect, it, vi } from 'vitest'
 import { lightTheme } from '../theme/tokens'
 import { FirehouseTooltip } from './FirehouseTooltip'
 
@@ -54,5 +55,13 @@ describe('FirehouseTooltip', () => {
   it('shows a note where the listing is out of date', () => {
     render(<FirehouseTooltip details={{ ...details, note: 'Temporarily at 90-26 57th Avenue' }} {...at} />)
     expect(screen.getByText('Temporarily at 90-26 57th Avenue').closest('.firehouse-card__note')).toBeInTheDocument()
+  })
+
+  it('as a sheet for a tap, is read out and closes', async () => {
+    const onClose = vi.fn()
+    render(<FirehouseTooltip details={details} palette={fire} sheet={{ onClose }} />)
+    expect(screen.getByRole('region', { name: 'Firehouse, 172 Tillary Street' })).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Close' }))
+    expect(onClose).toHaveBeenCalled()
   })
 })

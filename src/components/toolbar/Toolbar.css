@@ -37,3 +37,8 @@
     justify-self: stretch;
   }
 }
+
+/* Save view, as tall as the year selects beside it. */
+.toolbar__end .save-image--labelled {
+  height: 38px;
+}

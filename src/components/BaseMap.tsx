@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { Map as MapLibreMap, type MapMouseEvent, type PointLike } from 'maplibre-gl'
 import './BaseMap.css'
@@ -15,13 +15,15 @@ import { legendDetails } from '../map/legend'
 import { cardAction, clickAction, hitKind, hoverTarget, liveTarget, nearestFirst, sameTarget, tapResult, type Hit, type Target } from '../map/interaction'
 import { mapLayers, mapSources } from '../map/layers'
 import { fillsAt, planFills } from '../map/fillTween'
-import { HOVER_LAYERS, paintHover, paintMap } from '../map/paint'
+import { paintHover, paintMap } from '../map/paint'
 import { buildStyle } from '../map/style'
 import { useTheme } from '../theme/context'
 import { firehouseDetails } from '../map/firehouseHover'
 import { FirehouseTooltip } from './FirehouseTooltip'
 import { MapLegend } from './MapLegend'
 import { MapTooltip } from './MapTooltip'
+import { MapPicture } from './MapPicture'
+import { MapShotContext, shoot, type Shot } from './mapShot'
 import { pictureCaption, pictureView } from '../panel/caption'
 import { useSaveImage } from './useSaveImage'
 import './Picture.css'
@@ -34,44 +36,6 @@ const MARKER_REACH = { mouse: 6, touch: 20 }
 /** The camera's margin for what's in view, given whether the columns are stacked now. */
 function padding(borough: Parameters<typeof cameraPadding>[0]) {
   return cameraPadding(borough, { stacked: window.matchMedia?.(STACKED_LAYOUT).matches ?? false })
-}
-
-/** The map's pixels as an object URL, at its size on screen. */
-type Shot = { url: string; width: number; height: number }
-
-/** How long a frame may take before the map is taken to be unable to draw (its context lost). */
-const SHOT_TIMEOUT = 5000
-
-/**
- * The map's pixels, without the outline of what the pointer is over. A WebGL canvas keeps its
- * pixels only for the frame that draws them, so a frame is asked for and they're read in it, as
- * MapLibre's 'render' fires; toBlob copies them there and encodes them off the main thread.
- * The outline layers are hidden for it, not filtered: a filter change shows a frame late.
- */
-function shoot(map: MapLibreMap): Promise<Shot> {
-  const shown = HOVER_LAYERS.map((id) => [id, map.getLayoutProperty(id, 'visibility') ?? 'visible'] as const)
-  for (const [id] of shown) map.setLayoutProperty(id, 'visibility', 'none')
-  const restore = () => {
-    for (const [id, visibility] of shown) map.setLayoutProperty(id, 'visibility', visibility)
-  }
-  return new Promise<Shot>((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error('The map drew no frame')), SHOT_TIMEOUT)
-    map.once('render', () => {
-      const canvas = map.getCanvas()
-      const { clientWidth: width, clientHeight: height } = canvas
-      try {
-        canvas.toBlob((blob) => {
-          clearTimeout(timer)
-          if (blob) resolve({ url: URL.createObjectURL(blob), width, height })
-          else reject(new Error('The map gave no pixels'))
-        }, 'image/png')
-      } catch (e) {
-        clearTimeout(timer)
-        reject(e)
-      }
-    })
-    map.triggerRepaint()
-  }).finally(restore)
 }
 
 /** Respect a request for less motion: jump instead of flying. */
@@ -357,6 +321,18 @@ export default function BaseMap() {
     }
   }
 
+  // The map's picture for one of the whole view, taken from elsewhere on the page (SaveView).
+  const shooter = useContext(MapShotContext)
+  const legendRef = useRef(legend)
+  useEffect(() => {
+    legendRef.current = legend
+  })
+  useEffect(() => {
+    const map = mapRef.current
+    shooter.set(ready && map ? () => shoot(map).then((s) => ({ ...s, legend: legendRef.current })) : null)
+    return () => shooter.set(null)
+  }, [shooter, ready])
+
   return (
     <>
       <div className="map-frame">
@@ -380,10 +356,9 @@ export default function BaseMap() {
       <MapLegend details={legend} save={ready ? { state: picture.button, onClick: saveMap } : undefined} />
       {caption && shot && (
         <div className="picture-stage" inert>
-          <div ref={pictureRef} className="picture map-picture" style={{ width: `${shot.width}px` }}>
+          <div ref={pictureRef} className="picture" style={{ width: `${shot.width}px` }}>
             <p className="picture__title">{caption.title}</p>
-            <img src={shot.url} width={shot.width} height={shot.height} alt="" />
-            <MapLegend details={legend} />
+            <MapPicture shot={shot} legend={legend} />
             <p className="picture__credit">{caption.credit}</p>
           </div>
         </div>

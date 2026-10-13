@@ -9,6 +9,7 @@ import { useWidth } from '../useWidth'
 import { pictureCaption, pictureView, slug } from '../../panel/caption'
 import { rangeLabel } from '../../domain/stories'
 import { SaveImageButton } from '../SaveImageButton'
+import { TrendChart, TrendReadout } from './TrendChart'
 import { useSaveImage } from '../useSaveImage'
 import '../Picture.css'
 import './TrendDialog.css'
@@ -103,21 +104,13 @@ export function TrendDialog({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* In a picture, the key to the lines stays, on one line; the month and its values go. */}
-        <div className={marked ? 'trend-dialog__readout' : 'trend-dialog__readout trend-dialog__readout--key'} role="status">
-          {marked && <span className="trend-dialog__readout-period">{big.readout.period}</span>}
-          {big.readout.values.map((r) => (
-            <span key={r.name} className="trend-dialog__readout-item">
-              <span className="trend-dialog__readout-dot" style={{ background: r.colour }} aria-hidden="true" />
-              <span className="trend-dialog__readout-name">{r.name}</span>
-              {marked && <span className="trend-dialog__readout-value">{r.value}</span>}
-            </span>
-          ))}
-        </div>
+        <TrendReadout big={big} values={marked} />
 
         <div ref={chartRef}>
-          <svg
-            className="trend-dialog__chart"
-            viewBox={`0 0 ${size.width} ${size.height}`}
+          <TrendChart
+            big={big}
+            size={size}
+            marked={marked}
             role="img"
             aria-label={`${aria}. Use the arrow keys to read each period.`}
             tabIndex={0}
@@ -125,48 +118,7 @@ export function TrendDialog({ onClose }: { onClose: () => void }) {
             onPointerDown={point}
             onPointerMove={point}
             onPointerLeave={leave}
-          >
-            {big.grid.map((g) => (
-              <g key={g.y}>
-                <line x1={size.left} y1={g.y} x2={size.right} y2={g.y} className="trend-dialog__grid" />
-                <text x={size.left - 8} y={g.y + 4} textAnchor="end" className="trend-dialog__tick">
-                  {g.text}
-                </text>
-              </g>
-            ))}
-            <line x1={size.left} y1={size.baseline} x2={size.right} y2={size.baseline} className="trend-dialog__baseline" />
-            {big.ticks.map((k) => (
-              <text key={k.x} x={k.x} y={size.baseline + 22} textAnchor="middle" className={`trend-dialog__tick${marked && k.current ? ' trend-dialog__tick--current' : ''}`}>
-                {k.text}
-              </text>
-            ))}
-            {marked && <line x1={big.guideX} y1={16} x2={big.guideX} y2={size.baseline} className="trend-dialog__guide" />}
-            {big.lines.map((line) => (
-              <g key={line.name}>
-                <polyline
-                  points={line.points.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')}
-                  fill="none"
-                  stroke={line.colour}
-                  strokeWidth={line.width}
-                  strokeLinejoin="round"
-                />
-                {line.dots
-                  .filter((d) => marked || !d.highlight)
-                  .map((d) => (
-                    <circle
-                      key={`${d.x}-${d.highlight}`}
-                      className={d.highlight ? 'trend-dialog__marker' : undefined}
-                      cx={d.x}
-                      cy={d.y}
-                      r={d.r}
-                      fill={d.filled ? line.colour : theme.color.background}
-                      stroke={d.highlight ? theme.color.background : line.colour}
-                      strokeWidth={2}
-                    />
-                  ))}
-              </g>
-            ))}
-          </svg>
+          />
         </div>
         {note && <p className="trend-dialog__note">{note}</p>}
         {picture.saving && <p className="picture__credit">{pictureCaption('focus', state, ds).credit}</p>}

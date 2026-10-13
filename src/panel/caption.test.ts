@@ -44,6 +44,17 @@ describe('pictureCaption', () => {
     expect(c.credit).toBe('Data: FDNY via NYC Open Data')
   })
 
+  it('for the whole view: the place in focus, and whatever is on screen credited, firehouses included', () => {
+    const view = pictureCaption('view', { ...fire, borough: 'Bronx', pinnedArea: '44', showFirehouses: true }, ds)
+    expect(view.title).toBe('Structural fires by precinct · Precinct 44 · 2025')
+    expect(view.credit).toContain('FDNY')
+    expect(view.credit).toBe(pictureCaption('map', { ...fire, borough: 'Bronx', showFirehouses: true }, ds).credit)
+  })
+
+  it('for the whole view: by borough or by area as its map is coloured, as its legend says', () => {
+    expect(pictureCaption('view', { ...fire, geography: 'battalions', detail: 'borough' }, getDataset('structural-fires', 'battalions')).title).toBe('Structural fires by borough · New York City · 2025')
+  })
+
   it('names the years the data has, which a range reaching past it is cut to', () => {
     const density = getDataset('population-density', 'precincts')
     const demo = { ...initialExplorerState, geography: 'precincts' as const, yearFrom: 2019 as const, yearTo: 2024 as const }

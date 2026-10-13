@@ -30,9 +30,17 @@
   left: -10000px;
 }
 
-/* The map's picture: its pixels, then its legend under them, whatever the layout on screen. */
+/* The map in a picture (MapPicture): its pixels, then its legend under them. */
+.map-picture {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .map-picture img {
   display: block;
+  max-width: 100%;
+  height: auto;
   border-radius: 8px;
 }
 
@@ -41,4 +49,45 @@
   width: auto;
   max-width: none;
   margin: 0;
+}
+
+/* The whole view in a picture (SaveView): the details in two columns as wide as the panel's,
+   the trend across both, then the map, as tall as the details (SaveView sizes it). As wide as
+   that makes it. Its sizes come from SaveView, as --view-column, --view-gap and --view-legend-gap. */
+.view-picture {
+  width: max-content;
+}
+
+.view-picture__body {
+  display: flex;
+  gap: var(--view-gap);
+  align-items: flex-start;
+}
+
+.view-picture .map-picture {
+  gap: var(--view-legend-gap);
+}
+
+/* At the width SaveView gives it, which makes the image the height it wants. */
+.view-picture__map img {
+  width: 100%;
+}
+
+.view-picture__details {
+  display: grid;
+  grid-template-columns: var(--view-column) var(--view-column);
+  gap: var(--view-gap);
+  align-items: start;
+}
+
+/* The panel's own padding (Panel.css, which may load after this) has no place here: the
+   columns line up with the trend under them. */
+.view-picture .view-picture__column,
+.view-picture .view-picture__trend {
+  padding: 0;
+}
+
+/* Across both columns: TREND_WIDTH wide. */
+.view-picture__trend {
+  grid-column: 1 / -1;
 }

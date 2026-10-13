@@ -5,13 +5,14 @@ import { areaById, areaNoun } from '../domain/geography'
 import { rangeLabel } from '../domain/stories'
 import { activeMetric, effectiveDetail, type ExplorerState } from '../explorer/state'
 import { BATTALION_BOUNDARIES, layerSources, type Source } from '../layers'
+import { shownSources } from './sources'
 
 /**
  * What a picture shows, which decides what its caption says: the place in focus (the summary,
  * the breakdown, the trend); the five boroughs compared; the highest areas of a borough or the
- * city; the map; or the firehouses of a borough or battalion.
+ * city; the map; the firehouses of a borough or battalion; or the whole view, map and panel.
  */
-export type PictureOf = 'focus' | 'boroughs' | 'areas' | 'map' | 'firehouses'
+export type PictureOf = 'focus' | 'boroughs' | 'areas' | 'map' | 'firehouses' | 'view'
 
 export type Caption = { title: string; credit: string; name: string }
 
@@ -30,17 +31,23 @@ export function pictureCaption(of: PictureOf, state: Input, ds: LayerDataset): C
   const { range } = effectiveRange(ds, { from: state.yearFrom, to: state.yearTo })
   const area = areaNoun(state.geography).one
   const city = state.borough ?? 'New York City'
+  // What the map is coloured by, as its legend says: the whole view's picture is mostly its map.
+  const mapped = effectiveDetail(state) === 'borough' ? 'borough' : area
   const parts =
     of === 'boroughs'
       ? [`${layer.label} by borough`]
       : of === 'areas'
         ? [`${layer.label} by ${area}`, city]
         : of === 'map'
-          ? [`${layer.label} by ${effectiveDetail(state) === 'borough' ? 'borough' : area}`, city]
-          : [`${layer.label} by ${area}`, state.pinnedArea !== null ? areaById(ds.areas, state.pinnedArea).label : city]
+          ? [`${layer.label} by ${mapped}`, city]
+          : [`${layer.label} by ${of === 'view' ? mapped : area}`, state.pinnedArea !== null ? areaById(ds.areas, state.pinnedArea).label : city]
   parts.push(rangeLabel(range))
-  // The map shows firehouses when they're on, placed in battalion areas.
-  const sources = [...layerSources(layer), ...(of === 'map' && state.showFirehouses ? [FIREHOUSE_SOURCE, BATTALION_BOUNDARIES] : [])]
+  // The map shows firehouses when they're on, placed in battalion areas; the whole view credits
+  // all it shows, as Data sources does.
+  const sources =
+    of === 'view'
+      ? shownSources(state).sources
+      : [...layerSources(layer), ...(of === 'map' && state.showFirehouses ? [FIREHOUSE_SOURCE, BATTALION_BOUNDARIES] : [])]
   return { title: parts.join(' · '), credit: creditFor(sources), name: slug(parts.join(' ')) }
 }
 

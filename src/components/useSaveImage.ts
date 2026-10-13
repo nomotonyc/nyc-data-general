@@ -7,7 +7,7 @@ export type Picture = { node: HTMLElement; name: string }
 
 type Status = 'idle' | 'saving' | 'failed' | Exclude<Saved, 'done'>
 
-const LABEL = { idle: 'Save image', saving: 'Saving…', failed: 'Couldn’t save, try again' } as const
+const LABEL = { saving: 'Saving…', failed: 'Couldn’t save, try again' } as const
 
 /** useSaveImage's state, for its button. */
 export type SaveState = { label: string; saving: boolean; idle: boolean }
@@ -19,7 +19,7 @@ export type SaveState = { label: string; saving: boolean; idle: boolean }
  * which shares the picture already drawn, at once; until `view` (what's on screen) changes, after
  * which that picture is out of date and the button starts again.
  */
-export function useSaveImage(background: string, view: string) {
+export function useSaveImage(background: string, view: string, idleLabel = 'Save image') {
   const [state, setState] = useState<{ status: Status; view: string }>({ status: 'idle', view })
   const set = (status: Status) => setState({ status, view })
   const { status } = state
@@ -46,7 +46,7 @@ export function useSaveImage(background: string, view: string) {
   }
 
   const button: SaveState = {
-    label: typeof status === 'object' ? 'Tap to save' : LABEL[status],
+    label: typeof status === 'object' ? 'Tap to save' : status === 'idle' ? idleLabel : LABEL[status],
     saving: status === 'saving',
     idle: status === 'idle',
   }

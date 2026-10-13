@@ -3,7 +3,7 @@ import { areaIdsIn } from '../data/places'
 import { areaValue, effectiveRange, rankOf } from '../data/selectors'
 import { compareToAverage, formatValue, formatWithUnit, ordinal } from '../domain/format'
 import { BOROUGHS, areaById, areaNoun, boroughInSentence } from '../domain/geography'
-import { yearLabel } from '../domain/stories'
+import { rangeLabel } from '../domain/stories'
 import type { Metric } from '../layers'
 import { activeMetric, type ExplorerState } from '../explorer/state'
 import type { PlaceTarget } from './interaction'
@@ -43,7 +43,7 @@ export function hoverDetails(
   const metric = activeMetric(state)
   const format = metric.format ?? 'count'
   const { range } = effectiveRange(ds, { from: state.yearFrom, to: state.yearTo })
-  const years = range.from === range.to ? yearLabel(range.from) : `${range.from}–${yearLabel(range.to)}`
+  const years = rangeLabel(range)
   const value = (ids: readonly string[]) => areaValue(ds, metric, ids, range)
   const position = (lo: number, hi: number) => (v: number) => (hi === lo ? 50 : ((v - lo) / (hi - lo)) * 100)
   const noun = areaNoun(ds.geography)

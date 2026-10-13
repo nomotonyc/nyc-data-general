@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { Map as MapLibreMap, type MapMouseEvent, type PointLike } from 'maplibre-gl'
 import './BaseMap.css'
 import './MapControl.css'
@@ -21,6 +22,11 @@ import { firehouseDetails } from '../map/firehouseHover'
 import { FirehouseTooltip } from './FirehouseTooltip'
 import { MapLegend } from './MapLegend'
 import { MapTooltip } from './MapTooltip'
+import { MapPicture } from './MapPicture'
+import { MapShotContext, shoot, type Shot } from './mapShot'
+import { pictureCaption, pictureView } from '../panel/caption'
+import { useSaveImage } from './useSaveImage'
+import './Picture.css'
 
 const CLICKABLE = BOROUGHS.flatMap((b) => [boroughLayers(b).boroughFill, ...GEOGRAPHIES.map((g) => areaLayers(b, g).fill)])
 const FIREHOUSES = BOROUGHS.map((b) => boroughLayers(b).firehouse)
@@ -46,6 +52,9 @@ export default function BaseMap() {
   const [pointer, setPointer] = useState({ x: 0, y: 0, width: 0, height: 0 })
   // The card waits HOVER_DELAY after the pointer settles on a place.
   const [carded, setCarded] = useState<Target | null>(null)
+  // The map's pixels while its picture is laid out (saveMap).
+  const [shot, setShot] = useState<Shot | null>(null)
+  const pictureRef = useRef<HTMLDivElement>(null)
   // Touch has no hover: a tap selects a place, and its card opens at once as a sheet.
   const [tapped, setTapped] = useState(false)
   // The place under the pointer, as last seen by the map's handlers.
@@ -271,18 +280,58 @@ export default function BaseMap() {
   const at = { pointer, area: pointer }
   let card = null
   if (settled?.kind === 'firehouse') {
-    const props = { key: `firehouse-${settled.id}`, details: firehouseDetails(settled.firehouse), palette: theme.story[storyId] }
-    card = tapped ? <FirehouseTooltip {...props} sheet={{ onClose: clearHover }} /> : <FirehouseTooltip {...props} {...at} />
+    const key = `firehouse-${settled.id}`
+    const props = { details: firehouseDetails(settled.firehouse), palette: theme.story[storyId] }
+    card = tapped ? <FirehouseTooltip key={key} {...props} sheet={{ onClose: clearHover }} /> : <FirehouseTooltip key={key} {...props} {...at} />
   } else if (settled) {
-    const props = { key: settled.kind === 'borough' ? settled.borough : settled.id, details: hoverDetails(state, ds, settled), dotColor: ramp[1] }
+    const key = settled.kind === 'borough' ? settled.borough : settled.id
+    const props = { details: hoverDetails(state, ds, settled), dotColor: ramp[1] }
     // Focusing a borough goes into it and closes the card; a pin or unpin keeps it open.
     const onAction = () => {
       const action = cardAction(settled, state.pinnedArea)
       if (action.type === 'focusBorough') clearHover()
       dispatch(action)
     }
-    card = tapped ? <MapTooltip {...props} sheet={{ onAction, onClose: clearHover }} /> : <MapTooltip {...props} {...at} />
+    card = tapped ? <MapTooltip key={key} {...props} sheet={{ onAction, onClose: clearHover }} /> : <MapTooltip key={key} {...props} {...at} />
   }
+
+  const legend = legendDetails(plan, activeMetric(state), ramp, { from: yearFrom, to: yearTo }, {
+    from: ds.periods[0].year,
+    to: ds.periods[ds.periods.length - 1].year,
+  }, ds.placement)
+
+  // The map as a picture: its pixels, what it shows above, its legend, whose data below. It's laid
+  // out off the screen, since on screen the legend may sit on the map and buttons and cards do.
+  const picture = useSaveImage(theme.color.background, pictureView(state))
+  const caption = picture.saving ? pictureCaption('map', state, ds) : null
+  const saveMap = async () => {
+    const taken: { shot?: Shot } = {}
+    const ran = await picture.save(async () => {
+      const map = mapRef.current
+      if (!map) return null
+      const shot = (taken.shot = await shoot(map))
+      flushSync(() => setShot(shot))
+      await pictureRef.current?.querySelector('img')?.decode?.()
+      return pictureRef.current && { node: pictureRef.current, name: `map-${pictureCaption('map', state, ds).name}` }
+    })
+    // Only a press that saved clears its picture: one made mid-save leaves that save's alone.
+    if (ran) {
+      setShot(null)
+      if (taken.shot) URL.revokeObjectURL(taken.shot.url)
+    }
+  }
+
+  // The map's picture for one of the whole view, taken from elsewhere on the page (SaveView).
+  const shooter = useContext(MapShotContext)
+  const legendRef = useRef(legend)
+  useEffect(() => {
+    legendRef.current = legend
+  })
+  useEffect(() => {
+    const map = mapRef.current
+    shooter.set(ready && map ? () => shoot(map).then((s) => ({ ...s, legend: legendRef.current })) : null)
+    return () => shooter.set(null)
+  }, [shooter, ready])
 
   return (
     <>
@@ -303,12 +352,17 @@ export default function BaseMap() {
       {/* Opened by a tap: beside the columns, over the map on the side away from the tap, so the
           place tapped stays in view; under the map once they stack. */}
       {tapped && card && <div className={`map-sheet map-sheet--${pointer.x < pointer.width / 2 ? 'right' : 'left'}`}>{card}</div>}
-      <MapLegend
-        details={legendDetails(plan, activeMetric(state), ramp, { from: yearFrom, to: yearTo }, {
-          from: ds.periods[0].year,
-          to: ds.periods[ds.periods.length - 1].year,
-        }, ds.placement)}
-      />
+      {/* Saving waits for the map to load: its style takes no changes before. */}
+      <MapLegend details={legend} save={ready ? { state: picture.button, onClick: saveMap } : undefined} />
+      {caption && shot && (
+        <div className="picture-stage" inert>
+          <div ref={pictureRef} className="picture" style={{ width: `${shot.width}px` }}>
+            <p className="picture__title">{caption.title}</p>
+            <MapPicture shot={shot} legend={legend} />
+            <p className="picture__credit">{caption.credit}</p>
+          </div>
+        </div>
+      )}
     </>
   )
 }

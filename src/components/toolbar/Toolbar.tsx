@@ -2,6 +2,7 @@ import { Breadcrumb } from './Breadcrumb'
 import { StoryTabs } from './StoryTabs'
 import './Toolbar.css'
 import { YearRange } from './YearRange'
+import { SaveView } from '../SaveView'
 
 export function Toolbar() {
   return (
@@ -11,6 +12,7 @@ export function Toolbar() {
       <StoryTabs />
       <div className="toolbar__end">
         <YearRange />
+        <SaveView />
       </div>
     </div>
   )

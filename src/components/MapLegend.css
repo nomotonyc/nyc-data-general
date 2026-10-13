@@ -15,6 +15,29 @@
   background: var(--color-background);
 }
 
+/* The title, and the map's save button at its end: as small as the title, so the legend
+   is no taller (BOROUGH_PADDING keeps a focused borough clear of it). */
+.map-legend__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.map-legend__head .save-image {
+  width: 24px;
+  height: 24px;
+  margin: -6px -6px -6px 0;
+}
+
+/* Its words, when it has something to say ("Tap to save"), as small as the title. */
+.map-legend__head .save-image--labelled {
+  width: auto;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
 .map-legend__title,
 .map-legend__note {
   overflow: hidden;

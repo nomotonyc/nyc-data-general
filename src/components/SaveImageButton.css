@@ -1,0 +1,52 @@
+/* The icon alone: quiet, in a heading's row (panel sections, the legend). */
+.save-image {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--color-ink-muted);
+  cursor: pointer;
+}
+
+.save-image:hover {
+  background: var(--color-surface-sunken);
+  color: var(--color-ink);
+}
+
+.save-image[aria-disabled='true'] {
+  color: var(--color-ink-faint);
+  cursor: progress;
+}
+
+/* With its label, beside a dialog's Close button, as it. */
+.save-image--labelled {
+  width: auto;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  background: var(--color-background);
+  color: var(--color-ink);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* On a phone the icon alone while idle, so a title beside it keeps the width (aria-label still
+   names it); its words show again when they ask for something ("Tap to save"). */
+@media (max-width: 640px) {
+  .save-image--labelled.save-image--idle {
+    width: 44px;
+    padding: 0;
+  }
+
+  .save-image--idle .save-image__label {
+    display: none;
+  }
+}

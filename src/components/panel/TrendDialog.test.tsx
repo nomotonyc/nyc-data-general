@@ -7,9 +7,9 @@ import { BIG, expandedTrend } from '../../panel/expandedTrend'
 import { renderWithExplorer } from '../../test/renderWithExplorer'
 import { lightTheme } from '../../theme/tokens'
 import { Trend } from './Trend'
-import { saveImage } from './saveImage'
+import { saveImage } from '../saveImage'
 
-vi.mock('./saveImage', () => ({ saveImage: vi.fn(async () => 'done') }))
+vi.mock('../saveImage', () => ({ saveImage: vi.fn(async () => 'done') }))
 
 const fire = { storyId: 'fire' as const, metricId: 'structural-fires' }
 const dialog = () => screen.getByRole('dialog', { name: 'Structural fires · Queens' })

@@ -14,10 +14,18 @@ export const FIREHOUSES: readonly Firehouse[] = FIREHOUSE_COLLECTION.features.ma
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
-export function firehouseSourceUsed(updated: string): string {
-  const [year, month] = updated.split('-').map(Number)
-  return `Firehouse locations and units, as the city last updated them in ${MONTHS[month - 1]} ${year}`
+/** A YYYY-MM-DD date as its month and year: "September 2025". */
+function monthOf(date: string): string {
+  const [year, month] = date.split('-').map(Number)
+  return `${MONTHS[month - 1]} ${year}`
 }
+
+export function firehouseSourceUsed(updated: string): string {
+  return `Firehouse locations and units, as the city last updated them in ${monthOf(updated)}`
+}
+
+/** When the city last updated the listing, as a month: "September 2025". */
+export const LISTING_UPDATED = monthOf(FIREHOUSE_COLLECTION.updated)
 
 /** Credited in Data sources whenever firehouses are on screen. */
 export const FIREHOUSE_SOURCE: Source = {
@@ -27,8 +35,6 @@ export const FIREHOUSE_SOURCE: Source = {
   used: firehouseSourceUsed(FIREHOUSE_COLLECTION.updated),
 }
 
-const [updatedYear, updatedMonth] = FIREHOUSE_COLLECTION.updated.split('-').map(Number)
-
 /** Shown under "How this is calculated" whenever firehouses are on screen. */
 export const FIREHOUSE_METHOD: readonly string[] = [
   'Firehouse markers show the highest command each firehouse houses: a battalion (run by a battalion chief), a division (a deputy chief, over several battalions) or a borough command (an assistant chief).',
@@ -36,5 +42,5 @@ export const FIREHOUSE_METHOD: readonly string[] = [
   'Checked in October 2026 against FDNY’s own station list (in NERIS, the national fire reporting system) and, for engines, ladders and squads, City Planning’s 2026 fire company boundaries: every company shown is current and based in the firehouse shown, except Engine 287, Ladder 136 and Battalion 46, in temporary quarters while their firehouse is rebuilt (their card says where).',
   'Marine 3, 4 and 8, temporary marine units on FDNY’s station list, are not in the listing and not shown.',
   'Firehouse counts are of where firehouses stand, which is close to, but not the same as, the companies FDNY assigns to a battalion.',
-  `The listing was last updated in ${MONTHS[updatedMonth - 1]} ${updatedYear}; changes after the October 2026 check are not shown.`,
+  `The listing was last updated in ${LISTING_UPDATED}; changes after the October 2026 check are not shown.`,
 ]

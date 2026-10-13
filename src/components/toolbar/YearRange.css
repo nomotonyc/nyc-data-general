@@ -6,17 +6,33 @@
   color: var(--color-ink-muted);
 }
 
+/* The select and its chevron (YearRange's Select). */
+.year-range__select {
+  position: relative;
+  display: inline-flex;
+}
+
 .year-range select {
   min-height: 38px;
-  padding: 8px 10px;
+  padding: 8px 34px 8px 10px;
   border: 1px solid var(--color-line-strong);
   border-radius: 8px;
   background: var(--color-background);
   color: var(--color-ink);
   font-size: 14px;
+  appearance: none;
 }
 
-.year-range select + label {
+.year-range__chevron {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  color: var(--color-ink-muted);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.year-range__select + label {
   margin-left: 4px;
 }
 
@@ -27,9 +43,13 @@
     min-width: 0;
   }
 
-  .year-range select {
+  .year-range__select {
     flex: 1 1 0;
-    width: 0;
+    min-width: 0;
+  }
+
+  .year-range select {
+    width: 100%;
     min-width: 0;
   }
 }

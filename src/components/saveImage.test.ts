@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { saveImage } from './saveImage'
+import { DRAW_TIMEOUT, SHEET_OPEN, saveImage } from './saveImage'
 
 vi.mock('html-to-image', () => ({ toJpeg: vi.fn(async () => 'data:image/jpeg;base64,/9j/') }))
 const { toJpeg } = await import('html-to-image')
@@ -20,6 +20,7 @@ describe('saveImage', () => {
     })
   })
   afterEach(() => {
+    vi.useRealTimers()
     vi.restoreAllMocks()
     vi.unstubAllGlobals()
     Object.assign(navigator, { canShare: undefined, share: undefined })
@@ -84,6 +85,37 @@ describe('saveImage', () => {
     const file = share.mock.calls[0][0].files![0]
     expect(file).toMatchObject({ name: 'trend.jpg', type: 'image/jpeg' })
     expect(clicked).toHaveLength(0)
+  })
+
+  it('stops waiting once the share sheet is open, which it may stay for as long as it likes', async () => {
+    vi.useFakeTimers()
+    device({ phone: true, share: vi.fn(() => new Promise<void>(() => {})) })
+    const saved = saveImage(node, { name: 'trend', background: '#fff' })
+    await vi.advanceTimersByTimeAsync(SHEET_OPEN)
+    expect(await saved).toBe('done')
+    expect(clicked).toHaveLength(0)
+  })
+
+  it('downloads it after all when the open sheet fails later, other than by being dismissed', async () => {
+    vi.useFakeTimers()
+    let fail: (reason: unknown) => void = () => {}
+    device({ phone: true, share: vi.fn(() => new Promise<void>((_, reject) => (fail = reject))) })
+    const saved = saveImage(node, { name: 'trend', background: '#fff' })
+    await vi.advanceTimersByTimeAsync(SHEET_OPEN)
+    expect(await saved).toBe('done')
+    fail(new DOMException('too big', 'DataError'))
+    await vi.advanceTimersByTimeAsync(0)
+    expect(clicked).toHaveLength(1)
+  })
+
+  it('fails, rather than spinning for ever, when drawing the picture never finishes', async () => {
+    vi.useFakeTimers()
+    device({ phone: false })
+    vi.mocked(toJpeg).mockImplementationOnce(() => new Promise(() => {}))
+    const saved = saveImage(node, { name: 'trend', background: '#fff' })
+    const failed = expect(saved).rejects.toThrow()
+    await vi.advanceTimersByTimeAsync(DRAW_TIMEOUT)
+    await failed
   })
 
   it('does nothing more when the share sheet is dismissed', async () => {

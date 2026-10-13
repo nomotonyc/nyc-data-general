@@ -20,6 +20,8 @@ describe('expandedTrend header', () => {
     const t = expandedTrend({ ...fire, borough: 'Queens', pinnedArea: '114' }, ds, palette, null)!
     expect(t.kicker).toBe('Fire · Monthly trend')
     expect(t.title).toBe('Structural fires · Precinct 114')
+    expect(t.place).toBe('Precinct 114')
+    expect(t.note).toBe('Average per precinct, so the lines compare fairly')
     expect(t.sub).toBe('Month by month, Jan 2025 to Dec 2025, against Queens and New York City')
   })
 

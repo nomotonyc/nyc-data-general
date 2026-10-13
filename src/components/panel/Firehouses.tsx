@@ -1,13 +1,12 @@
-import { useId } from 'react'
 import { FIREHOUSES } from '../../data/firehouses'
 import { useExplorerState } from '../../explorer/context'
 import { unitChip } from '../../map/unitColours'
 import { firehouseScope, firehousesIn } from '../../panel/firehouses'
 import { useTheme } from '../../theme/context'
+import { SaveableSection } from './SaveableSection'
 
 /** A focused borough's or pinned battalion's firehouses: counts, companies by type, and for a battalion each firehouse. */
 export function Firehouses() {
-  const headingId = useId()
   const state = useExplorerState()
   const theme = useTheme()
   const scope = firehouseScope(state)
@@ -15,10 +14,7 @@ export function Firehouses() {
   const summary = firehousesIn(FIREHOUSES, scope)
   const palette = theme.story[state.storyId]
   return (
-    <section className="panel__section" aria-labelledby={headingId}>
-      <h3 id={headingId} className="panel__title">
-        {summary.title}
-      </h3>
+    <SaveableSection of="firehouses" title={summary.title}>
       <p className="panel__firehouse-totals">{summary.totals}</p>
       <div className="panel__firehouse-kinds">
         {summary.byKind.map((k) => {
@@ -40,6 +36,6 @@ export function Firehouses() {
           ))}
         </ul>
       )}
-    </section>
+    </SaveableSection>
   )
 }

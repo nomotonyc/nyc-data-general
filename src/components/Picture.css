@@ -1,0 +1,93 @@
+/* What only a saved picture shows: room around it, what it is above, whose data below. */
+.picture {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  background: var(--color-background);
+}
+
+.picture__title,
+.picture__credit {
+  margin: 0;
+}
+
+.picture__title {
+  color: var(--color-ink);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.picture__credit {
+  color: var(--color-ink-muted);
+  font-size: 11px;
+}
+
+/* Off the screen: where a picture that isn't on screen as it is (the map's) is laid out. */
+.picture-stage {
+  position: fixed;
+  top: 0;
+  left: -10000px;
+}
+
+/* The map in a picture (MapPicture): its pixels, then its legend under them. */
+.map-picture {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.map-picture img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.map-picture .map-legend {
+  position: static;
+  width: auto;
+  max-width: none;
+  margin: 0;
+}
+
+/* The whole view in a picture (SaveView): the details in two columns as wide as the panel's,
+   the trend across both, then the map, as tall as the details (SaveView sizes it). As wide as
+   that makes it. Its sizes come from SaveView, as --view-column, --view-gap and --view-legend-gap. */
+.view-picture {
+  width: max-content;
+}
+
+.view-picture__body {
+  display: flex;
+  gap: var(--view-gap);
+  align-items: flex-start;
+}
+
+.view-picture .map-picture {
+  gap: var(--view-legend-gap);
+}
+
+/* At the width SaveView gives it, which makes the image the height it wants. */
+.view-picture__map img {
+  width: 100%;
+}
+
+.view-picture__details {
+  display: grid;
+  grid-template-columns: var(--view-column) var(--view-column);
+  gap: var(--view-gap);
+  align-items: start;
+}
+
+/* The panel's own padding (Panel.css, which may load after this) has no place here: the
+   columns line up with the trend under them. */
+.view-picture .view-picture__column,
+.view-picture .view-picture__trend {
+  padding: 0;
+}
+
+/* Across both columns: TREND_WIDTH wide. */
+.view-picture__trend {
+  grid-column: 1 / -1;
+}

@@ -43,4 +43,11 @@ describe('YearRange', () => {
     await userEvent.selectOptions(to(), '2021')
     expect(to()).toHaveValue('2021')
   })
+
+  it('draws its own chevron in each select, decorative, with room from the edge', () => {
+    const { container } = renderWithExplorer(<YearRange />)
+    const chevrons = container.querySelectorAll('.year-range__chevron')
+    expect(chevrons).toHaveLength(2)
+    for (const c of chevrons) expect(c).toHaveAttribute('aria-hidden', 'true')
+  })
 })

@@ -21,7 +21,7 @@ export function Trend() {
           Trend · {t.title}
         </h3>
         {!t.empty && (
-          <button type="button" className="panel__expand" aria-label="Expand trend" onClick={open}>
+          <button type="button" className="panel__expand" data-export="skip" aria-label="Expand trend" onClick={open}>
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
               <path d="M9.5 2.5h4v4M6.5 13.5h-4v-4M13.5 2.5L9 7M2.5 13.5L7 9" />
             </svg>

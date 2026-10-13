@@ -3,7 +3,7 @@ import { areaIdsIn } from '../data/places'
 import { areaValue, effectiveRange, rankOf } from '../data/selectors'
 import { compareSigned, formatValue, ordinal, unitAfter } from '../domain/format'
 import { BOROUGHS, areaById, areaNoun, boroughInSentence, type Borough } from '../domain/geography'
-import { yearLabel } from '../domain/stories'
+import { rangeLabel } from '../domain/stories'
 import { activeMetric, type ExplorerState } from '../explorer/state'
 
 type Input = Pick<ExplorerState, 'storyId' | 'metricId' | 'borough' | 'pinnedArea' | 'yearFrom' | 'yearTo'>
@@ -37,7 +37,7 @@ export type FocusSummary = {
 /** The panel's headline for the city, a focused borough, or a pinned precinct or battalion. */
 export function focusSummary(state: Input, ds: LayerDataset): FocusSummary {
   const { metric, value, show, average, range } = reader(state, ds)
-  const years = range.from === range.to ? yearLabel(range.from) : `${range.from}–${yearLabel(range.to)}`
+  const years = rangeLabel(range)
   const measure = `${metric.measure} · ${years}`
   const cityIds = areaIdsIn(ds, null)
   const boroughValues = BOROUGHS.map((b) => value(areaIdsIn(ds, b)))

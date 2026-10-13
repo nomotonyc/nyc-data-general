@@ -8,6 +8,8 @@ import { useExplorerDispatch } from '../explorer/context'
 import { renderWithExplorer } from '../test/renderWithExplorer'
 import { lightTheme } from '../theme/tokens'
 import BaseMap from './BaseMap'
+import { saveImage } from './saveImage'
+import { MapShotContext, SHOT_PIXEL_RATIO, mapShooter } from './mapShot'
 import { MapToggles } from './rail/MapToggles'
 import { PlaceList } from './rail/PlaceList'
 import { Breadcrumb } from './toolbar/Breadcrumb'
@@ -17,6 +19,7 @@ type Handler = (event?: unknown) => void
 type Mock = ReturnType<typeof vi.fn>
 type FakeMap = {
   options: Record<string, unknown>
+  triggerRepaint: Mock
   fitBounds: Mock
   remove: Mock
   setFeatureState: Mock
@@ -24,11 +27,15 @@ type FakeMap = {
   setPaintProperty: Mock
   setFilter: Mock
   queryRenderedFeatures: Mock
-  canvas: { style: { cursor: string }; focus: Mock }
+  canvas: { style: { cursor: string }; focus: Mock; toBlob: Mock; clientWidth: number; clientHeight: number }
+  getLayoutProperty: Mock
+  setPixelRatio: Mock
   fire: (event: string, payload?: unknown) => void
 }
 
 const maps = vi.hoisted(() => [] as FakeMap[])
+
+vi.mock('./saveImage', () => ({ saveImage: vi.fn(async () => 'done') }))
 
 // jsdom has no WebGL, so a stand-in records what BaseMap asks MapLibre to do.
 vi.mock('maplibre-gl', async () => {
@@ -47,7 +54,12 @@ vi.mock('maplibre-gl', async () => {
       setPaintProperty = vi.fn()
       setFilter = vi.fn()
       queryRenderedFeatures = vi.fn(() => [])
-      canvas = { style: { cursor: '' }, focus: vi.fn() }
+      canvas = { style: { cursor: '' }, focus: vi.fn(), toBlob: vi.fn((done: (b: Blob) => void) => done(new Blob(['png']))), clientWidth: 800, clientHeight: 600 }
+      getLayoutProperty = vi.fn(() => undefined)
+      setPixelRatio = vi.fn()
+      getPixelRatio = vi.fn(() => 1)
+      // Draws a frame, as MapLibre would: the 'render' event fires while its pixels are there.
+      triggerRepaint = vi.fn(() => this.fire('render'))
       getCanvas() {
         return this.canvas
       }
@@ -584,6 +596,117 @@ describe('BaseMap', () => {
     expect(screen.queryByText('Click to focus on Queens')).not.toBeInTheDocument()
     expect(lastFilter(LAYERS.precinctHover)).toEqual(['in', ['get', 'precinct'], ['literal', []]])
   })
+  })
+})
+
+describe('saving the map as a picture', () => {
+  const fire = { storyId: 'fire' as const, metricId: 'structural-fires', geography: 'precincts' as const, yearFrom: 2025 as const, yearTo: 2025 as const }
+  beforeEach(() => {
+    Object.assign(URL, { createObjectURL: vi.fn(() => 'blob:map'), revokeObjectURL: vi.fn() })
+  })
+  const saveButton = () => screen.getByRole('button', { name: 'Save image: Map' })
+
+  it('offers to once the map has loaded, as its style takes no changes before', () => {
+    renderWithExplorer(<BaseMap />, fire)
+    expect(screen.queryByRole('button', { name: 'Save image: Map' })).not.toBeInTheDocument()
+    load()
+    expect(saveButton()).toBeInTheDocument()
+  })
+
+  it('draws the map, with what it shows above it, its legend, and whose data below it', async () => {
+    renderWithExplorer(<BaseMap />, fire)
+    load()
+    let picture: { img: string | null; text: string; legend: boolean; width: string } | null = null
+    vi.mocked(saveImage).mockImplementationOnce(async (node) => {
+      picture = { img: node.querySelector('img')?.getAttribute('src') ?? null, text: node.textContent ?? '', legend: !!node.querySelector('.map-legend'), width: node.style.width }
+      return 'done'
+    })
+    await userEvent.click(saveButton())
+    expect(picture).toMatchObject({ img: 'blob:map', legend: true, width: '800px' })
+    expect(picture!.text).toMatch(/^Structural fires by borough · New York City · 2025/)
+    expect(picture!.text).toMatch(/Data: .*NYC Department of City Planning/)
+    expect(vi.mocked(saveImage).mock.calls.at(-1)![1].name).toBe('map-structural-fires-by-borough-new-york-city-2025')
+  })
+
+  it('reads the map’s pixels in the frame that draws them, which a WebGL canvas keeps no longer', async () => {
+    renderWithExplorer(<BaseMap />, fire)
+    load()
+    const read: number[] = []
+    map().canvas.toBlob.mockImplementation((done: (b: Blob) => void) => {
+      read.push(map().triggerRepaint.mock.calls.length)
+      done(new Blob(['png']))
+    })
+    await userEvent.click(saveButton())
+    expect(read).toEqual([1])
+  })
+
+  it('hides the outline of what the pointer is over for the shot, then puts it back', async () => {
+    renderWithExplorer(<BaseMap />, fire)
+    load()
+    const during: unknown[][] = []
+    map().canvas.toBlob.mockImplementation((done: (b: Blob) => void) => {
+      during.push(map().setLayoutProperty.mock.calls.filter(([id]) => id === LAYERS.boroughHover).at(-1)!)
+      done(new Blob(['png']))
+    })
+    await userEvent.click(saveButton())
+    expect(during).toEqual([[LAYERS.boroughHover, 'visibility', 'none']])
+    expect(map().setLayoutProperty.mock.calls.filter(([id]) => id === LAYERS.boroughHover).at(-1)).toEqual([LAYERS.boroughHover, 'visibility', 'visible'])
+  })
+
+  it('lets the whole view take the map’s picture, with its legend, once loaded and not before', async () => {
+    const shooter = mapShooter()
+    renderWithExplorer(
+      <MapShotContext.Provider value={shooter}>
+        <BaseMap />
+      </MapShotContext.Provider>,
+      fire,
+    )
+    await expect(shooter.take()).rejects.toThrow()
+    load()
+    await expect(shooter.take()).resolves.toMatchObject({ url: 'blob:map', width: 800, height: 600, legend: { title: 'Structural fires, 2025 · by borough' } })
+  })
+
+  it('draws the map at a higher resolution for its picture, then goes back', async () => {
+    renderWithExplorer(<BaseMap />, fire)
+    load()
+    let during = 0
+    map().canvas.toBlob.mockImplementation((done: (b: Blob) => void) => {
+      during = map().setPixelRatio.mock.calls.at(-1)![0]
+      done(new Blob(['png']))
+    })
+    await userEvent.click(saveButton())
+    expect(during).toBe(SHOT_PIXEL_RATIO)
+    expect(map().setPixelRatio).toHaveBeenLastCalledWith(1)
+  })
+
+  it('puts the outlines back as they were when two pictures are taken at once', async () => {
+    const shooter = mapShooter()
+    renderWithExplorer(
+      <MapShotContext.Provider value={shooter}>
+        <BaseMap />
+      </MapShotContext.Provider>,
+      fire,
+    )
+    load()
+    // Visibility as MapLibre keeps it: whatever was last set.
+    const visibility = new Map<string, string>()
+    map().setLayoutProperty.mockImplementation((id: string, _: string, v: string) => void visibility.set(id, v))
+    map().getLayoutProperty.mockImplementation((id: string) => visibility.get(id))
+    await Promise.all([shooter.take(), shooter.take()])
+    expect(visibility.get(LAYERS.boroughHover)).toBe('visible')
+  })
+
+  it('keeps the picture a save is taking when pressed again mid-save, then takes it off the page', async () => {
+    renderWithExplorer(<BaseMap />, fire)
+    load()
+    let finish = () => {}
+    vi.mocked(saveImage).mockImplementationOnce(() => new Promise((r) => (finish = () => r('done'))))
+    await userEvent.click(saveButton())
+    await userEvent.click(screen.getByRole('button', { name: 'Saving…: Map' }))
+    expect(document.querySelector('.picture-stage img')).toBeInTheDocument()
+    await act(async () => finish())
+    expect(document.querySelector('.picture-stage')).not.toBeInTheDocument()
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:map')
   })
 })
 

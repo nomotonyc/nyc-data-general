@@ -145,8 +145,13 @@ export function trend(state: Input, ds: LayerDataset, palette: TrendPalette): Tr
     values,
     key: places.length > 1 ? [...lines].reverse().map((l) => ({ name: l.name, colour: l.colour })) : [],
     ticks,
-    note: perArea ? `Average per ${noun.one}, so the lines compare fairly` : null,
+    note: perArea ? perAreaNote(noun.one) : null,
     empty: null,
     aria,
   }
+}
+
+/** Under a trend whose lines are averages per area: why they are. */
+export function perAreaNote(area: string): string {
+  return `Average per ${area}, so the lines compare fairly`
 }

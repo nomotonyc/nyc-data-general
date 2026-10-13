@@ -1,16 +1,20 @@
 import type { LayerDataset } from '../data/dataset'
 import { formatValue } from '../domain/format'
-import { getStory } from '../domain/stories'
+import { getStory, type Year } from '../domain/stories'
 import type { ExplorerState } from '../explorer/state'
-import { MONTHS, mean, periodLabel, plotLines, signed, trendSeries, type TrendLine, type TrendPalette } from './trend'
+import { MONTHS, mean, perAreaNote, periodLabel, plotLines, signed, trendSeries, type TrendLine, type TrendPalette } from './trend'
 
 type Input = Pick<ExplorerState, 'storyId' | 'metricId' | 'borough' | 'pinnedArea' | 'yearFrom' | 'yearTo'>
 
 export type ExpandedTrend = {
   kicker: string
   title: string
+  /** The place it's about: a pinned area, a focused borough, or the city. */
+  place: string
+  /** Under the chart, when its lines are averages per area: why they are. */
+  note: string | null
   /** The first and last years the chart shows: those picked, cut to the data's. */
-  years: { from: number; to: number }
+  years: { from: Year; to: Year }
   sub: string
   stats: { label: string; value: string; note: string }[]
   /** Index of the period the readout, guide and highlighted dots show. */
@@ -110,6 +114,8 @@ export function expandedTrend(state: Input, ds: LayerDataset, palette: TrendPale
   return {
     kicker: `${getStory(state.storyId).name} · ${monthly ? 'Monthly' : 'Yearly'} trend`,
     title: `${metric.label} · ${focus.name}`,
+    place: focus.name,
+    note: perArea ? perAreaNote(noun.one) : null,
     years: { from: periods[0].year, to: periods[last].year },
     sub: `${monthly ? 'Month by month' : 'Year by year'}, ${periodLabel(periods[0])} to ${periodLabel(periods[last])}${against.length ? `, against ${against.join(' and ')}` : ''}`,
     stats: [

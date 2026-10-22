@@ -15,6 +15,10 @@ Three broad categories of data are planned:
 
 Data comes from [NYC Open Data](https://data.cityofnewyork.us/).
 
+Health facility reference data also comes from [Open NY](https://health.data.ny.gov/Health/Health-Facility-General-Information/vn5v-hh5r).
+The [NYC facility export and hospital comparison](public/data/reference_data/open_ny/README.md)
+document the verified county codes, coverage, and refresh command.
+
 ## Development
 
 ```sh

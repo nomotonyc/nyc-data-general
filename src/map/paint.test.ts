@@ -9,7 +9,7 @@ const base: Choropleth = { level: 'borough', focus: null, boroughs: {}, geograph
 const areaLevel: Choropleth = { ...base, level: 'area' }
 const queens: Choropleth = { ...base, level: 'area', focus: 'Queens' }
 const bronxBattalions: Choropleth = { ...base, level: 'area', focus: 'Bronx', geography: 'battalions' }
-const show = { outlines: true, labels: true, firehouses: false, pinned: [] as number[] }
+const show = { outlines: true, labels: true, hospitals: false, firehouses: false, pinned: [] as number[] }
 
 type FakeMap = ReturnType<typeof fakeMap>
 /** The last opacity set on a layer, or undefined if none. */

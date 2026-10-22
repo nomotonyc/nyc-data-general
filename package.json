@@ -13,7 +13,9 @@
     "data:precincts": "node scripts/build-precincts.mjs && node scripts/align-boroughs.mjs",
     "data:battalions": "node scripts/build-battalions.mjs",
     "data:firehouses": "node scripts/build-firehouses.mjs",
-    "data:layer": "node scripts/build-layer.mjs"
+    "data:ems-stations": "node scripts/build-ems-stations.mjs",
+    "data:layer": "node scripts/build-layer.mjs",
+    "data:open-ny-facilities": "node scripts/build-open-ny-facilities.mjs"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.3.0",

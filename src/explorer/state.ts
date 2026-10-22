@@ -17,6 +17,7 @@ export type ExplorerState = {
   detail: Detail
   showOutlines: boolean
   showLabels: boolean
+  showHospitals: boolean
   /** FDNY firehouse markers, in every story. */
   showFirehouses: boolean
   /** Inclusive; yearTo >= yearFrom. */
@@ -40,6 +41,7 @@ export const initialExplorerState: ExplorerState = {
   detail: 'borough',
   showOutlines: true,
   showLabels: true,
+  showHospitals: false,
   showFirehouses: false,
   yearFrom: LATEST_FULL_YEAR,
   yearTo: LATEST_FULL_YEAR,
@@ -56,6 +58,7 @@ export type ExplorerAction =
   | { type: 'setDetail'; detail: Detail }
   | { type: 'toggleOutlines' }
   | { type: 'toggleLabels' }
+  | { type: 'toggleHospitals' }
   | { type: 'toggleFirehouses' }
   | { type: 'setYearFrom'; year: number }
   | { type: 'setYearTo'; year: number }
@@ -91,6 +94,8 @@ export function explorerReducer(state: ExplorerState, action: ExplorerAction): E
       return { ...state, showOutlines: !state.showOutlines }
     case 'toggleLabels':
       return { ...state, showLabels: !state.showLabels }
+    case 'toggleHospitals':
+      return { ...state, showHospitals: !state.showHospitals }
     case 'toggleFirehouses':
       return { ...state, showFirehouses: !state.showFirehouses }
     case 'setYearFrom':

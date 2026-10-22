@@ -1,0 +1,1285 @@
+{
+  "type": "FeatureCollection",
+  "layerId": "hospitals_nyc",
+  "source": "hospitals_nyc.txt",
+  "countyFilter": [
+    "Bronx",
+    "Kings",
+    "New York",
+    "Queens",
+    "Richmond"
+  ],
+  "notes": [
+    "County filtering includes inherited cells from the pasted table; New York (county) is normalized to New York.",
+    "Source entries, including historical facilities, are retained without verifying current operating status.",
+    "Beds and opening/closing dates remain text to preserve ranges, alternatives and uncertainty. Source citations are preserved in sourceText.",
+    "Missing coordinates produce null geometry; no location is guessed."
+  ],
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1,
+        "name": "Bellevue Hospital",
+        "healthSystem": "NYC Health + Hospitals",
+        "county": "New York",
+        "city": "Manhattan",
+        "countyInherited": false,
+        "coordinatesText": "40°44′21″N 73°58′31″W",
+        "opened": "1736",
+        "beds": "844",
+        "sourceText": "Bellevue Hospital\tNYC Health + Hospitals\tNew York\tManhattan\t40°44′21″N 73°58′31″W\t1736\t844[14]",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.975278,
+          40.739167
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2,
+        "name": "BronxCare Health System",
+        "healthSystem": "BronxCare Health System",
+        "county": "Bronx",
+        "city": "The Bronx",
+        "countyInherited": false,
+        "coordinatesText": "40°50′37″N 73°54′39″W",
+        "opened": "1890",
+        "beds": "415",
+        "sourceText": "BronxCare Health System[Note 4]\tBronxCare Health System\tBronx\tThe Bronx\t40°50′37″N 73°54′39″W\t1890\t415",
+        "borough": "Bronx"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.910833,
+          40.843611
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3,
+        "name": "Brookdale University Hospital and Medical Center",
+        "healthSystem": "MediSys Health Network",
+        "county": "Kings",
+        "city": "Brooklyn",
+        "countyInherited": false,
+        "coordinatesText": "40°39′18″N 73°54′45″W",
+        "opened": "1921",
+        "beds": "530",
+        "sourceText": "Brookdale University Hospital and Medical Center\tMediSys Health Network\tKings\tBrooklyn\t40°39′18″N 73°54′45″W\t1921\t530",
+        "borough": "Brooklyn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9125,
+          40.655
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 4,
+        "name": "Brooklyn Hospital Center",
+        "healthSystem": "Mount Sinai Health System",
+        "county": "Kings",
+        "city": "Brooklyn",
+        "countyInherited": true,
+        "coordinatesText": "40°41′24″N 73°58′38″W",
+        "opened": "1845",
+        "beds": "464",
+        "sourceText": "Brooklyn Hospital Center\tMount Sinai Health System\t40°41′24″N 73°58′38″W\t1845\t464",
+        "borough": "Brooklyn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.977222,
+          40.69
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 5,
+        "name": "Calvary Hospital",
+        "healthSystem": "Independent",
+        "county": "Bronx",
+        "city": "The Bronx",
+        "countyInherited": false,
+        "coordinatesText": "40°50′52.9″N 73°50′38.8″W",
+        "opened": "1899",
+        "beds": "225",
+        "sourceText": "Calvary Hospital\tIndependent\tBronx\tThe Bronx\t40°50′52.9″N 73°50′38.8″W\t1899\t225",
+        "borough": "Bronx"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.844111,
+          40.848028
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 6,
+        "name": "Coler-Goldwater Specialty Hospital",
+        "healthSystem": "NYC Health + Hospitals",
+        "county": "New York",
+        "city": "Manhattan",
+        "countyInherited": false,
+        "coordinatesText": "40°46′13″N 73°56′32″W",
+        "opened": "1939",
+        "beds": "1025",
+        "sourceText": "Coler-Goldwater Specialty Hospital\tNYC Health + Hospitals\tNew York\tManhattan\t40°46′13″N 73°56′32″W\t1939\t1025[27]",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.942222,
+          40.770278
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 7,
+        "name": "Coney Island Hospital",
+        "healthSystem": "NYC Health + Hospitals",
+        "county": "Kings",
+        "city": "Brooklyn",
+        "countyInherited": false,
+        "coordinatesText": "40°35′07″N 73°57′56″W",
+        "opened": "1875",
+        "beds": "371",
+        "sourceText": "Coney Island Hospital\tNYC Health + Hospitals\tKings\tBrooklyn\t40°35′07″N 73°57′56″W\t1875\t371[32]",
+        "borough": "Brooklyn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.965556,
+          40.585278
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 8,
+        "name": "Elmhurst Hospital Center",
+        "healthSystem": "NYC Health + Hospitals",
+        "county": "Queens",
+        "city": "Elmhurst, Queens",
+        "countyInherited": false,
+        "coordinatesText": "40°44′41″N 73°53′11″W",
+        "opened": "1957",
+        "beds": "525",
+        "sourceText": "Elmhurst Hospital Center\tNYC Health + Hospitals\tQueens\tElmhurst, Queens\t40°44′41″N 73°53′11″W\t1957\t525[1]",
+        "borough": "Queens"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.886389,
+          40.744722
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 9,
+        "name": "Flushing Hospital Medical Center",
+        "healthSystem": "MediSys Health Network",
+        "county": "Queens",
+        "city": "Flushing, Queens",
+        "countyInherited": false,
+        "coordinatesText": "40°45′20″N 73°49′01″W",
+        "opened": "1953",
+        "beds": "271, 312",
+        "sourceText": "Flushing Hospital Medical Center\tMediSys Health Network\tQueens\tFlushing, Queens\t40°45′20″N 73°49′01″W\t1953\t271,[1] 312",
+        "borough": "Queens"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.816944,
+          40.755556
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 10,
+        "name": "Gouverneur Health",
+        "healthSystem": "NYC Health + Hospitals",
+        "county": "New York",
+        "city": "Manhattan",
+        "countyInherited": false,
+        "coordinatesText": "40°42′47″N 73°59′17″W",
+        "opened": "1885",
+        "beds": "25",
+        "sourceText": "Gouverneur Health\tNYC Health + Hospitals\tNew York\tManhattan\t40°42′47″N 73°59′17″W\t1885\t25[1][48]",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.988056,
+          40.713056
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 11,
+        "name": "Gracie Square Hospital",
+        "healthSystem": "NewYork-Presbyterian",
+        "county": "New York",
+        "city": "Manhattan",
+        "countyInherited": true,
+        "coordinatesText": "40°46′11″N 73°57′10″W",
+        "opened": "1959",
+        "beds": "157",
+        "sourceText": "Gracie Square Hospital\tNewYork-Presbyterian\t40°46′11″N 73°57′10″W\t1959\t157",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.952778,
+          40.769722
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 12,
+        "name": "Harlem Hospital Center",
+        "healthSystem": "NYC Health + Hospitals",
+        "county": "New York",
+        "city": "Manhattan",
+        "countyInherited": false,
+        "coordinatesText": "40°48′51″N 73°56′25″W",
+        "opened": "1887",
+        "beds": "272",
+        "sourceText": "Harlem Hospital Center\tNYC Health + Hospitals\tNew York\tManhattan\t40°48′51″N 73°56′25″W\t1887\t272[49]",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.940278,
+          40.814167
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 13,
+        "name": "Henry J. Carter Specialty Hospital and Nursing Facility",
+        "healthSystem": "NYC Health + Hospitals",
+        "county": "New York",
+        "city": "East Harlem, Manhattan",
+        "countyInherited": false,
+        "coordinatesText": "40°48′11″N 73°56′28″W",
+        "opened": "2013",
+        "beds": "365",
+        "sourceText": "Henry J. Carter Specialty Hospital and Nursing Facility\tNYC Health + Hospitals\tNew York\tEast Harlem, Manhattan\t40°48′11″N 73°56′28″W\t2013\t365",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.941111,
+          40.803056
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 14,
+        "name": "Hospital for Special Surgery",
+        "healthSystem": "NewYork-Presbyterian",
+        "county": "New York",
+        "city": "Manhattan",
+        "countyInherited": false,
+        "coordinatesText": "40°45′55″N 73°57′15″W",
+        "opened": "1863",
+        "beds": "205",
+        "sourceText": "Hospital for Special Surgery\tNewYork-Presbyterian\tNew York\tManhattan\t40°45′55″N 73°57′15″W\t1863\t205",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.954167,
+          40.765278
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 15,
+        "name": "Interfaith Medical Center",
+        "healthSystem": "Interfaith Medical Center",
+        "county": "Kings",
+        "city": "Brooklyn",
+        "countyInherited": false,
+        "coordinatesText": "40°40′47″N 73°56′14″W",
+        "opened": "1845",
+        "beds": "243",
+        "sourceText": "Interfaith Medical Center[Note 11]\tInterfaith Medical Center\tKings\tBrooklyn\t40°40′47″N 73°56′14″W\t1845\t243[1][52]",
+        "borough": "Brooklyn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.937222,
+          40.679722
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 16,
+        "name": "Jacobi Medical Center",
+        "healthSystem": "NYC Health + Hospitals",
+        "county": "Bronx",
+        "city": "The Bronx",
+        "countyInherited": false,
+        "coordinatesText": "40°51′22″N 73°50′47″W",
+        "opened": "1955",
+        "beds": "457",
+        "sourceText": "Jacobi Medical Center\tNYC Health + Hospitals\tBronx\tThe Bronx\t40°51′22″N 73°50′47″W\t1955\t457[55]",
+        "borough": "Bronx"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.846389,
+          40.856111
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 17,
+        "name": "Jamaica Hospital Medical Center",
+        "healthSystem": "MediSys Health Network",
+        "county": "Queens",
+        "city": "Jamaica, Queens",
+        "countyInherited": false,
+        "coordinatesText": "40°42′02″N 73°48′58″W",
+        "opened": "1891",
+        "beds": "402",
+        "sourceText": "Jamaica Hospital Medical Center\tMediSys Health Network\tQueens\tJamaica, Queens\t40°42′02″N 73°48′58″W\t1891\t402",
+        "borough": "Queens"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.816111,
+          40.700556
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 18,
+        "name": "Kings County Hospital Center",
+        "healthSystem": "NYC Health + Hospitals",
+        "county": "Kings",
+        "city": "Brooklyn",
+        "countyInherited": false,
+        "coordinatesText": "40°39′24″N 73°56′42″W",
+        "opened": "1831",
+        "beds": "627",
+        "sourceText": "Kings County Hospital Center\tNYC Health + Hospitals\tKings\tBrooklyn\t40°39′24″N 73°56′42″W\t1831\t627",
+        "borough": "Brooklyn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.945,
+          40.656667
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 19,
+        "name": "Kingsbrook Jewish Medical Center",
+        "healthSystem": "NYC Health + Hospitals",
+        "county": "Kings",
+        "city": "Kingsbrook Healthcare System",
+        "countyInherited": true,
+        "coordinatesText": "40°39′32″N 73°56′00″W",
+        "opened": "1925",
+        "beds": "303",
+        "sourceText": "Kingsbrook Jewish Medical Center\tKingsbrook Healthcare System\t40°39′32″N 73°56′00″W\t1925\t303",
+        "borough": "Brooklyn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.933333,
+          40.658889
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 20,
+        "name": "Lenox Hill Hospital",
+        "healthSystem": "Northwell Health",
+        "county": "New York",
+        "city": "Manhattan",
+        "countyInherited": false,
+        "coordinatesText": "40°46′25″N 73°57′39″W",
+        "opened": "1869",
+        "beds": "449",
+        "sourceText": "Lenox Hill Hospital\tNorthwell Health\tNew York\tManhattan\t40°46′25″N 73°57′39″W\t1869\t449[57]",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.960833,
+          40.773611
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 21,
+        "name": "Lincoln Hospital",
+        "healthSystem": "NYC Health + Hospitals",
+        "county": "Bronx",
+        "city": "The Bronx",
+        "countyInherited": false,
+        "coordinatesText": "40°49′N 73°55′W",
+        "opened": "1839",
+        "beds": "362",
+        "sourceText": "Lincoln Hospital\tNYC Health + Hospitals\tBronx\tThe Bronx\t40°49′N 73°55′W\t1839\t362[58]",
+        "borough": "Bronx"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.916667,
+          40.816667
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 22,
+        "name": "Long Island Jewish Forest Hills",
+        "healthSystem": "Northwell Health",
+        "county": "Queens",
+        "city": "Forest Hills, Quens",
+        "countyInherited": false,
+        "coordinatesText": "40°43′45″N 73°51′05″W",
+        "opened": "1953",
+        "beds": "227",
+        "sourceText": "Long Island Jewish Forest Hills\tQueens\tForest Hills, Quens\t40°43′45″N 73°51′05″W\t1953\t227[1]",
+        "borough": "Queens"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.851389,
+          40.729167
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 23,
+        "name": "Maimonides Medical Center",
+        "healthSystem": "Maimonides Health",
+        "county": "Kings",
+        "city": "Brooklyn",
+        "countyInherited": false,
+        "coordinatesText": "40°38′28″N 73°59′55″W",
+        "opened": "1911",
+        "beds": "711",
+        "sourceText": "Maimonides Medical Center\tMaimonides Health\tKings\tBrooklyn\t40°38′28″N 73°59′55″W\t1911\t711[1]",
+        "borough": "Brooklyn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.998611,
+          40.641111
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 24,
+        "name": "Maimonides Midwood Community Hospital",
+        "healthSystem": "Maimonides Health",
+        "county": "Kings",
+        "city": "Brooklyn",
+        "countyInherited": true,
+        "coordinatesText": "40°36′56″N 73°56′54″W",
+        "opened": "1929",
+        "beds": "134",
+        "sourceText": "Maimonides Midwood Community Hospital\t40°36′56″N 73°56′54″W\t1929\t134[1][3]",
+        "borough": "Brooklyn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.948333,
+          40.615556
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 25,
+        "name": "Manhattan Eye, Ear and Throat Hospital",
+        "healthSystem": "Northwell Health",
+        "county": "New York",
+        "city": "Manhattan",
+        "countyInherited": false,
+        "coordinatesText": "40°45′51″N 73°57′50″W",
+        "opened": "1869",
+        "beds": "13",
+        "sourceText": "Manhattan Eye, Ear and Throat Hospital\tNorthwell Health\tNew York\tManhattan\t40°45′51″N 73°57′50″W\t1869\t13[1]",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.963889,
+          40.764167
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 26,
+        "name": "Memorial Sloan Kettering Cancer Center",
+        "healthSystem": "Memorial Sloan Kettering",
+        "county": "New York",
+        "city": "New York City: Manhattan",
+        "countyInherited": false,
+        "coordinatesText": "40°45′51″N 73°57′25″W",
+        "opened": "1884",
+        "beds": "498",
+        "sourceText": "Memorial Sloan Kettering Cancer Center\tMemorial Sloan Kettering\tNew York\tNew York City: Manhattan\t40°45′51″N 73°57′25″W\t1884\t498",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.956944,
+          40.764167
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 27,
+        "name": "Metropolitan Hospital Center",
+        "healthSystem": "NYC Health + Hospitals",
+        "county": "New York",
+        "city": "New York City: Manhattan, East Harlem",
+        "countyInherited": false,
+        "coordinatesText": "40°47′5.74″N 73°56′40.94″W",
+        "opened": "1875",
+        "beds": "607",
+        "sourceText": "Metropolitan Hospital Center\tNYC Health + Hospitals\tNew York\tNew York City: Manhattan, East Harlem\t40°47′5.74″N 73°56′40.94″W\t1875\t607[67]",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.944706,
+          40.784928
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 28,
+        "name": "Misericordia Hospital",
+        "healthSystem": "Montefiore Health System",
+        "county": "Bronx",
+        "city": "New York City: The Bronx: Wakefield",
+        "countyInherited": false,
+        "coordinatesText": "40°53′38″N 73°51′40″W",
+        "opened": "1887",
+        "beds": "345",
+        "sourceText": "Misericordia Hospital[Note 15]\tMontefiore Health System\tBronx\tNew York City: The Bronx: Wakefield\t40°53′38″N 73°51′40″W\t1887\t345[1][70]",
+        "borough": "Bronx"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.861111,
+          40.893889
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 29,
+        "name": "Montefiore Medical Center",
+        "healthSystem": "Montefiore Health System",
+        "county": "Bronx",
+        "city": "The Bronx",
+        "countyInherited": false,
+        "coordinatesText": "40°52′49.35″N 73°52′44.67″W",
+        "opened": "1884",
+        "beds": "1530, 2059",
+        "sourceText": "Montefiore Medical Center\tMontefiore Health System\tBronx\tThe Bronx\t40°52′49.35″N 73°52′44.67″W\t1884\t1530,[1] 2059",
+        "borough": "Bronx"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.879075,
+          40.880375
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 30,
+        "name": "Morgan Stanley Children's Hospital",
+        "healthSystem": "NewYork-Presbyterian",
+        "county": "New York",
+        "city": "Manhattan",
+        "countyInherited": false,
+        "coordinatesText": "40°50′23″N 73°56′28″W",
+        "opened": "1887",
+        "beds": "299",
+        "sourceText": "Morgan Stanley Children's Hospital[Note 17]\tNewYork-Presbyterian\tNew York\tManhattan\t40°50′23″N 73°56′28″W\t1887\t299[73]",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.941111,
+          40.839722
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 31,
+        "name": "Mount Sinai Hospital",
+        "healthSystem": "Mount Sinai Health System",
+        "county": "New York",
+        "city": "Manhattan",
+        "countyInherited": true,
+        "coordinatesText": "40°47′24″N 73°57′12″W",
+        "opened": "1852",
+        "beds": "1141",
+        "sourceText": "Mount Sinai Hospital\tMount Sinai Health System\t\t40°47′24″N 73°57′12″W\t1852\t1141[57]",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.953333,
+          40.79
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 32,
+        "name": "Mount Sinai Morningside",
+        "healthSystem": "Mount Sinai Health System",
+        "county": "New York",
+        "city": "Morningside Heights",
+        "countyInherited": true,
+        "coordinatesText": "40°48′20″N 73°57′42″W",
+        "opened": "1850",
+        "beds": "495",
+        "sourceText": "Mount Sinai Morningside\tMorningside Heights\t40°48′20″N 73°57′42″W\t1850\t495",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.961667,
+          40.805556
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 33,
+        "name": "Mount Sinai Queens",
+        "healthSystem": "Mount Sinai Health System",
+        "county": "Queens",
+        "city": "Queens",
+        "countyInherited": false,
+        "coordinatesText": "40°46′06″N 73°55′29″W",
+        "opened": "1898",
+        "beds": "235",
+        "sourceText": "Mount Sinai Queens\tQueens\tQueens\t40°46′06″N 73°55′29″W\t1898\t235[1]",
+        "borough": "Queens"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.924722,
+          40.768333
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 34,
+        "name": "Mount Sinai West",
+        "healthSystem": "Mount Sinai Health System",
+        "county": "New York",
+        "city": "New York",
+        "countyInherited": false,
+        "coordinatesText": "40°46′12″N 73°59′15″W",
+        "opened": "1871",
+        "beds": "514",
+        "sourceText": "Mount Sinai West\tNew York\tNew York\t40°46′12″N 73°59′15″W\t1871\t514",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9875,
+          40.77
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 35,
+        "name": "NewYork-Presbyterian Queens",
+        "healthSystem": "NewYork-Presbyterian",
+        "county": "Queens",
+        "city": "Flushing, Queens",
+        "countyInherited": false,
+        "coordinatesText": "40°44′54″N 73°49′31″W",
+        "opened": "1892",
+        "beds": "482",
+        "sourceText": "NewYork-Presbyterian Queens\tNewYork-Presbyterian\tQueens\tFlushing, Queens\t40°44′54″N 73°49′31″W\t1892\t482[1][75]",
+        "borough": "Queens"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.825278,
+          40.748333
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 36,
+        "name": "NewYork-Presbyterian Hospital / Columbia University Irving Medical Center / Weill Cornell Medical Center",
+        "healthSystem": "NewYork-Presbyterian",
+        "county": "New York",
+        "city": "Manhattan",
+        "countyInherited": false,
+        "coordinatesText": "40°45′58″N 73°57′19″W",
+        "opened": "1771",
+        "beds": "2678",
+        "sourceText": "NewYork-Presbyterian Hospital / Columbia University Irving Medical Center / Weill Cornell Medical Center\tNew York\tManhattan\t40°45′58″N 73°57′19″W\t1771\t2678[76]",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.955278,
+          40.766111
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 37,
+        "name": "NewYork-Presbyterian Lower Manhattan Hospital",
+        "healthSystem": "NewYork-Presbyterian",
+        "county": "New York",
+        "city": "Manhattan",
+        "countyInherited": false,
+        "coordinatesText": "40°42′37″N 74°0′18″W",
+        "opened": "1853",
+        "beds": "170",
+        "sourceText": "NewYork-Presbyterian Lower Manhattan Hospital\tNew York\tManhattan\t40°42′37″N 74°0′18″W\t1853\t170",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.005,
+          40.710278
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 38,
+        "name": "NewYork-Presbyterian Brooklyn Methodist Hospital",
+        "healthSystem": "NewYork-Presbyterian",
+        "county": "Kings",
+        "city": "Brooklyn",
+        "countyInherited": false,
+        "coordinatesText": "40°40′03″N 73°58′43″W",
+        "opened": "1881",
+        "beds": "591",
+        "sourceText": "NewYork-Presbyterian Brooklyn Methodist Hospital\tKings\tBrooklyn\t40°40′03″N 73°58′43″W\t1881\t591",
+        "borough": "Brooklyn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.978611,
+          40.6675
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 39,
+        "name": "New York Eye and Ear Infirmary",
+        "healthSystem": "Mount Sinai Health System",
+        "county": "New York",
+        "city": "Manhattan",
+        "countyInherited": false,
+        "coordinatesText": "40°44′01″N 73°59′06″W",
+        "opened": "1820",
+        "beds": "69",
+        "sourceText": "New York Eye and Ear Infirmary\tMount Sinai Health System\tNew York\tManhattan\t40°44′01″N 73°59′06″W\t1820\t69",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.985,
+          40.733611
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 40,
+        "name": "North Central Bronx Hospital",
+        "healthSystem": "NYC Health + Hospitals",
+        "county": "Bronx",
+        "city": "Norwood, Bronx",
+        "countyInherited": false,
+        "coordinatesText": "40°52′55″N 73°52′52″W",
+        "opened": "1976",
+        "beds": "200",
+        "sourceText": "North Central Bronx Hospital\tNYC Health + Hospitals\tBronx\tNorwood, Bronx\t40°52′55″N 73°52′52″W\t1976\t200[1]",
+        "borough": "Bronx"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.881111,
+          40.881944
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 41,
+        "name": "NYU Langone Hassenfeld Children's Hospital",
+        "healthSystem": "NYU Langone Health",
+        "county": "New York",
+        "city": "Manhattan",
+        "countyInherited": false,
+        "coordinatesText": "40°44′31.09″N 73°58′26.52″W",
+        "opened": "2018 (Hassenfeld)",
+        "beds": "102",
+        "sourceText": "NYU Langone Hassenfeld Children's Hospital\tNYU Langone Health\tNew York\tManhattan\t40°44′31.09″N 73°58′26.52″W\t2018 (Hassenfeld)[Note 19]\t102[Note 20]",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.974033,
+          40.741969
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 42,
+        "name": "NYU Langone Kimmel Pavilion",
+        "healthSystem": "NYU Langone Health",
+        "county": "New York",
+        "city": "Manhattan",
+        "countyInherited": true,
+        "coordinatesText": "40°44′38″N 73°58′21″W",
+        "opened": "2018",
+        "beds": "374",
+        "sourceText": "NYU Langone Kimmel Pavilion\t40°44′38″N 73°58′21″W\t2018\t374",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9725,
+          40.743889
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 43,
+        "name": "NYU Langone Orthopedic Hospital",
+        "healthSystem": "NYU Langone Health",
+        "county": "New York",
+        "city": "Manhattan",
+        "countyInherited": true,
+        "coordinatesText": "40°44′04″N 73°58′59″W",
+        "opened": "1905",
+        "beds": "160",
+        "sourceText": "NYU Langone Orthopedic Hospital[Note 21]\t40°44′04″N 73°58′59″W\t1905\t160[1][79]",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.983056,
+          40.734444
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 44,
+        "name": "NYU Langone Tisch Hospital",
+        "healthSystem": "NYU Langone Health",
+        "county": "New York",
+        "city": "Manhattan",
+        "countyInherited": true,
+        "coordinatesText": "40°44′37″N 73°58′27″W",
+        "opened": "1962",
+        "beds": "1639",
+        "sourceText": "NYU Langone Tisch Hospital\t40°44′37″N 73°58′27″W\t1962\t1639[1][80]",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.974167,
+          40.743611
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 45,
+        "name": "NYU Langone Hospital – Brooklyn",
+        "healthSystem": "NYU Langone Health",
+        "county": "Kings",
+        "city": "Brooklyn",
+        "countyInherited": false,
+        "coordinatesText": "40°38′48″N 74°01′14″W",
+        "opened": "1883",
+        "beds": "450",
+        "sourceText": "NYU Langone Hospital – Brooklyn\tKings\tBrooklyn\t40°38′48″N 74°01′14″W\t1883\t450",
+        "borough": "Brooklyn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.020556,
+          40.646667
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 46,
+        "name": "Orbis International Flying Eye Hospital",
+        "healthSystem": "Orbis International",
+        "county": "New York",
+        "city": "Manhattan",
+        "countyInherited": false,
+        "coordinatesText": "40°45′14″N 73°59′31″W",
+        "opened": null,
+        "beds": null,
+        "sourceText": "Orbis International Flying Eye Hospital\tOrbis International\tNew York\tManhattan\t40°45′14″N 73°59′31″W\t\t",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.991944,
+          40.753889
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 47,
+        "name": "Queens Hospital Center",
+        "healthSystem": "NYC Health + Hospitals",
+        "county": "Queens",
+        "city": "Jamaica, Queens",
+        "countyInherited": false,
+        "coordinatesText": "40°43′01″N 73°48′16″W",
+        "opened": "1935",
+        "beds": "253",
+        "sourceText": "Queens Hospital Center\tNYC Health + Hospitals\tQueens\tJamaica, Queens\t40°43′01″N 73°48′16″W\t1935\t253[1]",
+        "borough": "Queens"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.804444,
+          40.716944
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 48,
+        "name": "Richmond University Medical Center",
+        "healthSystem": "Mount Sinai Health System",
+        "county": "Richmond",
+        "city": "Staten Island",
+        "countyInherited": false,
+        "coordinatesText": "40°38′08″N 74°06′22″W",
+        "opened": "1903",
+        "beds": "448",
+        "sourceText": "Richmond University Medical Center\tMount Sinai Health System\tRichmond\tStaten Island\t40°38′08″N 74°06′22″W\t1903\t448",
+        "borough": "Staten Island"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.106111,
+          40.635556
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 49,
+        "name": "Rockefeller University Hospital",
+        "healthSystem": "Rockefeller University",
+        "county": "New York",
+        "city": "Manhattan",
+        "countyInherited": false,
+        "coordinatesText": "40°45′41″N 73°57′21″W",
+        "opened": "1937",
+        "beds": null,
+        "sourceText": "Rockefeller University Hospital\tRockefeller University\tNew York\tManhattan\t40°45′41″N 73°57′21″W\t1937\t[88]",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.955833,
+          40.761389
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 50,
+        "name": "St. John's Episcopal Hospital South Shore",
+        "healthSystem": "Episcopal Health Services",
+        "county": "Queens",
+        "city": "Far Rockaway, Queens",
+        "countyInherited": false,
+        "coordinatesText": "40°35′58″N 73°45′11″W",
+        "opened": "1905",
+        "beds": "209",
+        "sourceText": "St. John's Episcopal Hospital South Shore\tEpiscopal Health Services\tQueens\tFar Rockaway, Queens\t40°35′58″N 73°45′11″W\t1905\t209[1]",
+        "borough": "Queens"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.753056,
+          40.599444
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 51,
+        "name": "Staten Island University Hospital, North and South Campus",
+        "healthSystem": "Northwell Health",
+        "county": "Richmond",
+        "city": "Prince's Bay, South Beach, Staten Island",
+        "countyInherited": false,
+        "coordinatesText": "40°35′11″N 74°05′07″W",
+        "opened": "1861",
+        "beds": "627",
+        "sourceText": "Staten Island University Hospital, North and South Campus\tNorthwell Health\tRichmond\tPrince's Bay, South Beach, Staten Island\t40°35′11″N 74°05′07″W\t1861\t627[1]",
+        "borough": "Staten Island"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.085278,
+          40.586389
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 52,
+        "name": "SUNY Downstate Medical Center",
+        "healthSystem": "Downstate Health Sciences University",
+        "county": "Kings",
+        "city": "Brooklyn",
+        "countyInherited": false,
+        "coordinatesText": "40°39′19″N 73°56′39″W",
+        "opened": null,
+        "beds": null,
+        "sourceText": "SUNY Downstate Medical Center\tDownstate Health Sciences University\tKings\tBrooklyn\t40°39′19″N 73°56′39″W\t\t",
+        "borough": "Brooklyn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.944167,
+          40.655278
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 53,
+        "name": "University Hospital of Brooklyn",
+        "healthSystem": "Downstate Health Sciences University",
+        "county": "Kings",
+        "city": "Brooklyn",
+        "countyInherited": false,
+        "coordinatesText": "40°39′23″N 73°56′43″W",
+        "opened": null,
+        "beds": "323",
+        "sourceText": "University Hospital of Brooklyn\tDownstate Health Sciences University\tKings\tBrooklyn\t40°39′23″N 73°56′43″W\t\t323[1]",
+        "borough": "Brooklyn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.945278,
+          40.656389
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 54,
+        "name": "Woodhull Medical Center",
+        "healthSystem": "NYC Health + Hospitals",
+        "county": "Kings",
+        "city": "Brooklyn",
+        "countyInherited": false,
+        "coordinatesText": "40°41′58″N 73°56′33″W",
+        "opened": "1982",
+        "beds": "371",
+        "sourceText": "Woodhull Medical Center\tNYC Health + Hospitals\tKings\tBrooklyn\t40°41′58″N 73°56′33″W\t1982\t371[1]",
+        "borough": "Brooklyn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.9425,
+          40.699444
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 55,
+        "name": "Wyckoff Heights Medical Center",
+        "healthSystem": "Independent",
+        "county": "Kings",
+        "city": "Brooklyn",
+        "countyInherited": true,
+        "coordinatesText": "40°42′15″N 73°55′2″W",
+        "opened": "1889",
+        "beds": "350",
+        "sourceText": "Wyckoff Heights Medical Center\tIndependent\t40°42′15″N 73°55′2″W\t1889\t350[117]",
+        "borough": "Brooklyn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.917222,
+          40.704167
+        ]
+      }
+    }
+  ]
+}

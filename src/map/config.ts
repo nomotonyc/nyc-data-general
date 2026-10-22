@@ -40,6 +40,7 @@ export const PRECINCTS_URL = `${import.meta.env.BASE_URL}data/nyc-precincts.geoj
 export const PRECINCT_LABELS_URL = `${import.meta.env.BASE_URL}data/nyc-precinct-labels.geojson`
 export const BATTALIONS_URL = `${import.meta.env.BASE_URL}data/nyc-battalions.geojson`
 export const BATTALION_LABELS_URL = `${import.meta.env.BASE_URL}data/nyc-battalion-labels.geojson`
+export const HOSPITALS_URL = `${import.meta.env.BASE_URL}data/reference_data/open_ny/hospitals_nyc.geojson`
 
 /** Self-hosted SDF glyphs. Only the 0-255 range ships; borough names are ASCII. */
 export const GLYPHS = `${import.meta.env.BASE_URL}fonts/{fontstack}/{range}.pbf`
@@ -56,6 +57,7 @@ export const SOURCES = {
   battalions: 'battalions',
   battalionLabels: 'battalion-labels',
   firehouses: 'firehouses',
+  hospitals: 'hospitals',
 } as const
 /** City-wide layers. Borough and precinct shapes have one layer set per borough (boroughLayers). */
 export const LAYERS = {
@@ -105,6 +107,7 @@ export function boroughLayers(borough: string) {
     battalionLine: `battalion-line-${slug}`,
     boroughLine: `borough-line-${slug}`,
     firehouse: `firehouse-${slug}`,
+    hospital: `hospital-${slug}`,
     firehouseRing: `firehouse-ring-${slug}`,
   }
 }

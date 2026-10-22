@@ -9,6 +9,7 @@ export type PaintableMap = Pick<MapLibreMap, 'setFeatureState' | 'setLayoutPrope
 export type Show = {
   outlines: boolean
   labels: boolean
+  hospitals: boolean
   firehouses: boolean
   /** The pinned area's number in the plan's geography, or none. */
   pinned: readonly number[]
@@ -45,6 +46,9 @@ export function paintMap(map: PaintableMap, plan: Choropleth, show: Show, option
     map.setPaintProperty(layers.boroughFill, 'fill-opacity', shown && !covered ? 1 : 0)
     map.setPaintProperty(layers.boroughLine, 'line-opacity', shown ? 1 : 0)
     const markers = show.firehouses && shown ? 1 : 0
+    const hospitalMarkers = show.hospitals && shown ? 1 : 0
+    map.setPaintProperty(layers.hospital, 'circle-opacity', hospitalMarkers)
+    map.setPaintProperty(layers.hospital, 'circle-stroke-opacity', hospitalMarkers)
     map.setPaintProperty(layers.firehouse, 'circle-opacity', markers)
     map.setPaintProperty(layers.firehouse, 'circle-stroke-opacity', markers)
     // The outer ring has no fill; only its stroke shows.

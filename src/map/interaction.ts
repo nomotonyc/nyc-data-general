@@ -3,7 +3,7 @@ import type { Firehouse } from '../domain/firehouses'
 import { effectiveDetail, type ExplorerAction, type ExplorerState } from '../explorer/state'
 
 /** A feature under the pointer: which kind of layer it came from, and its properties. */
-export type Hit = { kind: 'borough' | Geography | 'firehouse'; properties: Record<string, unknown> }
+export type Hit = { kind: 'borough' | Geography | 'firehouse' | 'hospital'; properties: Record<string, unknown> }
 
 /** Which kind of shape a layer draws, by its id (see boroughLayers). */
 export function hitKind(layerId: string): Hit['kind'] | null {
@@ -11,11 +11,12 @@ export function hitKind(layerId: string): Hit['kind'] | null {
   if (layerId.startsWith('precinct-fill-')) return 'precincts'
   if (layerId.startsWith('battalion-fill-')) return 'battalions'
   if (layerId.startsWith('firehouse-') && layerId !== 'firehouse-hover') return 'firehouse'
+  if (layerId.startsWith('hospital-')) return 'hospital'
   return null
 }
 
 /** What the pointer is over: a borough, an area by id, or a firehouse (hover only; clicks go to what's under it). */
-export type Target = PlaceTarget | { kind: 'firehouse'; id: number; firehouse: Firehouse }
+export type Target = PlaceTarget | { kind: 'firehouse'; id: number; firehouse: Firehouse } | { kind: 'hospital'; id: string; name: string; address: string; borough: string }
 /** A borough or an area: what a click acts on and the place hover card describes. */
 export type PlaceTarget = { kind: 'borough'; borough: Borough } | { kind: 'area'; id: string }
 
@@ -28,9 +29,13 @@ const NUMBER_PROPERTY: Record<Geography, string> = { precincts: 'precinct', batt
  * anything unknown, are nothing.
  */
 export function hoverTarget(
-  state: Pick<ExplorerState, 'borough' | 'detail' | 'geography'> & Partial<Pick<ExplorerState, 'showFirehouses'>>,
+  state: Pick<ExplorerState, 'borough' | 'detail' | 'geography'> & Partial<Pick<ExplorerState, 'showFirehouses' | 'showHospitals'>>,
   hits: readonly Hit[],
 ): Target | null {
+  if (state.showHospitals) {
+    const hit = hits.find((h) => h.kind === 'hospital' && (!state.borough || h.properties.borough === state.borough))
+    if (hit) return { kind: 'hospital', id: String(hit.properties.id), name: String(hit.properties.name), address: String(hit.properties.address), borough: String(hit.properties.borough) }
+  }
   if (state.showFirehouses) {
     const hit = hits.find((h) => h.kind === 'firehouse' && (!state.borough || h.properties.borough === state.borough))
     if (hit) {
@@ -90,7 +95,7 @@ export function cardAction(target: PlaceTarget, pinnedArea: string | null): Expl
  * nothing does what a click does too. `select` is what's selected after the tap.
  */
 export function tapResult(
-  state: Pick<ExplorerState, 'borough' | 'detail' | 'geography' | 'pinnedArea'> & Partial<Pick<ExplorerState, 'showFirehouses'>>,
+  state: Pick<ExplorerState, 'borough' | 'detail' | 'geography' | 'pinnedArea'> & Partial<Pick<ExplorerState, 'showFirehouses' | 'showHospitals'>>,
   hits: readonly Hit[],
   selected: Target | null = null,
 ): { select: Target | null; action: ExplorerAction | null } {
@@ -105,7 +110,7 @@ export function sameTarget(a: Target | null, b: Target | null): boolean {
   if (a === null || b === null) return a === b
   if (a.kind === 'borough') return b.kind === 'borough' && a.borough === b.borough
   if (a.kind === 'area') return b.kind === 'area' && a.id === b.id
-  return b.kind === 'firehouse' && a.id === b.id
+  return b.kind === a.kind && a.id === b.id
 }
 
 function isBorough(value: unknown): value is Borough {
@@ -117,8 +122,9 @@ function isBorough(value: unknown): value is Borough {
  * between precincts and battalions (when the pointer doesn't move, e.g. switching by keyboard),
  * and its id then names an area the new geography doesn't have.
  */
-export function liveTarget(target: Target | null, geography: Geography, firehouses = false): Target | null {
+export function liveTarget(target: Target | null, geography: Geography, firehouses = false, hospitals = false): Target | null {
   if (target?.kind === 'firehouse') return firehouses ? target : null
+  if (target?.kind === 'hospital') return hospitals ? target : null
   if (target?.kind !== 'area') return target
   return areasOf(geography).some((a) => a.id === target.id) ? target : null
 }

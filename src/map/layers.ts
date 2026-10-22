@@ -8,6 +8,7 @@ import {
   BOROUGHS_URL,
   BOROUGH_LABELS_URL,
   FADE_DURATION,
+  HOSPITALS_URL,
   LABEL_FONT,
   GEOGRAPHY_MAP,
   LAYERS,
@@ -23,6 +24,7 @@ export function mapSources(): Record<string, SourceSpecification> {
     [SOURCES.boroughLabels]: { type: 'geojson', data: BOROUGH_LABELS_URL },
     // Bundled with the app (the panel counts it too), so no fetch.
     [SOURCES.firehouses]: { type: 'geojson', data: FIREHOUSE_COLLECTION as GeoJSONSourceSpecification['data'], promoteId: 'id' },
+    [SOURCES.hospitals]: { type: 'geojson', data: HOSPITALS_URL, promoteId: 'id', attribution: '<a href="https://health.data.ny.gov/Health/Health-Facility-General-Information/vn5v-hh5r">Open NY</a>' },
   }
   for (const g of GEOGRAPHIES) {
     const { source, labelSource, url, labelsUrl, property } = GEOGRAPHY_MAP[g]
@@ -107,6 +109,22 @@ export function mapLayers(theme: Theme): LayerSpecification[] {
       'circle-stroke-opacity-transition': fade,
     },
   }))
+  const hospitals = BOROUGHS.map((b): LayerSpecification => ({
+    id: boroughLayers(b).hospital,
+    type: 'circle',
+    source: SOURCES.hospitals,
+    filter: inBorough(b),
+    paint: {
+      'circle-color': theme.color.firehouse,
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 4, 12, 5.5, 14, 7],
+      'circle-stroke-color': theme.color.firehouseRing,
+      'circle-stroke-width': 1.5,
+      'circle-opacity': 0,
+      'circle-stroke-opacity': 0,
+      'circle-opacity-transition': fade,
+      'circle-stroke-opacity-transition': fade,
+    },
+  }))
   // The borough commands' outer ring: a circle with no fill (opacity 0 always) and an ink stroke.
   const commandRings = BOROUGHS.map((b): LayerSpecification => ({
     id: boroughLayers(b).firehouseRing,
@@ -153,6 +171,7 @@ export function mapLayers(theme: Theme): LayerSpecification[] {
       ]
     }),
     ...commandRings,
+    ...hospitals,
     ...firehouses,
     {
       // The firehouse under the pointer, drawn larger with a heavier ring; paintHover sets the filter.

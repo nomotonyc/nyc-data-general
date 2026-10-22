@@ -12,6 +12,7 @@ describe('mapSources', () => {
     expect(sources[SOURCES.precincts]).toMatchObject({ type: 'geojson', promoteId: 'precinct' })
     expect(sources[SOURCES.precinctLabels]).toMatchObject({ type: 'geojson' })
     expect(sources[SOURCES.firehouses]).toMatchObject({ type: 'geojson', promoteId: 'id' })
+    expect(sources[SOURCES.hospitals]).toMatchObject({ type: 'geojson', promoteId: 'id' })
   })
 })
 
@@ -34,6 +35,7 @@ describe('mapLayers', () => {
       LAYERS.battalionHover,
       LAYERS.battalionHighlight,
       ...perBorough('firehouseRing'),
+      ...perBorough('hospital'),
       ...perBorough('firehouse'),
       LAYERS.firehouseHover,
       LAYERS.boroughLabel,

@@ -22,6 +22,7 @@ describe('initial state', () => {
       detail: 'borough',
       showOutlines: true,
       showLabels: true,
+      showHospitals: false,
       showFirehouses: false,
       yearFrom: 2025,
       yearTo: 2025,

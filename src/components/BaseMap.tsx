@@ -20,6 +20,7 @@ import { buildStyle } from '../map/style'
 import { useTheme } from '../theme/context'
 import { firehouseDetails } from '../map/firehouseHover'
 import { FirehouseTooltip } from './FirehouseTooltip'
+import { HospitalTooltip } from './HospitalTooltip'
 import { MapLegend } from './MapLegend'
 import { MapTooltip } from './MapTooltip'
 import { MapPicture } from './MapPicture'
@@ -30,6 +31,7 @@ import './Picture.css'
 
 const CLICKABLE = BOROUGHS.flatMap((b) => [boroughLayers(b).boroughFill, ...GEOGRAPHIES.map((g) => areaLayers(b, g).fill)])
 const FIREHOUSES = BOROUGHS.map((b) => boroughLayers(b).firehouse)
+const HOSPITALS = BOROUGHS.map((b) => boroughLayers(b).hospital)
 /** How far beyond a marker's edge the pointer still counts as over it, in pixels: markers are small, a fingertip is not. */
 const MARKER_REACH = { mouse: 6, touch: 20 }
 
@@ -127,7 +129,10 @@ export default function BaseMap() {
       const markers = stateRef.current.showFirehouses
         ? nearestFirst(map.queryRenderedFeatures(reach, { layers: FIREHOUSES }), e.point, (lngLat) => map.project(lngLat))
         : []
-      return [...markers, ...places].flatMap((f) => {
+      const hospitals = stateRef.current.showHospitals
+        ? nearestFirst(map.queryRenderedFeatures(reach, { layers: HOSPITALS }), e.point, (lngLat) => map.project(lngLat))
+        : []
+      return [...hospitals, ...markers, ...places].flatMap((f) => {
         const kind = hitKind(f.layer.id)
         return kind ? [{ kind, properties: f.properties }] : []
       })
@@ -209,7 +214,7 @@ export default function BaseMap() {
     }
   }, [dispatch, clearHover])
 
-  const { storyId, metricId, borough, detail, yearFrom, yearTo, pinnedArea, geography, showOutlines, showLabels, showFirehouses } = state
+  const { storyId, metricId, borough, detail, yearFrom, yearTo, pinnedArea, geography, showOutlines, showLabels, showHospitals, showFirehouses } = state
   const ramp = theme.story[storyId].ramp
   // Only what the colours depend on, so the map toggles don't recompute them.
   const plan = useMemo(
@@ -220,9 +225,9 @@ export default function BaseMap() {
 
   useEffect(() => {
     if (ready && mapRef.current) {
-      paintMap(mapRef.current, plan, { outlines: showOutlines, labels: showLabels, firehouses: showFirehouses, pinned }, { fills: false })
+      paintMap(mapRef.current, plan, { outlines: showOutlines, labels: showLabels, hospitals: showHospitals, firehouses: showFirehouses, pinned }, { fills: false })
     }
-  }, [ready, plan, showOutlines, showLabels, showFirehouses, pinned])
+  }, [ready, plan, showOutlines, showLabels, showHospitals, showFirehouses, pinned])
 
   // Colours ease to each new plan (a story, layer or year change) over the fade duration, as
   // everything else on the map does; MapLibre can't animate per-feature colours, so it's drawn
@@ -250,7 +255,7 @@ export default function BaseMap() {
 
   // A hover from before a precincts/battalions switch names an area the new geography doesn't have;
   // one over a firehouse ends when firehouses are turned off.
-  const live = liveTarget(hovered, geography, showFirehouses)
+  const live = liveTarget(hovered, geography, showFirehouses, showHospitals)
 
   // Outline what the pointer is over straight away; the card follows after a pause.
   useEffect(() => {
@@ -292,6 +297,10 @@ export default function BaseMap() {
     const key = `firehouse-${settled.id}`
     const props = { details: firehouseDetails(settled.firehouse), palette: theme.story[storyId] }
     card = tapped ? <FirehouseTooltip key={key} {...props} sheet={{ onClose: clearHover }} /> : <FirehouseTooltip key={key} {...props} {...at} />
+  } else if (settled?.kind === 'hospital') {
+    const key = `hospital-${settled.id}`
+    const props = { name: settled.name, address: settled.address, borough: settled.borough }
+    card = tapped ? <HospitalTooltip key={key} {...props} sheet={{ onClose: clearHover }} /> : <HospitalTooltip key={key} {...props} {...at} />
   } else if (settled) {
     const key = settled.kind === 'borough' ? settled.borough : settled.id
     const props = { details: hoverDetails(state, ds, settled), dotColor: ramp[1] }

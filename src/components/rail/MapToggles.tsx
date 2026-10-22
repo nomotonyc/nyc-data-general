@@ -4,7 +4,7 @@ import { useExplorerDispatch, useExplorerState } from '../../explorer/context'
 
 export function MapToggles() {
   const headingId = useId()
-  const { showOutlines, showLabels, showFirehouses, geography } = useExplorerState()
+  const { showOutlines, showLabels, showHospitals, showFirehouses, geography } = useExplorerState()
   const noun = areaNoun(geography)
   const dispatch = useExplorerDispatch()
 
@@ -20,6 +20,10 @@ export function MapToggles() {
       <label className="rail__check">
         <input type="checkbox" checked={showLabels} onChange={() => dispatch({ type: 'toggleLabels' })} />
         Place labels
+      </label>
+      <label className="rail__check">
+        <input type="checkbox" checked={showHospitals} onChange={() => dispatch({ type: 'toggleHospitals' })} />
+        Hospitals
       </label>
       <label className="rail__check">
         <input type="checkbox" checked={showFirehouses} onChange={() => dispatch({ type: 'toggleFirehouses' })} />

@@ -121,6 +121,13 @@ describe('placeAction', () => {
 })
 
 describe('hoverTarget', () => {
+  it('shows a hospital marker only while hospitals are enabled', () => {
+    const hospital = { kind: 'hospital' as const, properties: { id: '1438', name: 'Bellevue Hospital Center', address: '462 First Avenue', borough: 'Manhattan' } }
+    expect(hoverTarget({ ...city, showHospitals: true }, [hospital, borough('Manhattan')])).toEqual({ kind: 'hospital', id: '1438', name: 'Bellevue Hospital Center', address: '462 First Avenue', borough: 'Manhattan' })
+    expect(hoverTarget(city, [hospital, borough('Manhattan')])).toEqual({ kind: 'borough', borough: 'Manhattan' })
+    expect(hitKind(boroughLayers('Manhattan').hospital)).toBe('hospital')
+    expect(liveTarget({ kind: 'hospital', id: '1438', name: 'Bellevue', address: '', borough: 'Manhattan' }, 'precincts', false, false)).toBeNull()
+  })
   it('names the battalion under the pointer by its id', () => {
     expect(hoverTarget({ ...battalions, detail: 'area' }, [battalion(3, 'Bronx')])).toEqual({ kind: 'area', id: 'bn3' })
   })

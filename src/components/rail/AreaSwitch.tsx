@@ -4,7 +4,7 @@ import { useExplorerDispatch, useExplorerState } from '../../explorer/context'
 import { activeMetric } from '../../explorer/state'
 import { layerGeographies } from '../../layers'
 
-/** Precincts or battalions: the areas the map, panel and lists use below the boroughs. */
+/** Divisions, precincts or battalions: the areas the map, panel and lists use below the boroughs. */
 export function AreaSwitch() {
   const headingId = useId()
   const state = useExplorerState()
@@ -31,7 +31,9 @@ export function AreaSwitch() {
           </button>
         ))}
       </div>
-      {!available.includes('battalions') && <p className="rail__note">{layer.label} isn’t available by battalion yet.</p>}
+      {GEOGRAPHIES.filter((g) => !available.includes(g)).map((g) => (
+        <p key={g} className="rail__note">{layer.label} isn’t available by {areaNoun(g).one} yet.</p>
+      ))}
     </section>
   )
 }

@@ -9,7 +9,7 @@ export type ExplorerState = {
   metricId: string
   /** Focused borough; null is the whole city. */
   borough: Borough | null
-  /** Precincts or battalions: the areas below the boroughs. Only geographies the layer has. */
+  /** Divisions, precincts or battalions: the areas below the boroughs. Only geographies the layer has. */
   geography: Geography
   /** An area id in `geography`, always inside `borough`: pinning an area focuses its borough. */
   pinnedArea: string | null
@@ -18,8 +18,10 @@ export type ExplorerState = {
   showOutlines: boolean
   showLabels: boolean
   showHospitals: boolean
+  showEmsStations: boolean
   /** FDNY firehouse markers, in every story. */
   showFirehouses: boolean
+  showHydrants: boolean
   /** Inclusive; yearTo >= yearFrom. */
   yearFrom: Year
   yearTo: Year
@@ -42,7 +44,9 @@ export const initialExplorerState: ExplorerState = {
   showOutlines: true,
   showLabels: true,
   showHospitals: false,
+  showEmsStations: false,
   showFirehouses: false,
+  showHydrants: false,
   yearFrom: LATEST_FULL_YEAR,
   yearTo: LATEST_FULL_YEAR,
   trendOpen: false,
@@ -59,7 +63,9 @@ export type ExplorerAction =
   | { type: 'toggleOutlines' }
   | { type: 'toggleLabels' }
   | { type: 'toggleHospitals' }
+  | { type: 'toggleEmsStations' }
   | { type: 'toggleFirehouses' }
+  | { type: 'toggleHydrants' }
   | { type: 'setYearFrom'; year: number }
   | { type: 'setYearTo'; year: number }
   | { type: 'openTrend' }
@@ -76,7 +82,7 @@ export function explorerReducer(state: ExplorerState, action: ExplorerAction): E
       return keepGeography(state, { ...state, metricId: action.metricId })
     case 'setGeography':
       if (action.geography === state.geography || !layerGeographies(getLayer(state.metricId)).includes(action.geography)) return state
-      // Precincts and battalions don't nest, so a pin can't carry over; the borough can.
+      // The area systems don't nest, so a pin can't carry over; the borough can.
       return { ...state, geography: action.geography, pinnedArea: null }
     case 'focusBorough':
       return { ...state, borough: action.borough, pinnedArea: null }
@@ -96,8 +102,12 @@ export function explorerReducer(state: ExplorerState, action: ExplorerAction): E
       return { ...state, showLabels: !state.showLabels }
     case 'toggleHospitals':
       return { ...state, showHospitals: !state.showHospitals }
+    case 'toggleEmsStations':
+      return { ...state, showEmsStations: !state.showEmsStations }
     case 'toggleFirehouses':
       return { ...state, showFirehouses: !state.showFirehouses }
+    case 'toggleHydrants':
+      return { ...state, showHydrants: !state.showHydrants }
     case 'setYearFrom':
       if (!isYear(action.year)) return state
       return { ...state, yearFrom: action.year, yearTo: action.year > state.yearTo ? action.year : state.yearTo }

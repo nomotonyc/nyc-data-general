@@ -12,8 +12,10 @@
     "test:watch": "vitest",
     "data:precincts": "node scripts/build-precincts.mjs && node scripts/align-boroughs.mjs",
     "data:battalions": "node scripts/build-battalions.mjs",
+    "data:divisions": "node scripts/build-divisions.mjs",
     "data:firehouses": "node scripts/build-firehouses.mjs",
     "data:ems-stations": "node scripts/build-ems-stations.mjs",
+    "data:hydrants": "python3 scripts/build-hydrants.py",
     "data:layer": "node scripts/build-layer.mjs",
     "data:open-ny-facilities": "node scripts/build-open-ny-facilities.mjs"
   },

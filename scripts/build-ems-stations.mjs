@@ -1,102 +1,63 @@
-// Builds the EMS station points transcribed from the right-hand column of
-// public/data/unit_locations.pdf (FDNY Unit Location Chart, March 2011).
-// Standard addresses are geocoded against NYC Planning's authoritative PAD-backed
-// GeoSearch service. The two campus/pier locations use official NYC building centroids.
+// Build the EMS Stations map layer from NYC's Facilities Database.
 // Run: npm run data:ems-stations
-import { writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 
-const stations = [
-  { station: 4, division: 1, neighbourhood: 'Lower East Side', address: 'Pier 36, South Street', borough: 'Manhattan' },
-  { station: 8, division: 1, neighbourhood: 'Kips Bay', address: '462 1st Avenue', borough: 'Manhattan' },
-  { station: 10, division: 1, neighbourhood: 'Yorkville', address: '1918 1st Avenue', borough: 'Manhattan' },
-  { station: 16, division: 2, neighbourhood: 'Harlem', address: '506 Lenox Avenue', borough: 'Manhattan' },
-  { station: 14, division: 2, neighbourhood: 'South Bronx', address: '234 East 149th Street', borough: 'Bronx' },
-  { station: 15, division: 2, neighbourhood: 'Williamsbridge', address: '4109 White Plains Road', borough: 'Bronx' },
-  { station: 17, division: 2, neighbourhood: 'High Bridge', address: '1080 Ogden Avenue', borough: 'Bronx' },
-  { station: 18, division: 2, neighbourhood: 'Bathgate', address: '1647 Washington Avenue', borough: 'Bronx' },
-  { station: 19, division: 2, neighbourhood: 'University Heights', address: '2285 Jerome Avenue', borough: 'Bronx' },
-  { station: 20, division: 2, neighbourhood: 'Morris Park', address: '1410 Pelham Parkway', borough: 'Bronx' },
-  { station: 26, division: 2, neighbourhood: 'Morrisania', address: '1264 Boston Road', borough: 'Bronx' },
-  { station: 55, division: 2, neighbourhood: 'Melrose', address: '3134 Park Avenue', borough: 'Bronx' },
-  { station: 27, division: 2, neighbourhood: '50th Precinct', address: '3450 Kingsbridge Avenue', borough: 'Bronx' },
-  { station: 31, division: 3, neighbourhood: 'Cumberland', address: '39 Auburn Place', borough: 'Brooklyn' },
-  { station: 32, division: 3, neighbourhood: 'Carroll Gardens', address: '347 Bond Street', borough: 'Brooklyn' },
-  { station: 35, division: 3, neighbourhood: 'Williamsburg', address: '720 Flushing Avenue', borough: 'Brooklyn' },
-  { station: 38, division: 3, neighbourhood: 'Wingate', address: '554 Winthrop Street', borough: 'Brooklyn' },
-  { station: 39, division: 3, neighbourhood: 'Pennsylvania', address: '265 Pennsylvania Avenue', borough: 'Brooklyn' },
-  { station: 44, division: 3, neighbourhood: 'Brownsville', address: '266 Rockaway Avenue', borough: 'Brooklyn' },
-  { station: 57, division: 3, neighbourhood: 'Bedford-Stuyvesant', address: '131 Throop Avenue', borough: 'Brooklyn' },
-  { station: 58, division: 3, neighbourhood: 'East 83rd Street', address: '420 East 83rd Street', borough: 'Brooklyn' },
-  { station: 45, division: 4, neighbourhood: 'Woodside', address: '58-65 52nd Road', borough: 'Queens' },
-  { station: 46, division: 4, neighbourhood: 'Elmhurst', address: '79-01 Broadway', borough: 'Queens' },
-  { station: 47, division: 4, neighbourhood: 'Rockaway', address: '303 Beach 49th Street', borough: 'Queens' },
-  { station: 49, division: 4, neighbourhood: 'Astoria', address: '25-10 30th Avenue', borough: 'Queens' },
-  { station: 50, division: 4, neighbourhood: 'Hillcrest', address: '82-68 164th Street', borough: 'Queens' },
-  { station: 52, division: 4, neighbourhood: 'Flushing', address: '135-16 38th Avenue', borough: 'Queens' },
-  {
-    station: 53,
-    division: 4,
-    neighbourhood: 'Fort Totten',
-    address: 'Building 104, Fort Totten',
-    borough: 'Queens',
-    note: 'The March 2011 chart says Building 104; current NYC municipal records identify EMS Station 53 as Building 103, whose official centroid is used.',
-  },
-  { station: 54, division: 4, neighbourhood: 'Springfield Gardens', address: '222-15 Merrick Boulevard', borough: 'Queens' },
-  { station: 22, division: 5, neighbourhood: 'Willowbrook', address: '460 Brielle Avenue', borough: 'Staten Island' },
-  { station: 23, division: 5, neighbourhood: 'Rossville', address: '1100 Rossville Avenue', borough: 'Staten Island' },
-  { station: 40, division: 5, neighbourhood: 'Sunset Park', address: '5011 7th Avenue', borough: 'Brooklyn' },
-  { station: 43, division: 5, neighbourhood: 'Gravesend', address: '2601 Ocean Parkway', borough: 'Brooklyn' },
-]
+export const endpoint = 'https://data.cityofnewyork.us/resource/67g2-p84d.json'
+export const facilityType = 'AMBULANCE STATION'
+const output = new URL('../public/data/reference_data/ems_stations.geojson', import.meta.url)
+const boroughs = {
+  MANHATTAN: 'Manhattan', BRONX: 'Bronx', BROOKLYN: 'Brooklyn',
+  QUEENS: 'Queens', 'STATEN ISLAND': 'Staten Island',
+}
 
-// EMS 4: NYC BIN 1078939. EMS 47 shares the Engine 265/Ladder 121 firehouse and
-// uses its FDNY Firehouse Listing point because PAD labels the lot 329 Beach 49th
-// Street. EMS 53: NYC BIN 4539866. The chart labels the latter "Bldg #104";
-// current NYC municipal records identify EMS 53 as Building 103.
-const officialBuildingPoints = new Map([
-  [4, [-73.98627314069, 40.709638489289]],
-  [47, [-73.779164, 40.593539]],
-  [53, [-73.780776530795, 40.791242554765]],
-])
+export function buildEmsStations(rows, retrievedAt = new Date().toISOString()) {
+  const ids = new Set()
+  const features = rows.map((row) => {
+    if (row.factype !== facilityType) throw new Error(`Unexpected facility type: ${row.factype}`)
+    if (!row.uid || ids.has(row.uid)) throw new Error(`Missing or duplicate UID: ${row.uid}`)
+    ids.add(row.uid)
+    const longitude = Number(row.longitude)
+    const latitude = Number(row.latitude)
+    if (!row.longitude || !row.latitude || !Number.isFinite(longitude) || !Number.isFinite(latitude)) throw new Error(`Missing coordinates for ${row.facname}`)
+    const borough = boroughs[row.boro]
+    if (!borough) throw new Error(`Unexpected borough: ${row.boro}`)
+    return {
+      type: 'Feature',
+      properties: { ...row, id: row.uid, name: row.facname, borough },
+      geometry: { type: 'Point', coordinates: [longitude, latitude] },
+    }
+  }).sort((a, b) => a.properties.borough.localeCompare(b.properties.borough)
+    || a.properties.name.localeCompare(b.properties.name) || a.properties.id.localeCompare(b.properties.id))
 
-async function geocode({ station, address, borough }) {
-  const official = officialBuildingPoints.get(station)
-  if (official) return official
-
-  const url = new URL('https://geosearch.planninglabs.nyc/v2/search')
-  url.searchParams.set('text', `${address}, ${borough}`)
-  url.searchParams.set('size', '5')
-  const response = await fetch(url, { signal: AbortSignal.timeout(30_000) })
-  if (!response.ok) throw new Error(`GeoSearch answered ${response.status} for EMS Station ${station}`)
-  const body = await response.json()
-  const boroughMatch = body.features?.find((feature) => feature.properties?.borough === borough)
-  const feature = boroughMatch ?? body.features?.[0]
-  const coordinates = feature?.geometry?.coordinates
-  if (!Array.isArray(coordinates) || coordinates.length !== 2 || !coordinates.every(Number.isFinite)) {
-    throw new Error(`No point found for EMS Station ${station}: ${address}, ${borough}`)
+  return {
+    type: 'FeatureCollection', layerId: 'ems_stations', facilityType,
+    source: 'NYC Facilities Database', datasetId: '67g2-p84d',
+    sourceUrl: 'https://data.cityofnewyork.us/City-Government/Facilities-Database-Shapefile/2fpa-bnsx',
+    retrievedAt, features,
   }
-  console.log(`EMS ${String(station).padStart(2)}: ${feature.properties.label}`)
-  return coordinates
 }
 
-if (stations.length !== 33 || new Set(stations.map(({ station }) => station)).size !== stations.length) {
-  throw new Error('Expected 33 unique EMS stations from the PDF')
+async function main() {
+  const fileIndex = process.argv.indexOf('--from-file')
+  let rows
+  if (fileIndex !== -1) {
+    rows = JSON.parse(readFileSync(process.argv[fileIndex + 1], 'utf8'))
+  } else {
+    const url = new URL(endpoint)
+    url.search = new URLSearchParams({
+      $where: `factype = '${facilityType}'`, $order: 'boro,facname,uid', $limit: '50000',
+    }).toString()
+    const response = await fetch(url, { signal: AbortSignal.timeout(60_000) })
+    if (!response.ok) throw new Error(`NYC Open Data answered ${response.status}`)
+    rows = await response.json()
+  }
+  const collection = buildEmsStations(rows)
+  mkdirSync(new URL('.', output), { recursive: true })
+  writeFileSync(output, `${JSON.stringify(collection, null, 2)}\n`)
+  console.log(`Wrote ${collection.features.length} ${facilityType} facilities to ${fileURLToPath(output)}`)
 }
 
-const features = []
-for (const station of stations) {
-  const coordinates = (await geocode(station)).map((value) => Number(value.toFixed(6)))
-  features.push({
-    type: 'Feature',
-    properties: { id: station.station, ...station, note: station.note ?? null },
-    geometry: { type: 'Point', coordinates },
-  })
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((error) => { console.error(error); process.exitCode = 1 })
 }
-
-const collection = {
-  type: 'FeatureCollection',
-  features,
-  source: 'FDNY Unit Location Chart, March 2011',
-  geocoder: 'NYC Planning GeoSearch, NYC Open Data building centroids, and the FDNY Firehouse Listing',
-}
-writeFileSync('src/data/ems-stations.json', `${JSON.stringify(collection)}\n`)
-console.log(`Wrote ${features.length} EMS stations to src/data/ems-stations.json`)

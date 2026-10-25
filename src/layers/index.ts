@@ -46,6 +46,13 @@ export const BATTALION_BOUNDARIES: Source = {
   used: 'Battalion boundaries',
 }
 
+export const DIVISION_BOUNDARIES: Source = {
+  name: 'Fire Divisions',
+  publisher: 'NYC Department of City Planning, via NYC Open Data',
+  url: 'https://data.cityofnewyork.us/City-Government/Fire-Divisions/68m2-uzcb',
+  used: 'Division boundaries',
+}
+
 // What places precinct-recorded counts in battalions (see data-sources.md, "By battalion").
 const ALARM_BOXES: Source = {
   name: 'In-Service Alarm Box Locations',
@@ -90,7 +97,7 @@ const RESIDENT_SOURCES: Source[] = [
 
 /** The datasets that place a layer's records in battalions, beyond the battalion boundaries. */
 function placementSources(layer: Metric): Source[] {
-  if (!layerGeographies(layer).includes('battalions') || layer.build?.kind !== 'open-data-counts') return []
+  if (!layerGeographies(layer).some((geography) => geography === 'battalions' || geography === 'divisions') || layer.build?.kind !== 'open-data-counts') return []
   return [...(layer.build.alarmBox ? [ALARM_BOXES, GEOCLIENT] : []), ...RESIDENT_SOURCES]
 }
 
@@ -100,7 +107,8 @@ function placementSources(layer: Metric): Source[] {
  */
 export function layerSources(layer: Metric): Source[] {
   const battalions = layerGeographies(layer).includes('battalions') ? [BATTALION_BOUNDARIES] : []
-  const all = [...layer.sources, PRECINCT_BOUNDARIES, ...battalions, BOROUGH_BOUNDARIES, ...placementSources(layer)]
+  const divisions = layerGeographies(layer).includes('divisions') ? [DIVISION_BOUNDARIES] : []
+  const all = [...layer.sources, PRECINCT_BOUNDARIES, ...divisions, ...battalions, BOROUGH_BOUNDARIES, ...placementSources(layer)]
   return all.filter((s, i) => all.findIndex((o) => o.url === s.url) === i)
 }
 

@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
-import { Map as MapLibreMap, type MapMouseEvent, type PointLike } from 'maplibre-gl'
+import { Map as MapLibreMap, type GeoJSONSource, type MapMouseEvent, type PointLike } from 'maplibre-gl'
 import './BaseMap.css'
 import './MapControl.css'
 import { BOROUGHS, GEOGRAPHIES, areaById } from '../domain/geography'
@@ -8,9 +8,10 @@ import { useDataset, useExplorerDispatch, useExplorerState } from '../explorer/c
 import { activeMetric } from '../explorer/state'
 import { cameraPadding, cameraTarget } from '../map/camera'
 import { choropleth } from '../map/choropleth'
-import { FADE_DURATION, FIXED_VIEW, FLY_DURATION, HOVER_DELAY, NYC_BOUNDS, STACKED_LAYOUT, areaLayers, boroughLayers } from '../map/config'
+import { FADE_DURATION, FIXED_VIEW, FLY_DURATION, HOVER_DELAY, HYDRANTS_URL, NYC_BOUNDS, SOURCES, STACKED_LAYOUT, areaLayers, boroughLayers } from '../map/config'
 import { cameraEasing } from '../map/easing'
 import { hoverDetails } from '../map/hover'
+import { HOSPITAL_MARKER, hospitalMarkerImage } from '../map/hospitalMarker'
 import { legendDetails } from '../map/legend'
 import { cardAction, clickAction, hitKind, hoverTarget, liveTarget, nearestFirst, sameTarget, tapResult, type Hit, type Target } from '../map/interaction'
 import { mapLayers, mapSources } from '../map/layers'
@@ -32,6 +33,7 @@ import './Picture.css'
 const CLICKABLE = BOROUGHS.flatMap((b) => [boroughLayers(b).boroughFill, ...GEOGRAPHIES.map((g) => areaLayers(b, g).fill)])
 const FIREHOUSES = BOROUGHS.map((b) => boroughLayers(b).firehouse)
 const HOSPITALS = BOROUGHS.map((b) => boroughLayers(b).hospital)
+const EMS_STATIONS = BOROUGHS.map((b) => boroughLayers(b).emsStation)
 /** How far beyond a marker's edge the pointer still counts as over it, in pixels: markers are small, a fingertip is not. */
 const MARKER_REACH = { mouse: 6, touch: 20 }
 
@@ -105,6 +107,7 @@ export default function BaseMap() {
 
     map.on('style.load', () => {
       for (const [id, source] of Object.entries(mapSources())) map.addSource(id, source)
+      map.addImage(HOSPITAL_MARKER, hospitalMarkerImage(), { pixelRatio: 2 })
       for (const layer of mapLayers(themeRef.current)) map.addLayer(layer)
     })
     map.once('load', () => setReady(true))
@@ -132,7 +135,10 @@ export default function BaseMap() {
       const hospitals = stateRef.current.showHospitals
         ? nearestFirst(map.queryRenderedFeatures(reach, { layers: HOSPITALS }), e.point, (lngLat) => map.project(lngLat))
         : []
-      return [...hospitals, ...markers, ...places].flatMap((f) => {
+      const emsStations = stateRef.current.showEmsStations
+        ? nearestFirst(map.queryRenderedFeatures(reach, { layers: EMS_STATIONS }), e.point, (lngLat) => map.project(lngLat))
+        : []
+      return [...hospitals, ...emsStations, ...markers, ...places].flatMap((f) => {
         const kind = hitKind(f.layer.id)
         return kind ? [{ kind, properties: f.properties }] : []
       })
@@ -214,7 +220,15 @@ export default function BaseMap() {
     }
   }, [dispatch, clearHover])
 
-  const { storyId, metricId, borough, detail, yearFrom, yearTo, pinnedArea, geography, showOutlines, showLabels, showHospitals, showFirehouses } = state
+  const { storyId, metricId, borough, detail, yearFrom, yearTo, pinnedArea, geography, showOutlines, showLabels, showHospitals, showEmsStations, showFirehouses, showHydrants } = state
+  const hydrantsLoaded = useRef(false)
+  useEffect(() => {
+    if (!ready || storyId !== 'fire' || !showHydrants || hydrantsLoaded.current) return
+    const source = mapRef.current?.getSource(SOURCES.hydrants) as GeoJSONSource | undefined
+    if (!source) return
+    source.setData(HYDRANTS_URL)
+    hydrantsLoaded.current = true
+  }, [ready, storyId, showHydrants])
   const ramp = theme.story[storyId].ramp
   // Only what the colours depend on, so the map toggles don't recompute them.
   const plan = useMemo(
@@ -225,9 +239,9 @@ export default function BaseMap() {
 
   useEffect(() => {
     if (ready && mapRef.current) {
-      paintMap(mapRef.current, plan, { outlines: showOutlines, labels: showLabels, hospitals: showHospitals, firehouses: showFirehouses, pinned }, { fills: false })
+      paintMap(mapRef.current, plan, { outlines: showOutlines, labels: showLabels, hospitals: showHospitals, emsStations: showEmsStations, firehouses: showFirehouses, hydrants: storyId === 'fire' && showHydrants, pinned }, { fills: false })
     }
-  }, [ready, plan, showOutlines, showLabels, showHospitals, showFirehouses, pinned])
+  }, [ready, plan, showOutlines, showLabels, showHospitals, showEmsStations, showFirehouses, showHydrants, storyId, pinned])
 
   // Colours ease to each new plan (a story, layer or year change) over the fade duration, as
   // everything else on the map does; MapLibre can't animate per-feature colours, so it's drawn
@@ -253,9 +267,9 @@ export default function BaseMap() {
     return () => cancelAnimationFrame(frame)
   }, [ready, plan])
 
-  // A hover from before a precincts/battalions switch names an area the new geography doesn't have;
+  // A hover from before an area-system switch names an area the new geography doesn't have;
   // one over a firehouse ends when firehouses are turned off.
-  const live = liveTarget(hovered, geography, showFirehouses, showHospitals)
+  const live = liveTarget(hovered, geography, showFirehouses, showHospitals, showEmsStations)
 
   // Outline what the pointer is over straight away; the card follows after a pause.
   useEffect(() => {
@@ -268,7 +282,7 @@ export default function BaseMap() {
   // A tapped card describes the view it was opened in; one changed from outside the map (the
   // rail, the panel, the breadcrumb) closes it. A mouse's next move would; a finger never moves.
   // Pinning from the city view zooms into the area's borough, but the pinned area's card stays.
-  const view = `${storyId}|${metricId}|${borough}|${detail}|${geography}|${showFirehouses}`
+  const view = `${storyId}|${metricId}|${borough}|${detail}|${geography}|${showHospitals}|${showEmsStations}|${showFirehouses}`
   const shownIn = useRef(view)
   useEffect(() => {
     if (shownIn.current === view) return
@@ -300,6 +314,10 @@ export default function BaseMap() {
   } else if (settled?.kind === 'hospital') {
     const key = `hospital-${settled.id}`
     const props = { name: settled.name, address: settled.address, borough: settled.borough }
+    card = tapped ? <HospitalTooltip key={key} {...props} sheet={{ onClose: clearHover }} /> : <HospitalTooltip key={key} {...props} {...at} />
+  } else if (settled?.kind === 'emsStation') {
+    const key = `ems-station-${settled.id}`
+    const props = { name: settled.name, address: settled.address, borough: settled.borough, label: 'EMS Station' }
     card = tapped ? <HospitalTooltip key={key} {...props} sheet={{ onClose: clearHover }} /> : <HospitalTooltip key={key} {...props} {...at} />
   } else if (settled) {
     const key = settled.kind === 'borough' ? settled.borough : settled.id

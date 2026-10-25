@@ -1,0 +1,40 @@
+station_id,command,division,station_number,station_name,telephone,address,borough,zip,source
+ems-14,bxs,2,14,South Bronx,(718) 665-1832,234 E 149th St,Bronx,10451,IMG_2054.jpeg
+ems-17,bxs,2,17,High Bridge,(718) 588-5555,1080 Ogden Av,Bronx,10452,IMG_2054.jpeg
+ems-18,bxs,2,18,Bathgate,(718) 716-0167,1647 Washington Av,Bronx,10457,IMG_2054.jpeg
+ems-26,bxs,2,26,Morrisania,(718) 378-0980,1264 Boston Rd,Bronx,10456,IMG_2054.jpeg
+ems-55,bxs,2,55,Melrose,(718) 993-3562,3134 Park Av,Bronx,10451,IMG_2054.jpeg
+ems-3,bxn,7,3,Soundview,(718) 430-0080,501 Zerega Av,Bronx,10473,IMG_2054.jpeg
+ems-15,bxn,7,15,Williamsbridge,(718) 405-5274,4109 White Plains Rd,Bronx,10466,IMG_2054.jpeg
+ems-19,bxn,7,19,University Heights,(718) 933-1974,2285 Jerome Av,Bronx,10468,IMG_2054.jpeg
+ems-20,bxn,7,20,Morris Park,(929) 466-2337,1410 Pelham Pkwy,Bronx,10461,IMG_2054.jpeg
+ems-27,bxn,7,27,Woodlawn,(718) 231-1286,243 E 233 St,Bronx,10470,IMG_2054.jpeg
+ems-10,mnn,6,10,Yorkville,(212) 860-4865,1918 1st Av,Manhattan,10029,IMG_2054.jpeg
+ems-13,mnn,6,13,Washington Heights,(212) 923-1847 / 27,501 W 172nd St,Manhattan,10033,IMG_2054.jpeg
+ems-16,mnn,6,16,Harlem,(212) 281-6620 / 29,15 West 136 St,Manhattan,10037,IMG_2054.jpeg
+ems-4,mns,1,4,Lower East Side,(212) 964-4651,299 South St,Manhattan,10002,IMG_2054.jpeg
+ems-7,mns,1,7,Midtown West,(212) 242-3679,512 West 23rd St,Manhattan,10011,IMG_2054.jpeg
+ems-8,mns,1,8,Kips Bay,(212) 213-4069,435 E 26th St,Manhattan,10010,IMG_2054.jpeg
+ems-47,qne,4,47,Rockaway,(718) 471-9658 / 59,303 Beach 49th St,Queens,11692,IMG_2054.jpeg
+ems-50,qne,4,50,Hillcrest,(718) 380-2372,159-10 Goethals Av,Queens,11432,IMG_2054.jpeg
+ems-53,qne,4,53,Fort Totten Outpost,(718) 281-8303,Fort Totten Building 103,Queens,11359,IMG_2054.jpeg
+ems-54,qne,4,54,Springfield Gardens,(718) 525-0945,222-15 Merrick Blvd,Queens,11413,IMG_2054.jpeg
+ems-50a,qne,4,50A,QN Training (Station 50A),(718) 380-4201,82-68 164th St,Queens,11432,IMG_2054.jpeg
+ems-52,qne,4,52,Flushing,(718) 961-9051,135-16 38th Av,Queens,11354,IMG_2054.jpeg
+ems-45,qnw,9,45,Woodside,(718) 899-5416,58-65 52nd Rd,Queens,11377,IMG_2054.jpeg
+ems-46,qnw,9,46,Elmhurst,(718) 334-5646,80-63 Baxter Av,Queens,11373,IMG_2054.jpeg
+ems-49,qnw,9,49,Astoria,(718) 728-1867 / 68,19-40 42nd St,Queens,11105,IMG_2054.jpeg
+ems-49a,qnw,9,49A,RIO (Station 49A),(718) 546-1929,15-02A Hazen St,Queens,11370,IMG_2054.jpeg
+ems-38,bkc,3,38,Wingate,(718) 221-8052,554 Winthrop St,Brooklyn,11203,IMG_2054.jpeg
+ems-39,bkc,3,39,Pennsylvania,(718) 385-7345 / 46,265 Pennsylvania Av,Brooklyn,11207,IMG_2054.jpeg
+ems-44,bkc,3,44,Brownsville,(718) 566-1615,266 Rockaway Av,Brooklyn,11233,IMG_2054.jpeg
+ems-58,bkc,3,58,Canarsie Station,(718) 968-9781,420 East 83rd St,Brooklyn,11236,IMG_2054.jpeg
+ems-59,bkc,3,59,Spring Creek Station,(718) 927-3400,10110 Foster Av,Brooklyn,11236,IMG_2054.jpeg
+ems-31,bkn,8,31,Cumberland,(929) 683-1679,100 North Portland Av,Brooklyn,11205,IMG_2054.jpeg
+ems-32,bkn,8,32,Carroll Gardens,(718) 222-1290,347 Bond St,Brooklyn,11231,IMG_2054.jpeg
+ems-35,bkn,8,35,Williamsburg,(929) 539-1879,332 Metropolitan Av,Brooklyn,11211,IMG_2054.jpeg
+ems-57,bkn,8,57,Bedford Stuyvesant,(718) 302-5660,131 Throop Av,Brooklyn,11206,IMG_2054.jpeg
+ems-22,si,5,22,Willowbrook,(718) 979-9811,460 Brielle Av,Staten Island,10314,IMG_2054.jpeg
+ems-23,si,5,23,Rossville,(718) 948-7250,1100 Rossville Av,Staten Island,10309,IMG_2054.jpeg
+ems-40,bks,5,40,Sunset Park,(718) 437-3539,5011 7th Av,Brooklyn,11220,IMG_2054.jpeg
+ems-43,bks,5,43,Gravesend,(718) 344-1251,2601 Ocean Pkwy,Brooklyn,11235,IMG_2054.jpeg

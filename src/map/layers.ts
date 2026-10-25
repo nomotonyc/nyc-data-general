@@ -3,11 +3,13 @@ import type { GeoJSONSourceSpecification, LayerSpecification, SourceSpecificatio
 import { FIREHOUSE_COLLECTION } from '../data/firehouses'
 import { BOROUGHS, GEOGRAPHIES } from '../domain/geography'
 import type { Theme } from '../theme/tokens'
+import { HOSPITAL_MARKER } from './hospitalMarker'
 import {
   ATTRIBUTION,
   BOROUGHS_URL,
   BOROUGH_LABELS_URL,
   FADE_DURATION,
+  EMS_STATIONS_URL,
   HOSPITALS_URL,
   LABEL_FONT,
   GEOGRAPHY_MAP,
@@ -25,6 +27,8 @@ export function mapSources(): Record<string, SourceSpecification> {
     // Bundled with the app (the panel counts it too), so no fetch.
     [SOURCES.firehouses]: { type: 'geojson', data: FIREHOUSE_COLLECTION as GeoJSONSourceSpecification['data'], promoteId: 'id' },
     [SOURCES.hospitals]: { type: 'geojson', data: HOSPITALS_URL, promoteId: 'id', attribution: '<a href="https://health.data.ny.gov/Health/Health-Facility-General-Information/vn5v-hh5r">Open NY</a>' },
+    [SOURCES.emsStations]: { type: 'geojson', data: EMS_STATIONS_URL, promoteId: 'id', attribution: '<a href="https://data.cityofnewyork.us/City-Government/Facilities-Database-Shapefile/2fpa-bnsx">NYC Facilities Database</a>' },
+    [SOURCES.hydrants]: { type: 'geojson', data: { type: 'FeatureCollection', features: [] }, attribution: '<a href="https://data.cityofnewyork.us/Environment/Hydrants/5bgh-vtsn">NYC DEP Hydrants</a>' },
   }
   for (const g of GEOGRAPHIES) {
     const { source, labelSource, url, labelsUrl, property } = GEOGRAPHY_MAP[g]
@@ -111,18 +115,46 @@ export function mapLayers(theme: Theme): LayerSpecification[] {
   }))
   const hospitals = BOROUGHS.map((b): LayerSpecification => ({
     id: boroughLayers(b).hospital,
-    type: 'circle',
+    type: 'symbol',
     source: SOURCES.hospitals,
+    filter: inBorough(b),
+    layout: {
+      'icon-image': HOSPITAL_MARKER,
+      'icon-size': ['interpolate', ['linear'], ['zoom'], 10, 0.55, 12, 0.75, 14, 1],
+      'icon-allow-overlap': true,
+      'icon-ignore-placement': true,
+    },
+    paint: {
+      'icon-opacity': 0,
+      'icon-opacity-transition': fade,
+    },
+  }))
+  const emsStations = BOROUGHS.map((b): LayerSpecification => ({
+    id: boroughLayers(b).emsStation,
+    type: 'circle',
+    source: SOURCES.emsStations,
     filter: inBorough(b),
     paint: {
       'circle-color': theme.color.firehouse,
       'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 4, 12, 5.5, 14, 7],
-      'circle-stroke-color': theme.color.firehouseRing,
-      'circle-stroke-width': 1.5,
+      'circle-stroke-color': theme.story.medical.accent,
+      'circle-stroke-width': 2,
       'circle-opacity': 0,
       'circle-stroke-opacity': 0,
       'circle-opacity-transition': fade,
       'circle-stroke-opacity-transition': fade,
+    },
+  }))
+  const hydrants = BOROUGHS.map((b): LayerSpecification => ({
+    id: boroughLayers(b).hydrant,
+    type: 'circle',
+    source: SOURCES.hydrants,
+    filter: inBorough(b),
+    paint: {
+      'circle-color': theme.story.fire.accent,
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 1.2, 12, 2, 14, 3],
+      'circle-opacity': 0,
+      'circle-opacity-transition': fade,
     },
   }))
   // The borough commands' outer ring: a circle with no fill (opacity 0 always) and an ink stroke.
@@ -172,6 +204,8 @@ export function mapLayers(theme: Theme): LayerSpecification[] {
     }),
     ...commandRings,
     ...hospitals,
+    ...emsStations,
+    ...hydrants,
     ...firehouses,
     {
       // The firehouse under the pointer, drawn larger with a heavier ring; paintHover sets the filter.

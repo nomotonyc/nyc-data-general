@@ -12,15 +12,15 @@ describe('DetailToggle', () => {
 
   it('switches to precincts', async () => {
     renderWithExplorer(<DetailToggle />, { geography: 'precincts' })
-    await userEvent.click(screen.getByRole('button', { name: 'Precincts' }))
-    expect(screen.getByRole('button', { name: 'Precincts' })).toHaveAttribute('aria-pressed', 'true')
+    await userEvent.click(screen.getByRole('button', { name: 'Precinct' }))
+    expect(screen.getByRole('button', { name: 'Precinct' })).toHaveAttribute('aria-pressed', 'true')
   })
 
   it('locks to precincts and says why when a borough is focused', () => {
     renderWithExplorer(<DetailToggle />, { geography: 'precincts', borough: 'Bronx' })
-    expect(screen.getByRole('button', { name: 'Precincts' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: 'Precinct' })).toHaveAttribute('aria-pressed', 'true')
     expect(screen.getByRole('button', { name: 'Boroughs' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Precincts' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Precinct' })).toBeDisabled()
     expect(screen.getByText('Focused views always show precincts.')).toBeInTheDocument()
   })
 })

@@ -31,6 +31,7 @@ type FakeMap = {
   canvas: { style: { cursor: string }; focus: Mock; toBlob: Mock; clientWidth: number; clientHeight: number }
   getLayoutProperty: Mock
   setPixelRatio: Mock
+  addImage: Mock
   fire: (event: string, payload?: unknown) => void
 }
 
@@ -50,6 +51,7 @@ vi.mock('maplibre-gl', async () => {
       remove = vi.fn()
       addSource = vi.fn()
       addLayer = vi.fn()
+      addImage = vi.fn()
       setFeatureState = vi.fn()
       removeFeatureState = vi.fn()
       setLayoutProperty = vi.fn()

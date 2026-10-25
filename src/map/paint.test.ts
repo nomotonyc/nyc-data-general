@@ -9,7 +9,7 @@ const base: Choropleth = { level: 'borough', focus: null, boroughs: {}, geograph
 const areaLevel: Choropleth = { ...base, level: 'area' }
 const queens: Choropleth = { ...base, level: 'area', focus: 'Queens' }
 const bronxBattalions: Choropleth = { ...base, level: 'area', focus: 'Bronx', geography: 'battalions' }
-const show = { outlines: true, labels: true, hospitals: false, firehouses: false, pinned: [] as number[] }
+const show = { outlines: true, labels: true, hospitals: false, emsStations: false, firehouses: false, hydrants: false, pinned: [] as number[] }
 
 type FakeMap = ReturnType<typeof fakeMap>
 /** The last opacity set on a layer, or undefined if none. */
@@ -22,6 +22,11 @@ const paint = (plan: Choropleth, s = show) => {
 }
 
 describe('paintMap', () => {
+  it('shows hydrants only in the focused borough when enabled', () => {
+    const map = paint(queens, { ...show, hydrants: true })
+    expect(opacity(map, boroughLayers('Queens').hydrant)).toBe(1)
+    expect(opacity(map, boroughLayers('Bronx').hydrant)).toBe(0)
+  })
   it('gives every borough and area of the plan’s geography its fill, clearing the ones without', () => {
     const map = paint({ ...base, boroughs: { Queens: '#111111' }, areas: { 116: '#222222' } })
     expect(map.setFeatureState).toHaveBeenCalledWith({ source: SOURCES.boroughs, id: 'Queens' }, { fill: '#111111' })

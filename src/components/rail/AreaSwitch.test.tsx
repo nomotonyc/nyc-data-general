@@ -9,13 +9,14 @@ const areas = () => screen.getByRole('group', { name: 'Areas' })
 const detail = () => screen.getByRole('group', { name: 'Detail' })
 
 describe('AreaSwitch', () => {
-  it('switches a layer with battalion data to battalions, and the Detail toggle follows', async () => {
+  it('shows Division, Precinct and Battalion in order and follows the selected area in Detail', async () => {
     renderWithExplorer(<Rail />, { geography: 'precincts', storyId: 'fire', metricId: 'fire-apparatus-accidents' })
-    expect(within(areas()).getByRole('button', { name: 'Precincts' })).toHaveAttribute('aria-pressed', 'true')
-    await userEvent.click(within(areas()).getByRole('button', { name: 'Battalions' }))
-    expect(within(areas()).getByRole('button', { name: 'Battalions' })).toHaveAttribute('aria-pressed', 'true')
-    expect(within(detail()).getByRole('button', { name: 'Battalions' })).toBeInTheDocument()
-    expect(within(detail()).queryByRole('button', { name: 'Precincts' })).not.toBeInTheDocument()
+    expect(within(areas()).getAllByRole('button').map((button) => button.textContent)).toEqual(['Division', 'Precinct', 'Battalion'])
+    expect(within(areas()).getByRole('button', { name: 'Precinct' })).toHaveAttribute('aria-pressed', 'true')
+    await userEvent.click(within(areas()).getByRole('button', { name: 'Division' }))
+    expect(within(areas()).getByRole('button', { name: 'Division' })).toHaveAttribute('aria-pressed', 'true')
+    expect(within(detail()).getByRole('button', { name: 'Division' })).toBeInTheDocument()
+    expect(within(detail()).queryByRole('button', { name: 'Precinct' })).not.toBeInTheDocument()
   })
 
   // Every layer has battalions today; a new layer without them must say so rather than show an empty map.
@@ -23,14 +24,22 @@ describe('AreaSwitch', () => {
 
   it.runIf(without)('says when a layer is not available by battalion, instead of showing an empty map', () => {
     renderWithExplorer(<Rail />, { storyId: without!.story, metricId: without!.id })
-    expect(within(areas()).getByRole('button', { name: 'Battalions' })).toBeDisabled()
+    expect(within(areas()).getByRole('button', { name: 'Battalion' })).toBeDisabled()
     expect(screen.getByText(`${without!.label} isn’t available by battalion yet.`)).toBeInTheDocument()
   })
 
   it('offers battalions for every layer that has them', () => {
     for (const layer of LAYERS.filter((l) => layerGeographies(l).includes('battalions'))) {
       const { unmount } = renderWithExplorer(<Rail />, { storyId: layer.story, metricId: layer.id })
-      expect(within(areas()).getByRole('button', { name: 'Battalions' }), layer.id).toBeEnabled()
+      expect(within(areas()).getByRole('button', { name: 'Battalion' }), layer.id).toBeEnabled()
+      unmount()
+    }
+  })
+
+  it('offers divisions for every real layer', () => {
+    for (const layer of LAYERS) {
+      const { unmount } = renderWithExplorer(<Rail />, { storyId: layer.story, metricId: layer.id })
+      expect(within(areas()).getByRole('button', { name: 'Division' }), layer.id).toBeEnabled()
       unmount()
     }
   })

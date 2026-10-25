@@ -9,7 +9,7 @@ export default {
   measure: 'Residents per square mile of land, from Census Bureau estimates',
   unit: 'people per sq mi',
   aggregation: 'ratio',
-  geographies: ['precincts', 'battalions'],
+  geographies: ['divisions', 'precincts', 'battalions'],
   data: { resolution: 'year', firstYear: 2021, lastYear: 2024 },
   breakdown: { title: 'Age mix', parts: ['Under 18', '18–34', '35–64', '65 and over'] },
   sources: [

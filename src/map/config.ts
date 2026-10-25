@@ -40,7 +40,11 @@ export const PRECINCTS_URL = `${import.meta.env.BASE_URL}data/nyc-precincts.geoj
 export const PRECINCT_LABELS_URL = `${import.meta.env.BASE_URL}data/nyc-precinct-labels.geojson`
 export const BATTALIONS_URL = `${import.meta.env.BASE_URL}data/nyc-battalions.geojson`
 export const BATTALION_LABELS_URL = `${import.meta.env.BASE_URL}data/nyc-battalion-labels.geojson`
+export const DIVISIONS_URL = `${import.meta.env.BASE_URL}data/nyc-divisions.geojson`
+export const DIVISION_LABELS_URL = `${import.meta.env.BASE_URL}data/nyc-division-labels.geojson`
 export const HOSPITALS_URL = `${import.meta.env.BASE_URL}data/reference_data/open_ny/hospitals_nyc.geojson`
+export const EMS_STATIONS_URL = `${import.meta.env.BASE_URL}data/reference_data/ems_stations.geojson`
+export const HYDRANTS_URL = `${import.meta.env.BASE_URL}data/reference_data/hydrants.geojson`
 
 /** Self-hosted SDF glyphs. Only the 0-255 range ships; borough names are ASCII. */
 export const GLYPHS = `${import.meta.env.BASE_URL}fonts/{fontstack}/{range}.pbf`
@@ -56,8 +60,12 @@ export const SOURCES = {
   precinctLabels: 'precinct-labels',
   battalions: 'battalions',
   battalionLabels: 'battalion-labels',
+  divisions: 'divisions',
+  divisionLabels: 'division-labels',
   firehouses: 'firehouses',
   hospitals: 'hospitals',
+  emsStations: 'ems-stations',
+  hydrants: 'hydrants',
 } as const
 /** City-wide layers. Borough and precinct shapes have one layer set per borough (boroughLayers). */
 export const LAYERS = {
@@ -69,11 +77,24 @@ export const LAYERS = {
   battalionHover: 'battalion-hover',
   battalionHighlight: 'battalion-highlight',
   battalionLabel: 'battalion-label',
+  divisionHover: 'division-hover',
+  divisionHighlight: 'division-highlight',
+  divisionLabel: 'division-label',
   firehouseHover: 'firehouse-hover',
 } as const
 
 /** Per geography: its shape and label sources, the feature property holding the area number, and its city-wide layers. */
 export const GEOGRAPHY_MAP = {
+  divisions: {
+    source: SOURCES.divisions,
+    labelSource: SOURCES.divisionLabels,
+    url: DIVISIONS_URL,
+    labelsUrl: DIVISION_LABELS_URL,
+    property: 'division',
+    hover: LAYERS.divisionHover,
+    highlight: LAYERS.divisionHighlight,
+    label: LAYERS.divisionLabel,
+  },
   precincts: {
     source: SOURCES.precincts,
     labelSource: SOURCES.precinctLabels,
@@ -105,9 +126,13 @@ export function boroughLayers(borough: string) {
     precinctLine: `precinct-line-${slug}`,
     battalionFill: `battalion-fill-${slug}`,
     battalionLine: `battalion-line-${slug}`,
+    divisionFill: `division-fill-${slug}`,
+    divisionLine: `division-line-${slug}`,
     boroughLine: `borough-line-${slug}`,
     firehouse: `firehouse-${slug}`,
     hospital: `hospital-${slug}`,
+    emsStation: `ems-station-${slug}`,
+    hydrant: `hydrant-${slug}`,
     firehouseRing: `firehouse-ring-${slug}`,
   }
 }
@@ -115,6 +140,7 @@ export function boroughLayers(borough: string) {
 /** A borough's fill and line layers for one geography's areas. */
 export function areaLayers(borough: string, geography: Geography) {
   const layers = boroughLayers(borough)
+  if (geography === 'divisions') return { fill: layers.divisionFill, line: layers.divisionLine }
   return geography === 'battalions'
     ? { fill: layers.battalionFill, line: layers.battalionLine }
     : { fill: layers.precinctFill, line: layers.precinctLine }

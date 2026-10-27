@@ -42,3 +42,19 @@
 .toolbar__end .save-image--labelled {
   height: 38px;
 }
+
+/* Printed pages can be narrower than the desktop breakpoint, but have enough
+   landscape width for the compact one-row toolbar. */
+@media print {
+  .toolbar {
+    grid-template-columns: minmax(0, 1fr) auto minmax(max-content, 1fr);
+  }
+
+  .toolbar > * {
+    justify-self: auto;
+  }
+
+  .toolbar__end {
+    justify-self: end;
+  }
+}

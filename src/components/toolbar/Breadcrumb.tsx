@@ -4,6 +4,17 @@ import './Breadcrumb.css'
 
 type Crumb = { label: string; go: () => void }
 
+const BRAND_IMAGE = `${import.meta.env.BASE_URL}nyc-brand.png`
+
+function CityBrand() {
+  return (
+    <>
+      <img className="breadcrumb__brand-image" src={BRAND_IMAGE} alt="" aria-hidden="true" />
+      <span className="visually-hidden">New York City</span>
+    </>
+  )
+}
+
 export function Breadcrumb() {
   const { borough, pinnedArea } = useExplorerState()
   const dispatch = useExplorerDispatch()
@@ -24,12 +35,12 @@ export function Breadcrumb() {
               </span>
             )}
             {i === crumbs.length - 1 ? (
-              <span className="breadcrumb__current" aria-current="location">
-                {crumb.label}
+              <span className={`breadcrumb__current${i === 0 ? ' breadcrumb__brand' : ''}`} aria-current="location">
+                {i === 0 ? <CityBrand /> : crumb.label}
               </span>
             ) : (
-              <button type="button" onClick={crumb.go}>
-                {crumb.label}
+              <button type="button" onClick={crumb.go} className={i === 0 ? 'breadcrumb__brand' : undefined}>
+                {i === 0 ? <CityBrand /> : crumb.label}
               </button>
             )}
           </li>

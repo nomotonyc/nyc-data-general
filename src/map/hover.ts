@@ -52,7 +52,7 @@ export function hoverDetails(
     const area = areaById(ds.areas, target.id)
     const own = value([area.id])
     const cityIds = ds.areas.map((a) => a.id)
-    const boroughIds = areaIdsIn(ds, area.borough)
+    const boroughIds = ds.areas.filter((candidate) => candidate.borough === area.borough).map((candidate) => candidate.id)
     const cityValues = cityIds.map((id) => value([id]))
     const boroughValues = boroughIds.map((id) => value([id]))
     const cityAverage = average(ds, metric, cityIds, cityValues, range)

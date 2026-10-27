@@ -37,3 +37,20 @@
   padding: 8px 10px;
   font-weight: 700;
 }
+
+/* The supplied wordmark replaces the plain city label while keeping the breadcrumb's
+   baseline and focus target. Its intrinsic ratio is 445:75; 222px is half the source width. */
+.breadcrumb__brand {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.breadcrumb__brand-image {
+  display: block;
+  width: 222px;
+  max-width: 100%;
+  height: auto;
+}

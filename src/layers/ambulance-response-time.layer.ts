@@ -13,7 +13,7 @@ export default {
   format: 'minutes',
   aggregation: 'ratio',
   scale: 1 / 60,
-  geographies: ['precincts', 'battalions'],
+  geographies: ['divisions', 'precincts', 'battalions'],
   data: { resolution: 'month', firstYear: 2019, lastYear: 2026 },
   breakdown: {
     title: 'How long responses took',

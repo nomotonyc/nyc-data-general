@@ -4,14 +4,19 @@ import { BOROUGHS } from '../domain/geography'
 import { lightTheme } from '../theme/tokens'
 import { FADE_DURATION, LAYERS, SOURCES, boroughLayers } from './config'
 import { mapLayers, mapSources } from './layers'
+import { HOSPITAL_MARKER, hospitalMarkerImage } from './hospitalMarker'
 
 describe('mapSources', () => {
   it('keys boroughs by name and precincts by number, so colours can be set per feature', () => {
     const sources = mapSources()
     expect(sources[SOURCES.boroughs]).toMatchObject({ type: 'geojson', promoteId: 'borough' })
     expect(sources[SOURCES.precincts]).toMatchObject({ type: 'geojson', promoteId: 'precinct' })
+    expect(sources[SOURCES.divisions]).toMatchObject({ type: 'geojson', promoteId: 'division' })
     expect(sources[SOURCES.precinctLabels]).toMatchObject({ type: 'geojson' })
     expect(sources[SOURCES.firehouses]).toMatchObject({ type: 'geojson', promoteId: 'id' })
+    expect(sources[SOURCES.hospitals]).toMatchObject({ type: 'geojson', promoteId: 'id' })
+    expect(sources[SOURCES.emsStations]).toMatchObject({ type: 'geojson', promoteId: 'id' })
+    expect(sources[SOURCES.hydrants]).toMatchObject({ type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
   })
 })
 
@@ -23,20 +28,28 @@ describe('mapLayers', () => {
   it('stacks every fill under every line, then the highlight, then labels', () => {
     expect(layers.map((l) => l.id)).toEqual([
       ...perBorough('boroughFill'),
+      ...perBorough('divisionFill'),
       ...perBorough('precinctFill'),
       ...perBorough('battalionFill'),
+      ...perBorough('divisionLine'),
       ...perBorough('precinctLine'),
       ...perBorough('battalionLine'),
       ...perBorough('boroughLine'),
       LAYERS.boroughHover,
+      LAYERS.divisionHover,
+      LAYERS.divisionHighlight,
       LAYERS.precinctHover,
       LAYERS.precinctHighlight,
       LAYERS.battalionHover,
       LAYERS.battalionHighlight,
       ...perBorough('firehouseRing'),
+      ...perBorough('hospital'),
+      ...perBorough('emsStation'),
+      ...perBorough('hydrant'),
       ...perBorough('firehouse'),
       LAYERS.firehouseHover,
       LAYERS.boroughLabel,
+      LAYERS.divisionLabel,
       LAYERS.precinctLabel,
       LAYERS.battalionLabel,
     ])
@@ -55,11 +68,12 @@ describe('mapLayers', () => {
     for (const b of BOROUGHS) {
       const ids = boroughLayers(b)
       expect(byId(ids.boroughFill).paint).toMatchObject({ 'fill-opacity-transition': { duration: FADE_DURATION } })
+      expect(byId(ids.divisionFill).paint).toMatchObject({ 'fill-opacity-transition': { duration: FADE_DURATION } })
       expect(byId(ids.precinctFill).paint).toMatchObject({ 'fill-opacity-transition': { duration: FADE_DURATION } })
       expect(byId(ids.precinctLine).paint).toMatchObject({ 'line-opacity-transition': { duration: FADE_DURATION } })
       expect(byId(ids.boroughLine).paint).toMatchObject({ 'line-opacity-transition': { duration: FADE_DURATION } })
     }
-    for (const id of [LAYERS.boroughLabel, LAYERS.precinctLabel]) {
+    for (const id of [LAYERS.boroughLabel, LAYERS.divisionLabel, LAYERS.precinctLabel]) {
       expect(byId(id).paint, id).toMatchObject({ 'text-opacity-transition': { duration: FADE_DURATION } })
     }
   })
@@ -67,7 +81,7 @@ describe('mapLayers', () => {
   it('reads fills from feature state', () => {
     for (const b of BOROUGHS) {
       const ids = boroughLayers(b)
-      for (const id of [ids.boroughFill, ids.precinctFill]) expect(JSON.stringify(byId(id).paint), id).toContain('feature-state')
+      for (const id of [ids.boroughFill, ids.divisionFill, ids.precinctFill]) expect(JSON.stringify(byId(id).paint), id).toContain('feature-state')
     }
   })
 
@@ -85,6 +99,20 @@ describe('mapLayers', () => {
 
   it('starts with the pin highlight hidden', () => {
     expect(byId(LAYERS.precinctHighlight).layout).toMatchObject({ visibility: 'none' })
+  })
+
+  it('draws hospitals with the supplied red cross symbol', () => {
+    for (const b of BOROUGHS) {
+      const layer = byId(boroughLayers(b).hospital)
+      expect(layer).toMatchObject({
+        type: 'symbol',
+        layout: { 'icon-image': HOSPITAL_MARKER, 'icon-allow-overlap': true },
+        paint: { 'icon-opacity': 0, 'icon-opacity-transition': { duration: FADE_DURATION } },
+      })
+    }
+    const image = hospitalMarkerImage()
+    expect(image).toMatchObject({ width: 64, height: 64 })
+    expect(image.data).toHaveLength(64 * 64 * 4)
   })
 })
 

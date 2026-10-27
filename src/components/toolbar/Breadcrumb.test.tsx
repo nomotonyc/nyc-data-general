@@ -10,6 +10,7 @@ describe('Breadcrumb', () => {
   it('shows only New York City at city level', () => {
     renderWithExplorer(<Breadcrumb />)
     expect(current()).toHaveTextContent('New York City')
+    expect(current()?.querySelector('img')).toHaveAttribute('src', expect.stringContaining('nyc-brand.png'))
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
 

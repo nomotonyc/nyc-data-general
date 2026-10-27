@@ -76,3 +76,35 @@
     border-top: 1px solid var(--color-line);
   }
 }
+
+@media print {
+  @page {
+    size: landscape;
+    margin: 0.35in;
+  }
+
+  .explorer {
+    height: auto;
+    overflow: visible;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .explorer__body {
+    grid-template-columns: minmax(6in, 1fr) 2.8in;
+  }
+
+  .explorer__panel {
+    overflow: visible;
+  }
+
+  /* The controls describe an interactive view rather than exported data. Leaving
+     them out gives the map most of the printed page while the focus data stays beside it. */
+  .explorer__rail {
+    display: none;
+  }
+
+  .explorer__map {
+    min-height: 6.8in;
+  }
+}

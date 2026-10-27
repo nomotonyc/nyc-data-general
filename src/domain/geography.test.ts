@@ -3,6 +3,8 @@ import {
   BATTALIONS,
   BATTALION_AREAS,
   BOROUGHS,
+  DIVISIONS,
+  DIVISION_AREAS,
   PRECINCTS,
   PRECINCT_AREAS,
   areaById,
@@ -92,8 +94,22 @@ describe('battalions', () => {
   })
 })
 
+describe('divisions', () => {
+  it('lists the nine FDNY divisions and assigns every battalion exactly once', () => {
+    expect(DIVISIONS.map((division) => division.number)).toEqual([1, 3, 6, 7, 8, 11, 13, 14, 15])
+    const battalions = DIVISIONS.flatMap((division) => division.battalions).sort((a, b) => a - b)
+    expect(battalions).toEqual(BATTALIONS.map((battalion) => battalion.number))
+  })
+
+  it('gives every division a unique area id', () => {
+    expect(DIVISION_AREAS.find((area) => area.number === 14)).toEqual({ id: 'div14', kind: 'division', number: 14, label: 'Division 14', borough: 'Queens' })
+    expect(new Set(DIVISION_AREAS.map((area) => area.id)).size).toBe(9)
+  })
+})
+
 describe('areasOf and areaById', () => {
   it('returns the areas of a geography', () => {
+    expect(areasOf('divisions')).toBe(DIVISION_AREAS)
     expect(areasOf('precincts')).toBe(PRECINCT_AREAS)
     expect(areasOf('battalions')).toBe(BATTALION_AREAS)
   })
@@ -105,8 +121,9 @@ describe('areasOf and areaById', () => {
   })
 
   it('names a geography’s areas', () => {
-    expect(areaNoun('precincts')).toEqual({ one: 'precinct', many: 'precincts', title: 'Precincts' })
-    expect(areaNoun('battalions')).toEqual({ one: 'battalion', many: 'battalions', title: 'Battalions' })
+    expect(areaNoun('divisions')).toEqual({ one: 'division', many: 'divisions', title: 'Division' })
+    expect(areaNoun('precincts')).toEqual({ one: 'precinct', many: 'precincts', title: 'Precinct' })
+    expect(areaNoun('battalions')).toEqual({ one: 'battalion', many: 'battalions', title: 'Battalion' })
   })
 })
 

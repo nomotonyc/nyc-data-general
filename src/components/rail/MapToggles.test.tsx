@@ -5,6 +5,16 @@ import { renderWithExplorer } from '../../test/renderWithExplorer'
 import { MapToggles } from './MapToggles'
 
 describe('MapToggles', () => {
+  it('lists hospitals third and EMS stations between hospitals and firehouses', async () => {
+    renderWithExplorer(<MapToggles />)
+    const boxes = screen.getAllByRole('checkbox')
+    expect(boxes.map((box) => box.closest('label')?.textContent?.trim())).toEqual(['Battalion outlines', 'Place labels', 'Hospitals', 'EMS stations', 'Firehouses'])
+    await userEvent.click(screen.getByRole('checkbox', { name: 'Hospitals' }))
+    expect(screen.getByRole('checkbox', { name: 'Hospitals' })).toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Firehouses' })).not.toBeChecked()
+    await userEvent.click(screen.getByRole('checkbox', { name: 'EMS stations' }))
+    expect(screen.getByRole('checkbox', { name: 'EMS stations' })).toBeChecked()
+  })
   it('shows outlines and labels by default', () => {
     renderWithExplorer(<MapToggles />, { geography: 'precincts' })
     expect(screen.getByRole('checkbox', { name: 'Precinct outlines' })).toBeChecked()

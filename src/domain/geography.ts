@@ -38,15 +38,16 @@ export function boroughInSentence(borough: Borough): string {
   return borough === 'Bronx' ? 'the Bronx' : borough
 }
 
-/** How the city is divided below the boroughs: NYPD precincts or FDNY battalions. */
-export type Geography = 'precincts' | 'battalions'
-export const GEOGRAPHIES: readonly Geography[] = ['precincts', 'battalions']
+/** How the city is divided below the boroughs: FDNY divisions or battalions, or NYPD precincts. */
+export type Geography = 'divisions' | 'precincts' | 'battalions'
+/** The order shown in the Areas control. */
+export const GEOGRAPHIES: readonly Geography[] = ['divisions', 'precincts', 'battalions']
 
-/** A unit values are reported for: one precinct or one battalion. */
+/** A unit values are reported for: one division, precinct or battalion. */
 export type Area = {
-  /** Unique across geographies: "14" is precinct 14, "bn14" is battalion 14. */
+  /** Unique across geographies: "14" is precinct 14, "bn14" is battalion 14, "div14" is division 14. */
   id: string
-  kind: 'precinct' | 'battalion'
+  kind: 'division' | 'precinct' | 'battalion'
   number: number
   label: string
   borough: Borough
@@ -86,12 +87,39 @@ export const BATTALION_AREAS: readonly Area[] = BATTALIONS.map(({ number, boroug
   borough,
 }))
 
+/**
+ * FDNY's nine operational divisions and their battalions. Some division commands cross borough
+ * lines; `borough` is the division command's primary borough and keeps focused views consistent
+ * with the rest of the explorer.
+ */
+export const DIVISIONS: readonly { number: number; borough: Borough; battalions: readonly number[] }[] = [
+  { number: 1, borough: 'Manhattan', battalions: [1, 2, 4, 6, 7] },
+  { number: 3, borough: 'Manhattan', battalions: [8, 9, 10, 11, 12] },
+  { number: 6, borough: 'Bronx', battalions: [3, 14, 16, 17, 26] },
+  { number: 7, borough: 'Bronx', battalions: [13, 15, 18, 19, 20, 27] },
+  { number: 8, borough: 'Staten Island', battalions: [21, 22, 23, 40, 42, 43] },
+  { number: 11, borough: 'Brooklyn', battalions: [28, 31, 32, 35, 48, 57] },
+  { number: 13, borough: 'Queens', battalions: [47, 50, 51, 54] },
+  { number: 14, borough: 'Queens', battalions: [45, 46, 49, 52, 53] },
+  { number: 15, borough: 'Brooklyn', battalions: [33, 37, 38, 39, 41, 44, 58] },
+]
+
+export const DIVISION_AREAS: readonly Area[] = DIVISIONS.map(({ number, borough }) => ({
+  id: `div${number}`,
+  kind: 'division',
+  number,
+  label: `Division ${number}`,
+  borough,
+}))
+
 /** The id of a geography's area from its number, as map features carry it. */
 export function areaIdOf(geography: Geography, number: number): string {
+  if (geography === 'divisions') return `div${number}`
   return geography === 'battalions' ? `bn${number}` : String(number)
 }
 
 export function areasOf(geography: Geography): readonly Area[] {
+  if (geography === 'divisions') return DIVISION_AREAS
   return geography === 'battalions' ? BATTALION_AREAS : PRECINCT_AREAS
 }
 
@@ -103,9 +131,10 @@ export function areaById(areas: readonly Area[], id: string): Area {
 
 /** How to name a geography's areas in sentences and controls. */
 export function areaNoun(geography: Geography): { one: string; many: string; title: string } {
+  if (geography === 'divisions') return { one: 'division', many: 'divisions', title: 'Division' }
   return geography === 'battalions'
-    ? { one: 'battalion', many: 'battalions', title: 'Battalions' }
-    : { one: 'precinct', many: 'precincts', title: 'Precincts' }
+    ? { one: 'battalion', many: 'battalions', title: 'Battalion' }
+    : { one: 'precinct', many: 'precincts', title: 'Precinct' }
 }
 
 /** ZIP codes in precinct 116, which NYPD created from the southeast of 105 in late 2024. */

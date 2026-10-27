@@ -1,0 +1,290 @@
+{
+  "type": "FeatureCollection",
+  "layerId": "psych_hospitals_nyc",
+  "source": "psych_hospitals_nyc",
+  "countyFilter": [
+    "Bronx",
+    "Kings",
+    "New York",
+    "Queens",
+    "Richmond"
+  ],
+  "notes": [
+    "County filtering includes inherited cells from the pasted table; New York (county) is normalized to New York.",
+    "Source entries, including historical facilities, are retained without verifying current operating status.",
+    "Beds and opening/closing dates remain text to preserve ranges, alternatives and uncertainty. Source citations are preserved in sourceText.",
+    "Missing coordinates produce null geometry; no location is guessed."
+  ],
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 1,
+        "name": "Bloomingdale Insane Asylum",
+        "healthSystem": null,
+        "county": "New York",
+        "city": "New York City: Manhattan: Morningside Heights",
+        "countyInherited": false,
+        "coordinatesText": "40°48′31″N 73°57′41″W",
+        "opened": "1821-1889",
+        "beds": null,
+        "sourceText": "Bloomingdale Insane Asylum\tNew York (county)\tNew York City: Manhattan: Morningside Heights\t40°48′31″N 73°57′41″W\t1821-1889\t[167]",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.961389,
+          40.808611
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 2,
+        "name": "Bronx Psychiatric Center",
+        "healthSystem": null,
+        "county": "Bronx",
+        "city": "New York City: The Bronx",
+        "countyInherited": false,
+        "coordinatesText": "40°51′09″N 73°50′14″W",
+        "opened": "1963",
+        "beds": "156",
+        "sourceText": "Bronx Psychiatric Center\tBronx\tNew York City: The Bronx\t40°51′09″N 73°50′14″W\t1963\t156[168][169]",
+        "borough": "Bronx"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.837222,
+          40.8525
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 3,
+        "name": "Brooklyn Children's Psychiatric Center",
+        "healthSystem": null,
+        "county": "Kings",
+        "city": "New York City: Brooklyn",
+        "countyInherited": false,
+        "coordinatesText": "40°40′30″N 73°55′15″W",
+        "opened": "1969",
+        "beds": null,
+        "sourceText": "Brooklyn Children's Psychiatric Center[Note 40]\tKings\tNew York City: Brooklyn\t40°40′30″N 73°55′15″W\t1969\t[169]",
+        "borough": "Brooklyn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.920833,
+          40.675
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 4,
+        "name": "Creedmoor Psychiatric Center",
+        "healthSystem": null,
+        "county": "Queens",
+        "city": "New York City: Queens: Queens Village",
+        "countyInherited": false,
+        "coordinatesText": "40°44′29″N 73°43′54″W",
+        "opened": "1912",
+        "beds": "328",
+        "sourceText": "Creedmoor Psychiatric Center\tQueens\tNew York City: Queens: Queens Village\t40°44′29″N 73°43′54″W\t1912\t328[176]",
+        "borough": "Queens"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.731667,
+          40.741389
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 5,
+        "name": "Kingsboro Psychiatric Center",
+        "healthSystem": null,
+        "county": "Kings",
+        "city": "New York City: Brooklyn",
+        "countyInherited": false,
+        "coordinatesText": "40°39′27″N 73°56′17″W",
+        "opened": "?",
+        "beds": "163",
+        "sourceText": "Kingsboro Psychiatric Center\tKings\tNew York City: Brooklyn\t40°39′27″N 73°56′17″W\t?\t163[183][52]",
+        "borough": "Brooklyn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.938056,
+          40.6575
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 6,
+        "name": "Kirby Forensic Psychiatric Center",
+        "healthSystem": null,
+        "county": "New York",
+        "city": "New York City: Manhattan: Ward Island",
+        "countyInherited": false,
+        "coordinatesText": "40°47′22″N 73°55′47″W",
+        "opened": "?",
+        "beds": "475",
+        "sourceText": "Kirby Forensic Psychiatric Center\tNew York (county)\tNew York City: Manhattan: Ward Island\t40°47′22″N 73°55′47″W\t?\t475[1][52]",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.929722,
+          40.789444
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 7,
+        "name": "Manhattan Psychiatric Center (New York State Department of Mental Hygiene)",
+        "healthSystem": null,
+        "county": "New York",
+        "city": "New York City: Manhattan",
+        "countyInherited": false,
+        "coordinatesText": "40°47′21″N 73°55′47″W",
+        "opened": "1848",
+        "beds": "509",
+        "sourceText": "Manhattan Psychiatric Center (New York State Department of Mental Hygiene)\tNew York (county)\tNew York City: Manhattan\t40°47′21″N 73°55′47″W\t1848\t509",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.929722,
+          40.789167
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 8,
+        "name": "New York State Psychiatric Institute",
+        "healthSystem": null,
+        "county": "New York",
+        "city": "New York City: Manhattan",
+        "countyInherited": false,
+        "coordinatesText": "40°50′38″N 73°56′40″W",
+        "opened": "1895",
+        "beds": "21",
+        "sourceText": "New York State Psychiatric Institute\tNew York (county)\tNew York City: Manhattan\t40°50′38″N 73°56′40″W\t1895\t21[190]",
+        "borough": "Manhattan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.944444,
+          40.843889
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 9,
+        "name": "Queens Children's Psychiatric Center",
+        "healthSystem": null,
+        "county": "Queens",
+        "city": "New York City: Queens",
+        "countyInherited": false,
+        "coordinatesText": null,
+        "opened": null,
+        "beds": null,
+        "sourceText": "Queens Children's Psychiatric Center\tQueens\tNew York City: Queens\t\t\t",
+        "borough": "Queens"
+      },
+      "geometry": null
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 10,
+        "name": "South Beach Psychiatric Center",
+        "healthSystem": null,
+        "county": "Richmond",
+        "city": "New York City: Staten Island",
+        "countyInherited": false,
+        "coordinatesText": "40°35′03″N 74°04′44″W",
+        "opened": null,
+        "beds": "507",
+        "sourceText": "South Beach Psychiatric Center\tRichmond\tNew York City: Staten Island\t40°35′03″N 74°04′44″W\t\t507[200]",
+        "borough": "Staten Island"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.078889,
+          40.584167
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 11,
+        "name": "Willowbrook State School",
+        "healthSystem": null,
+        "county": "Richmond",
+        "city": "New York City: Staten Island: Willowbrook",
+        "countyInherited": false,
+        "coordinatesText": "40°35′58″N 74°09′02″W",
+        "opened": "1947–1987",
+        "beds": null,
+        "sourceText": "Willowbrook State School[Note 43]\tRichmond\tNew York City: Staten Island: Willowbrook\t40°35′58″N 74°09′02″W\t1947–1987\t",
+        "borough": "Staten Island"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.150556,
+          40.599444
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 12,
+        "name": "Zucker Hillside Hospital (Northwell Health)",
+        "healthSystem": null,
+        "county": "Queens",
+        "city": "New York City: Queens: Glen Oaks",
+        "countyInherited": false,
+        "coordinatesText": "40°45′08″N 73°42′37″W",
+        "opened": "1926",
+        "beds": "0",
+        "sourceText": "Zucker Hillside Hospital (Northwell Health)\tQueens\tNew York City: Queens: Glen Oaks\t40°45′08″N 73°42′37″W\t1926\t0[1]",
+        "borough": "Queens"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.710278,
+          40.752222
+        ]
+      }
+    }
+  ]
+}

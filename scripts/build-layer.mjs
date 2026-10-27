@@ -88,6 +88,7 @@ async function writeLayerFile(layer, geography, file) {
 
 if (layer.build?.kind === 'census-density') {
   await buildCensus(layer)
+  await import('./build-divisions.mjs')
   process.exit(0)
 }
 
@@ -243,6 +244,8 @@ for (const period of layerPeriods(layer)) {
 }
 
 for (const geography of layerGeographies(layer)) {
+  // Divisions are exact rollups of the battalion file and are rebuilt below.
+  if (geography === 'divisions') continue
   if (geography === 'battalions' && !points) {
     await buildBattalionsByPlacement(layer, batches.flat())
     continue
@@ -255,6 +258,7 @@ for (const geography of layerGeographies(layer)) {
   for (const r of report) console.log(`| ${r.year} | ${fmt(r.counted)} | ${fmt(r.noPrecinct)} |`)
   console.log(`\nWrote ${path}`)
 }
+await import('./build-divisions.mjs')
 
 /** Population density from Census Bureau bulk files, cached in .cache/census/. */
 async function buildCensus(layer) {
@@ -308,6 +312,7 @@ async function buildCensus(layer) {
   }
 
   for (const geography of layerGeographies(layer)) {
+    if (geography === 'divisions') continue
     const weights = apportion(blocks, await shapesOf(geography), geography)
     console.log(`\nBlocks outside every ${geography === 'battalions' ? 'battalion' : 'precinct'}: ${weights.unplacedBlocks.blocks} (${fmt(weights.unplacedBlocks.population)} residents)`)
     const { file, report } = densityFile(layer, weights, acsByYear, { geography })

@@ -1,0 +1,1770 @@
+{
+  "source": "https://health.data.ny.gov/resource/vn5v-hh5r.json",
+  "hospital_filter": "fac_desc_short = 'HOSP'",
+  "methodology": [
+    "Facility ID defines a distinct Open NY site. All cooperator rows remain in facilities_nyc.json.",
+    "Candidate matches were reviewed using source names, legacy names and locations; they are not official crosswalks.",
+    "Combined Columbia/Weill Cornell and Staten Island North/South entries require separate map points for Columbia and Princes Bay.",
+    "Distances are approximate. Candidate coordinates over 500 m apart or absent source coordinates require location review.",
+    "An unmatched legacy entry is not proof of closure or invalidity. This dataset alone cannot establish coverage of all psychiatric, federal, research or historical hospitals.",
+    "The source classifies some ambulatory sites as HOSP; this comparison follows its classification and makes no emergency-service claim."
+  ],
+  "summary": {
+    "source_hospital_rows": 68,
+    "distinct_source_hospitals": 62,
+    "legacy_general_entries": 55,
+    "legacy_psychiatric_entries": 12,
+    "statuses": {
+      "candidate_legacy_match": 45,
+      "combined_in_legacy_missing_separate_point": 2,
+      "missing_from_legacy": 15
+    }
+  },
+  "hospitals": [
+    {
+      "fac_id": "1437",
+      "facility_name": "New York-Presbyterian/Lower Manhattan Hospital",
+      "cnty_cd": "7093",
+      "borough": "Manhattan",
+      "borough_sort_code": "031",
+      "address1": "170 William Street",
+      "coordinates": [
+        -74.005486,
+        40.710426
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 37,
+          "name": "NewYork-Presbyterian Lower Manhattan Hospital",
+          "coordinates": [
+            -74.005,
+            40.710278
+          ],
+          "approximate_distance_m": 44
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1438",
+      "facility_name": "Bellevue Hospital Center",
+      "cnty_cd": "7093",
+      "borough": "Manhattan",
+      "borough_sort_code": "031",
+      "address1": "462 First Avenue",
+      "coordinates": [
+        -73.976509,
+        40.739605
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 1,
+          "name": "Bellevue Hospital",
+          "coordinates": [
+            -73.975278,
+            40.739167
+          ],
+          "approximate_distance_m": 115
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1445",
+      "facility_name": "Harlem Hospital Center",
+      "cnty_cd": "7093",
+      "borough": "Manhattan",
+      "borough_sort_code": "031",
+      "address1": "506 Lenox Avenue",
+      "coordinates": [
+        -73.940506,
+        40.81435
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 12,
+          "name": "Harlem Hospital Center",
+          "coordinates": [
+            -73.940278,
+            40.814167
+          ],
+          "approximate_distance_m": 28
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1446",
+      "facility_name": "NYU Langone Orthopedic Hospital",
+      "cnty_cd": "7093",
+      "borough": "Manhattan",
+      "borough_sort_code": "031",
+      "address1": "301 East 17th Street",
+      "coordinates": [
+        -73.98307,
+        40.734127
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 43,
+          "name": "NYU Langone Orthopedic Hospital",
+          "coordinates": [
+            -73.983056,
+            40.734444
+          ],
+          "approximate_distance_m": 35
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1447",
+      "facility_name": "Hospital for Special Surgery",
+      "cnty_cd": "7093",
+      "borough": "Manhattan",
+      "borough_sort_code": "031",
+      "address1": "535 E 70th Street",
+      "coordinates": [
+        -73.954185,
+        40.765381
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 14,
+          "name": "Hospital for Special Surgery",
+          "coordinates": [
+            -73.954167,
+            40.765278
+          ],
+          "approximate_distance_m": 12
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1450",
+      "facility_name": "Lenox Hill Hospital",
+      "cnty_cd": "7093",
+      "borough": "Manhattan",
+      "borough_sort_code": "031",
+      "address1": "100 East 77th Street",
+      "coordinates": [
+        -73.960632,
+        40.773907
+      ],
+      "source_row_count": 2,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 20,
+          "name": "Lenox Hill Hospital",
+          "coordinates": [
+            -73.960833,
+            40.773611
+          ],
+          "approximate_distance_m": 37
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1453",
+      "facility_name": "Memorial Hospital for Cancer and Allied Diseases",
+      "cnty_cd": "7093",
+      "borough": "Manhattan",
+      "borough_sort_code": "031",
+      "address1": "1275 York Avenue",
+      "coordinates": [
+        -73.956812,
+        40.764386
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 26,
+          "name": "Memorial Sloan Kettering Cancer Center",
+          "coordinates": [
+            -73.956944,
+            40.764167
+          ],
+          "approximate_distance_m": 27
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1454",
+      "facility_name": "Metropolitan Hospital Center",
+      "cnty_cd": "7093",
+      "borough": "Manhattan",
+      "borough_sort_code": "031",
+      "address1": "1901 First Avenue",
+      "coordinates": [
+        -73.94368,
+        40.784775
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 27,
+          "name": "Metropolitan Hospital Center",
+          "coordinates": [
+            -73.944706,
+            40.784928
+          ],
+          "approximate_distance_m": 88
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1456",
+      "facility_name": "Mount Sinai Hospital",
+      "cnty_cd": "7093",
+      "borough": "Manhattan",
+      "borough_sort_code": "031",
+      "address1": "One Gustave L Levy Place",
+      "coordinates": [
+        -73.953766,
+        40.790482
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 31,
+          "name": "Mount Sinai Hospital",
+          "coordinates": [
+            -73.953333,
+            40.79
+          ],
+          "approximate_distance_m": 65
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1458",
+      "facility_name": "New York-Presbyterian Hospital - New York Weill Cornell Center",
+      "cnty_cd": "7093",
+      "borough": "Manhattan",
+      "borough_sort_code": "031",
+      "address1": "525 East 68th Street",
+      "coordinates": [
+        -73.954926,
+        40.76408
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 36,
+          "name": "NewYork-Presbyterian Hospital / Columbia University Irving Medical Center / Weill Cornell Medical Center",
+          "coordinates": [
+            -73.955278,
+            40.766111
+          ],
+          "approximate_distance_m": 228
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1460",
+      "facility_name": "New York Eye and Ear Infirmary of Mount Sinai",
+      "cnty_cd": "7093",
+      "borough": "Manhattan",
+      "borough_sort_code": "031",
+      "address1": "310 East 14th Street",
+      "coordinates": [
+        -73.984711,
+        40.732189
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 39,
+          "name": "New York Eye and Ear Infirmary",
+          "coordinates": [
+            -73.985,
+            40.733611
+          ],
+          "approximate_distance_m": 160
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1463",
+      "facility_name": "NYU Langone Hospitals",
+      "cnty_cd": "7093",
+      "borough": "Manhattan",
+      "borough_sort_code": "031",
+      "address1": "550 First Avenue",
+      "coordinates": [
+        -73.974159,
+        40.742874
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 44,
+          "name": "NYU Langone Tisch Hospital",
+          "coordinates": [
+            -73.974167,
+            40.743611
+          ],
+          "approximate_distance_m": 82
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1464",
+      "facility_name": "New York-Presbyterian Hospital - Columbia Presbyterian Center",
+      "cnty_cd": "7093",
+      "borough": "Manhattan",
+      "borough_sort_code": "031",
+      "address1": "622 West 168th Street",
+      "coordinates": [
+        -73.94065,
+        40.84131
+      ],
+      "source_row_count": 1,
+      "status": "combined_in_legacy_missing_separate_point",
+      "legacy_candidates": [
+        {
+          "id": 36,
+          "name": "NewYork-Presbyterian Hospital / Columbia University Irving Medical Center / Weill Cornell Medical Center",
+          "coordinates": [
+            -73.955278,
+            40.766111
+          ],
+          "approximate_distance_m": 8452
+        }
+      ],
+      "location_review_needed": true
+    },
+    {
+      "fac_id": "1466",
+      "facility_name": "Mount Sinai West",
+      "cnty_cd": "7093",
+      "borough": "Manhattan",
+      "borough_sort_code": "031",
+      "address1": "1000 10th Avenue",
+      "coordinates": [
+        -73.987785,
+        40.770092
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 34,
+          "name": "Mount Sinai West",
+          "coordinates": [
+            -73.9875,
+            40.77
+          ],
+          "approximate_distance_m": 26
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1469",
+      "facility_name": "Mount Sinai Morningside",
+      "cnty_cd": "7093",
+      "borough": "Manhattan",
+      "borough_sort_code": "031",
+      "address1": "1111 Amsterdam Avenue",
+      "coordinates": [
+        -73.961639,
+        40.805912
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 32,
+          "name": "Mount Sinai Morningside",
+          "coordinates": [
+            -73.961667,
+            40.805556
+          ],
+          "approximate_distance_m": 40
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1486",
+      "facility_name": "Henry J. Carter Specialty Hospital",
+      "cnty_cd": "7093",
+      "borough": "Manhattan",
+      "borough_sort_code": "031",
+      "address1": "1752 Park Avenue",
+      "coordinates": [
+        -73.940811,
+        40.802979
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 13,
+          "name": "Henry J. Carter Specialty Hospital and Nursing Facility",
+          "coordinates": [
+            -73.941111,
+            40.803056
+          ],
+          "approximate_distance_m": 27
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "3975",
+      "facility_name": "New York-Presbyterian Hospital - Allen Hospital",
+      "cnty_cd": "7093",
+      "borough": "Manhattan",
+      "borough_sort_code": "031",
+      "address1": "5141 Broadway",
+      "coordinates": [
+        -73.912773,
+        40.872475
+      ],
+      "source_row_count": 1,
+      "status": "missing_from_legacy",
+      "legacy_candidates": [],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "9700",
+      "facility_name": "Northwell Greenwich Village Hospital",
+      "cnty_cd": "7093",
+      "borough": "Manhattan",
+      "borough_sort_code": "031",
+      "address1": "30 Seventh Avenue",
+      "coordinates": [
+        -74.000488,
+        40.737576
+      ],
+      "source_row_count": 2,
+      "status": "missing_from_legacy",
+      "legacy_candidates": [],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "10139",
+      "facility_name": "New York-Presbyterian David H. Koch Center",
+      "cnty_cd": "7093",
+      "borough": "Manhattan",
+      "borough_sort_code": "031",
+      "address1": "1283 York Avenue",
+      "coordinates": [
+        -73.955346,
+        40.764794
+      ],
+      "source_row_count": 1,
+      "status": "missing_from_legacy",
+      "legacy_candidates": [],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "10355",
+      "facility_name": "David H. Koch Center For Cancer Care",
+      "cnty_cd": "7093",
+      "borough": "Manhattan",
+      "borough_sort_code": "031",
+      "address1": "530 East 74th Street",
+      "coordinates": [
+        -73.951584,
+        40.767588
+      ],
+      "source_row_count": 1,
+      "status": "missing_from_legacy",
+      "legacy_candidates": [],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "15437",
+      "facility_name": "Mount Sinai -  Behavioral Health Center",
+      "cnty_cd": "7093",
+      "borough": "Manhattan",
+      "borough_sort_code": "031",
+      "address1": "45 Rivington Street",
+      "coordinates": [
+        -73.99109,
+        40.72082
+      ],
+      "source_row_count": 1,
+      "status": "missing_from_legacy",
+      "legacy_candidates": [],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1164",
+      "facility_name": "BronxCare Hospital Center",
+      "cnty_cd": "7094",
+      "borough": "Bronx",
+      "borough_sort_code": "032",
+      "address1": "1276 Fulton Avenue",
+      "coordinates": [
+        -73.903656,
+        40.831772
+      ],
+      "source_row_count": 1,
+      "status": "missing_from_legacy",
+      "legacy_candidates": [],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1165",
+      "facility_name": "Jacobi Medical Center",
+      "cnty_cd": "7094",
+      "borough": "Bronx",
+      "borough_sort_code": "032",
+      "address1": "1400 Pelham Parkway",
+      "coordinates": [
+        -73.846741,
+        40.857388
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 16,
+          "name": "Jacobi Medical Center",
+          "coordinates": [
+            -73.846389,
+            40.856111
+          ],
+          "approximate_distance_m": 145
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1168",
+      "facility_name": "Montefiore Medical Center-Wakefield Hospital",
+      "cnty_cd": "7094",
+      "borough": "Bronx",
+      "borough_sort_code": "032",
+      "address1": "600 East 233rd Street",
+      "coordinates": [
+        -73.86142,
+        40.894569
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 28,
+          "name": "Misericordia Hospital",
+          "coordinates": [
+            -73.861111,
+            40.893889
+          ],
+          "approximate_distance_m": 80
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1169",
+      "facility_name": "Montefiore Medical Center - Henry & Lucy Moses Div",
+      "cnty_cd": "7094",
+      "borough": "Bronx",
+      "borough_sort_code": "032",
+      "address1": "111 East 210th Street",
+      "coordinates": null,
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 29,
+          "name": "Montefiore Medical Center",
+          "coordinates": [
+            -73.879075,
+            40.880375
+          ],
+          "approximate_distance_m": null
+        }
+      ],
+      "location_review_needed": true
+    },
+    {
+      "fac_id": "1172",
+      "facility_name": "Lincoln Medical & Mental Health Center",
+      "cnty_cd": "7094",
+      "borough": "Bronx",
+      "borough_sort_code": "032",
+      "address1": "234 East 149th Street",
+      "coordinates": [
+        -73.92421,
+        40.817661
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 21,
+          "name": "Lincoln Hospital",
+          "coordinates": [
+            -73.916667,
+            40.816667
+          ],
+          "approximate_distance_m": 644
+        }
+      ],
+      "location_review_needed": true
+    },
+    {
+      "fac_id": "1175",
+      "facility_name": "Calvary Hospital Inc",
+      "cnty_cd": "7094",
+      "borough": "Bronx",
+      "borough_sort_code": "032",
+      "address1": "1740-70 Eastchester Road",
+      "coordinates": [
+        -73.844658,
+        40.847294
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 5,
+          "name": "Calvary Hospital",
+          "coordinates": [
+            -73.844111,
+            40.848028
+          ],
+          "approximate_distance_m": 94
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1176",
+      "facility_name": "SBH Health System",
+      "cnty_cd": "7094",
+      "borough": "Bronx",
+      "borough_sort_code": "032",
+      "address1": "4422 Third Avenue",
+      "coordinates": [
+        -73.891014,
+        40.853909
+      ],
+      "source_row_count": 1,
+      "status": "missing_from_legacy",
+      "legacy_candidates": [],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1178",
+      "facility_name": "BronxCare Hospital Center",
+      "cnty_cd": "7094",
+      "borough": "Bronx",
+      "borough_sort_code": "032",
+      "address1": "1650 Grand Concourse",
+      "coordinates": [
+        -73.911545,
+        40.843609
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 2,
+          "name": "BronxCare Health System",
+          "coordinates": [
+            -73.910833,
+            40.843611
+          ],
+          "approximate_distance_m": 60
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1185",
+      "facility_name": "Montefiore Medical Center - Montefiore Westchester Square",
+      "cnty_cd": "7094",
+      "borough": "Bronx",
+      "borough_sort_code": "032",
+      "address1": "2475 St. Raymond Avenue",
+      "coordinates": [
+        -73.848244,
+        40.840431
+      ],
+      "source_row_count": 1,
+      "status": "missing_from_legacy",
+      "legacy_candidates": [],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1186",
+      "facility_name": "North Central Bronx Hospital",
+      "cnty_cd": "7094",
+      "borough": "Bronx",
+      "borough_sort_code": "032",
+      "address1": "3424 Kossuth Avenue & 210th Street",
+      "coordinates": [
+        -73.881538,
+        40.880512
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 40,
+          "name": "North Central Bronx Hospital",
+          "coordinates": [
+            -73.881111,
+            40.881944
+          ],
+          "approximate_distance_m": 163
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "3058",
+      "facility_name": "Montefiore Med Center - Jack D Weiler Hosp of A Einstein College Div",
+      "cnty_cd": "7094",
+      "borough": "Bronx",
+      "borough_sort_code": "032",
+      "address1": "1825 Eastchester Road",
+      "coordinates": [
+        -73.845055,
+        40.849575
+      ],
+      "source_row_count": 1,
+      "status": "missing_from_legacy",
+      "legacy_candidates": [],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "15897",
+      "facility_name": "Montefiore Einstein Children's Center for Mental Health of the Children's Hospital at Montefiore Einstein",
+      "cnty_cd": "7094",
+      "borough": "Bronx",
+      "borough_sort_code": "032",
+      "address1": "1300 Waters Place",
+      "coordinates": [
+        -73.83847,
+        40.84608
+      ],
+      "source_row_count": 1,
+      "status": "missing_from_legacy",
+      "legacy_candidates": [],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1286",
+      "facility_name": "Brookdale Hospital Medical Center",
+      "cnty_cd": "7095",
+      "borough": "Brooklyn",
+      "borough_sort_code": "033",
+      "address1": "1 Brookdale Plaza",
+      "coordinates": [
+        -73.912579,
+        40.655066
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 3,
+          "name": "Brookdale University Hospital and Medical Center",
+          "coordinates": [
+            -73.9125,
+            40.655
+          ],
+          "approximate_distance_m": 10
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1288",
+      "facility_name": "Brooklyn Hospital Center - Downtown Campus",
+      "cnty_cd": "7095",
+      "borough": "Brooklyn",
+      "borough_sort_code": "033",
+      "address1": "121 Dekalb Avenue",
+      "coordinates": [
+        -73.977455,
+        40.689842
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 4,
+          "name": "Brooklyn Hospital Center",
+          "coordinates": [
+            -73.977222,
+            40.69
+          ],
+          "approximate_distance_m": 26
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1293",
+      "facility_name": "Maimonides Midwood Community Hospital",
+      "cnty_cd": "7095",
+      "borough": "Brooklyn",
+      "borough_sort_code": "033",
+      "address1": "2525 Kings Highway",
+      "coordinates": [
+        -73.948967,
+        40.613419
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 24,
+          "name": "Maimonides Midwood Community Hospital",
+          "coordinates": [
+            -73.948333,
+            40.615556
+          ],
+          "approximate_distance_m": 244
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1294",
+      "facility_name": "South Brooklyn Health",
+      "cnty_cd": "7095",
+      "borough": "Brooklyn",
+      "borough_sort_code": "033",
+      "address1": "2601 Ocean Parkway",
+      "coordinates": [
+        -73.965797,
+        40.58662
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 7,
+          "name": "Coney Island Hospital",
+          "coordinates": [
+            -73.965556,
+            40.585278
+          ],
+          "approximate_distance_m": 151
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1301",
+      "facility_name": "Kings County Hospital Center",
+      "cnty_cd": "7095",
+      "borough": "Brooklyn",
+      "borough_sort_code": "033",
+      "address1": "451 Clarkson Avenue",
+      "coordinates": [
+        -73.944099,
+        40.655823
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 18,
+          "name": "Kings County Hospital Center",
+          "coordinates": [
+            -73.945,
+            40.656667
+          ],
+          "approximate_distance_m": 121
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1304",
+      "facility_name": "NYU Langone Hospital-Brooklyn",
+      "cnty_cd": "7095",
+      "borough": "Brooklyn",
+      "borough_sort_code": "033",
+      "address1": "150 55th Street",
+      "coordinates": [
+        -74.020439,
+        40.646591
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 45,
+          "name": "NYU Langone Hospital – Brooklyn",
+          "coordinates": [
+            -74.020556,
+            40.646667
+          ],
+          "approximate_distance_m": 13
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1305",
+      "facility_name": "Maimonides Medical Center",
+      "cnty_cd": "7095",
+      "borough": "Brooklyn",
+      "borough_sort_code": "033",
+      "address1": "4802 Tenth Avenue",
+      "coordinates": [
+        -73.99839,
+        40.639423
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 23,
+          "name": "Maimonides Medical Center",
+          "coordinates": [
+            -73.998611,
+            40.641111
+          ],
+          "approximate_distance_m": 189
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1306",
+      "facility_name": "NewYork-Presbyterian Brooklyn Methodist Hospital",
+      "cnty_cd": "7095",
+      "borough": "Brooklyn",
+      "borough_sort_code": "033",
+      "address1": "506 Sixth Street",
+      "coordinates": [
+        -73.978905,
+        40.668087
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 38,
+          "name": "NewYork-Presbyterian Brooklyn Methodist Hospital",
+          "coordinates": [
+            -73.978611,
+            40.6675
+          ],
+          "approximate_distance_m": 70
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1309",
+      "facility_name": "Interfaith Medical Center",
+      "cnty_cd": "7095",
+      "borough": "Brooklyn",
+      "borough_sort_code": "033",
+      "address1": "1545 Atlantic Avenue",
+      "coordinates": [
+        -73.937515,
+        40.67794
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 15,
+          "name": "Interfaith Medical Center",
+          "coordinates": [
+            -73.937222,
+            40.679722
+          ],
+          "approximate_distance_m": 200
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1315",
+      "facility_name": "Kingsbrook Jewish Medical Village",
+      "cnty_cd": "7095",
+      "borough": "Brooklyn",
+      "borough_sort_code": "033",
+      "address1": "585 Schenectady Avenue",
+      "coordinates": [
+        -73.934036,
+        40.659435
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 19,
+          "name": "Kingsbrook Jewish Medical Center",
+          "coordinates": [
+            -73.933333,
+            40.658889
+          ],
+          "approximate_distance_m": 85
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1318",
+      "facility_name": "Wyckoff Heights Medical Center",
+      "cnty_cd": "7095",
+      "borough": "Brooklyn",
+      "borough_sort_code": "033",
+      "address1": "374 Stockholm Street",
+      "coordinates": [
+        -73.91774,
+        40.704517
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 55,
+          "name": "Wyckoff Heights Medical Center",
+          "coordinates": [
+            -73.917222,
+            40.704167
+          ],
+          "approximate_distance_m": 58
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1320",
+      "facility_name": "University Hospital of Brooklyn",
+      "cnty_cd": "7095",
+      "borough": "Brooklyn",
+      "borough_sort_code": "033",
+      "address1": "445 Lenox Road",
+      "coordinates": [
+        -73.945045,
+        40.654518
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 52,
+          "name": "SUNY Downstate Medical Center",
+          "coordinates": [
+            -73.944167,
+            40.655278
+          ],
+          "approximate_distance_m": 112
+        },
+        {
+          "id": 53,
+          "name": "University Hospital of Brooklyn",
+          "coordinates": [
+            -73.945278,
+            40.656389
+          ],
+          "approximate_distance_m": 209
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1324",
+      "facility_name": "Mount Sinai Brooklyn",
+      "cnty_cd": "7095",
+      "borough": "Brooklyn",
+      "borough_sort_code": "033",
+      "address1": "3201 Kings Highway",
+      "coordinates": [
+        -73.94323,
+        40.617954
+      ],
+      "source_row_count": 1,
+      "status": "missing_from_legacy",
+      "legacy_candidates": [],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1692",
+      "facility_name": "Woodhull Medical & Mental Health Center",
+      "cnty_cd": "7095",
+      "borough": "Brooklyn",
+      "borough_sort_code": "033",
+      "address1": "760 Broadway",
+      "coordinates": [
+        -73.941711,
+        40.700535
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 54,
+          "name": "Woodhull Medical Center",
+          "coordinates": [
+            -73.9425,
+            40.699444
+          ],
+          "approximate_distance_m": 138
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "9753",
+      "facility_name": "NYU Langone Hospital - Joseph S. and Diane H. Steinberg Ambulatory Care Center",
+      "cnty_cd": "7095",
+      "borough": "Brooklyn",
+      "borough_sort_code": "033",
+      "address1": "70 Atlantic Avenue",
+      "coordinates": [
+        -73.99751,
+        40.69093
+      ],
+      "source_row_count": 1,
+      "status": "missing_from_legacy",
+      "legacy_candidates": [],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "10223",
+      "facility_name": "Calvary Hospital",
+      "cnty_cd": "7095",
+      "borough": "Brooklyn",
+      "borough_sort_code": "033",
+      "address1": "150 55th Street",
+      "coordinates": [
+        -74.021033,
+        40.646444
+      ],
+      "source_row_count": 1,
+      "status": "missing_from_legacy",
+      "legacy_candidates": [],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1626",
+      "facility_name": "Elmhurst Hospital Center",
+      "cnty_cd": "7096",
+      "borough": "Queens",
+      "borough_sort_code": "034",
+      "address1": "79-01 Broadway",
+      "coordinates": [
+        -73.885719,
+        40.74432
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 8,
+          "name": "Elmhurst Hospital Center",
+          "coordinates": [
+            -73.886389,
+            40.744722
+          ],
+          "approximate_distance_m": 72
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1628",
+      "facility_name": "Flushing Hospital Medical Center",
+      "cnty_cd": "7096",
+      "borough": "Queens",
+      "borough_sort_code": "034",
+      "address1": "45th Avenue & Parsons Blvd",
+      "coordinates": [
+        -73.815475,
+        40.755531
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 9,
+          "name": "Flushing Hospital Medical Center",
+          "coordinates": [
+            -73.816944,
+            40.755556
+          ],
+          "approximate_distance_m": 124
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1629",
+      "facility_name": "Jamaica Hospital Medical Center",
+      "cnty_cd": "7096",
+      "borough": "Queens",
+      "borough_sort_code": "034",
+      "address1": "89th Avenue & Van Wyck Expressway",
+      "coordinates": [
+        -73.816299,
+        40.701412
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 17,
+          "name": "Jamaica Hospital Medical Center",
+          "coordinates": [
+            -73.816111,
+            40.700556
+          ],
+          "approximate_distance_m": 96
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1630",
+      "facility_name": "Long Island Jewish Medical Center",
+      "cnty_cd": "7096",
+      "borough": "Queens",
+      "borough_sort_code": "034",
+      "address1": "270-05 76th Avenue",
+      "coordinates": [
+        -73.70664,
+        40.75467
+      ],
+      "source_row_count": 2,
+      "status": "missing_from_legacy",
+      "legacy_candidates": [],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1633",
+      "facility_name": "Queens Hospital Center",
+      "cnty_cd": "7096",
+      "borough": "Queens",
+      "borough_sort_code": "034",
+      "address1": "82-68 164th Street",
+      "coordinates": [
+        -73.803581,
+        40.71722
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 47,
+          "name": "Queens Hospital Center",
+          "coordinates": [
+            -73.804444,
+            40.716944
+          ],
+          "approximate_distance_m": 79
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1635",
+      "facility_name": "St Johns Episcopal Hospital So Shore",
+      "cnty_cd": "7096",
+      "borough": "Queens",
+      "borough_sort_code": "034",
+      "address1": "327 Beach 19th Street",
+      "coordinates": [
+        -73.752769,
+        40.598637
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 50,
+          "name": "St. John's Episcopal Hospital South Shore",
+          "coordinates": [
+            -73.753056,
+            40.599444
+          ],
+          "approximate_distance_m": 93
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1637",
+      "facility_name": "NewYork-Presbyterian/Queens",
+      "cnty_cd": "7096",
+      "borough": "Queens",
+      "borough_sort_code": "034",
+      "address1": "56-45 Main Street",
+      "coordinates": [
+        -73.826035,
+        40.747517
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 35,
+          "name": "NewYork-Presbyterian Queens",
+          "coordinates": [
+            -73.825278,
+            40.748333
+          ],
+          "approximate_distance_m": 111
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1638",
+      "facility_name": "Long Island Jewish Forest Hills",
+      "cnty_cd": "7096",
+      "borough": "Queens",
+      "borough_sort_code": "034",
+      "address1": "102-01 66th Road",
+      "coordinates": [
+        -73.851036,
+        40.728745
+      ],
+      "source_row_count": 2,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 22,
+          "name": "Long Island Jewish Forest Hills",
+          "coordinates": [
+            -73.851389,
+            40.729167
+          ],
+          "approximate_distance_m": 56
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1639",
+      "facility_name": "Mount Sinai Hospital - Mount Sinai Hospital of Queens",
+      "cnty_cd": "7096",
+      "borough": "Queens",
+      "borough_sort_code": "034",
+      "address1": "25-10 30th Avenue",
+      "coordinates": [
+        -73.924461,
+        40.768269
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 33,
+          "name": "Mount Sinai Queens",
+          "coordinates": [
+            -73.924722,
+            40.768333
+          ],
+          "approximate_distance_m": 23
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1473",
+      "facility_name": "RUMC-Bayley Seton",
+      "cnty_cd": "7097",
+      "borough": "Staten Island",
+      "borough_sort_code": "035",
+      "address1": "75 Vanderbilt Avenue",
+      "coordinates": [
+        -74.07476,
+        40.621376
+      ],
+      "source_row_count": 1,
+      "status": "missing_from_legacy",
+      "legacy_candidates": [],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1737",
+      "facility_name": "Staten Island University Hospital Prince's Bay",
+      "cnty_cd": "7097",
+      "borough": "Staten Island",
+      "borough_sort_code": "035",
+      "address1": "375 Seguine Avenue",
+      "coordinates": [
+        -74.196808,
+        40.516773
+      ],
+      "source_row_count": 2,
+      "status": "combined_in_legacy_missing_separate_point",
+      "legacy_candidates": [
+        {
+          "id": 51,
+          "name": "Staten Island University Hospital, North and South Campus",
+          "coordinates": [
+            -74.085278,
+            40.586389
+          ],
+          "approximate_distance_m": 12199
+        }
+      ],
+      "location_review_needed": true
+    },
+    {
+      "fac_id": "1738",
+      "facility_name": "Richmond University Medical Center",
+      "cnty_cd": "7097",
+      "borough": "Staten Island",
+      "borough_sort_code": "035",
+      "address1": "355 Bard Avenue",
+      "coordinates": [
+        -74.106674,
+        40.635807
+      ],
+      "source_row_count": 1,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 48,
+          "name": "Richmond University Medical Center",
+          "coordinates": [
+            -74.106111,
+            40.635556
+          ],
+          "approximate_distance_m": 55
+        }
+      ],
+      "location_review_needed": false
+    },
+    {
+      "fac_id": "1740",
+      "facility_name": "Staten Island University Hosp-North",
+      "cnty_cd": "7097",
+      "borough": "Staten Island",
+      "borough_sort_code": "035",
+      "address1": "475 Seaview Avenue",
+      "coordinates": [
+        -74.08561,
+        40.58453
+      ],
+      "source_row_count": 2,
+      "status": "candidate_legacy_match",
+      "legacy_candidates": [
+        {
+          "id": 51,
+          "name": "Staten Island University Hospital, North and South Campus",
+          "coordinates": [
+            -74.085278,
+            40.586389
+          ],
+          "approximate_distance_m": 209
+        }
+      ],
+      "location_review_needed": false
+    }
+  ],
+  "legacy_without_hospital_match": [
+    {
+      "id": 6,
+      "name": "Coler-Goldwater Specialty Hospital",
+      "healthSystem": "NYC Health + Hospitals",
+      "county": "New York",
+      "city": "Manhattan",
+      "countyInherited": false,
+      "coordinatesText": "40°46′13″N 73°56′32″W",
+      "opened": "1939",
+      "beds": "1025",
+      "sourceText": "Coler-Goldwater Specialty Hospital\tNYC Health + Hospitals\tNew York\tManhattan\t40°46′13″N 73°56′32″W\t1939\t1025[27]",
+      "borough": "Manhattan"
+    },
+    {
+      "id": 10,
+      "name": "Gouverneur Health",
+      "healthSystem": "NYC Health + Hospitals",
+      "county": "New York",
+      "city": "Manhattan",
+      "countyInherited": false,
+      "coordinatesText": "40°42′47″N 73°59′17″W",
+      "opened": "1885",
+      "beds": "25",
+      "sourceText": "Gouverneur Health\tNYC Health + Hospitals\tNew York\tManhattan\t40°42′47″N 73°59′17″W\t1885\t25[1][48]",
+      "borough": "Manhattan"
+    },
+    {
+      "id": 11,
+      "name": "Gracie Square Hospital",
+      "healthSystem": "NewYork-Presbyterian",
+      "county": "New York",
+      "city": "Manhattan",
+      "countyInherited": true,
+      "coordinatesText": "40°46′11″N 73°57′10″W",
+      "opened": "1959",
+      "beds": "157",
+      "sourceText": "Gracie Square Hospital\tNewYork-Presbyterian\t40°46′11″N 73°57′10″W\t1959\t157",
+      "borough": "Manhattan"
+    },
+    {
+      "id": 25,
+      "name": "Manhattan Eye, Ear and Throat Hospital",
+      "healthSystem": "Northwell Health",
+      "county": "New York",
+      "city": "Manhattan",
+      "countyInherited": false,
+      "coordinatesText": "40°45′51″N 73°57′50″W",
+      "opened": "1869",
+      "beds": "13",
+      "sourceText": "Manhattan Eye, Ear and Throat Hospital\tNorthwell Health\tNew York\tManhattan\t40°45′51″N 73°57′50″W\t1869\t13[1]",
+      "borough": "Manhattan"
+    },
+    {
+      "id": 30,
+      "name": "Morgan Stanley Children's Hospital",
+      "healthSystem": "NewYork-Presbyterian",
+      "county": "New York",
+      "city": "Manhattan",
+      "countyInherited": false,
+      "coordinatesText": "40°50′23″N 73°56′28″W",
+      "opened": "1887",
+      "beds": "299",
+      "sourceText": "Morgan Stanley Children's Hospital[Note 17]\tNewYork-Presbyterian\tNew York\tManhattan\t40°50′23″N 73°56′28″W\t1887\t299[73]",
+      "borough": "Manhattan"
+    },
+    {
+      "id": 41,
+      "name": "NYU Langone Hassenfeld Children's Hospital",
+      "healthSystem": "NYU Langone Health",
+      "county": "New York",
+      "city": "Manhattan",
+      "countyInherited": false,
+      "coordinatesText": "40°44′31.09″N 73°58′26.52″W",
+      "opened": "2018 (Hassenfeld)",
+      "beds": "102",
+      "sourceText": "NYU Langone Hassenfeld Children's Hospital\tNYU Langone Health\tNew York\tManhattan\t40°44′31.09″N 73°58′26.52″W\t2018 (Hassenfeld)[Note 19]\t102[Note 20]",
+      "borough": "Manhattan"
+    },
+    {
+      "id": 42,
+      "name": "NYU Langone Kimmel Pavilion",
+      "healthSystem": "NYU Langone Health",
+      "county": "New York",
+      "city": "Manhattan",
+      "countyInherited": true,
+      "coordinatesText": "40°44′38″N 73°58′21″W",
+      "opened": "2018",
+      "beds": "374",
+      "sourceText": "NYU Langone Kimmel Pavilion\t40°44′38″N 73°58′21″W\t2018\t374",
+      "borough": "Manhattan"
+    },
+    {
+      "id": 46,
+      "name": "Orbis International Flying Eye Hospital",
+      "healthSystem": "Orbis International",
+      "county": "New York",
+      "city": "Manhattan",
+      "countyInherited": false,
+      "coordinatesText": "40°45′14″N 73°59′31″W",
+      "opened": null,
+      "beds": null,
+      "sourceText": "Orbis International Flying Eye Hospital\tOrbis International\tNew York\tManhattan\t40°45′14″N 73°59′31″W\t\t",
+      "borough": "Manhattan"
+    },
+    {
+      "id": 49,
+      "name": "Rockefeller University Hospital",
+      "healthSystem": "Rockefeller University",
+      "county": "New York",
+      "city": "Manhattan",
+      "countyInherited": false,
+      "coordinatesText": "40°45′41″N 73°57′21″W",
+      "opened": "1937",
+      "beds": null,
+      "sourceText": "Rockefeller University Hospital\tRockefeller University\tNew York\tManhattan\t40°45′41″N 73°57′21″W\t1937\t[88]",
+      "borough": "Manhattan"
+    }
+  ],
+  "psychiatric_entries_not_reconciled": [
+    {
+      "id": 1,
+      "name": "Bloomingdale Insane Asylum",
+      "healthSystem": null,
+      "county": "New York",
+      "city": "New York City: Manhattan: Morningside Heights",
+      "countyInherited": false,
+      "coordinatesText": "40°48′31″N 73°57′41″W",
+      "opened": "1821-1889",
+      "beds": null,
+      "sourceText": "Bloomingdale Insane Asylum\tNew York (county)\tNew York City: Manhattan: Morningside Heights\t40°48′31″N 73°57′41″W\t1821-1889\t[167]",
+      "borough": "Manhattan"
+    },
+    {
+      "id": 2,
+      "name": "Bronx Psychiatric Center",
+      "healthSystem": null,
+      "county": "Bronx",
+      "city": "New York City: The Bronx",
+      "countyInherited": false,
+      "coordinatesText": "40°51′09″N 73°50′14″W",
+      "opened": "1963",
+      "beds": "156",
+      "sourceText": "Bronx Psychiatric Center\tBronx\tNew York City: The Bronx\t40°51′09″N 73°50′14″W\t1963\t156[168][169]",
+      "borough": "Bronx"
+    },
+    {
+      "id": 3,
+      "name": "Brooklyn Children's Psychiatric Center",
+      "healthSystem": null,
+      "county": "Kings",
+      "city": "New York City: Brooklyn",
+      "countyInherited": false,
+      "coordinatesText": "40°40′30″N 73°55′15″W",
+      "opened": "1969",
+      "beds": null,
+      "sourceText": "Brooklyn Children's Psychiatric Center[Note 40]\tKings\tNew York City: Brooklyn\t40°40′30″N 73°55′15″W\t1969\t[169]",
+      "borough": "Brooklyn"
+    },
+    {
+      "id": 4,
+      "name": "Creedmoor Psychiatric Center",
+      "healthSystem": null,
+      "county": "Queens",
+      "city": "New York City: Queens: Queens Village",
+      "countyInherited": false,
+      "coordinatesText": "40°44′29″N 73°43′54″W",
+      "opened": "1912",
+      "beds": "328",
+      "sourceText": "Creedmoor Psychiatric Center\tQueens\tNew York City: Queens: Queens Village\t40°44′29″N 73°43′54″W\t1912\t328[176]",
+      "borough": "Queens"
+    },
+    {
+      "id": 5,
+      "name": "Kingsboro Psychiatric Center",
+      "healthSystem": null,
+      "county": "Kings",
+      "city": "New York City: Brooklyn",
+      "countyInherited": false,
+      "coordinatesText": "40°39′27″N 73°56′17″W",
+      "opened": "?",
+      "beds": "163",
+      "sourceText": "Kingsboro Psychiatric Center\tKings\tNew York City: Brooklyn\t40°39′27″N 73°56′17″W\t?\t163[183][52]",
+      "borough": "Brooklyn"
+    },
+    {
+      "id": 6,
+      "name": "Kirby Forensic Psychiatric Center",
+      "healthSystem": null,
+      "county": "New York",
+      "city": "New York City: Manhattan: Ward Island",
+      "countyInherited": false,
+      "coordinatesText": "40°47′22″N 73°55′47″W",
+      "opened": "?",
+      "beds": "475",
+      "sourceText": "Kirby Forensic Psychiatric Center\tNew York (county)\tNew York City: Manhattan: Ward Island\t40°47′22″N 73°55′47″W\t?\t475[1][52]",
+      "borough": "Manhattan"
+    },
+    {
+      "id": 7,
+      "name": "Manhattan Psychiatric Center (New York State Department of Mental Hygiene)",
+      "healthSystem": null,
+      "county": "New York",
+      "city": "New York City: Manhattan",
+      "countyInherited": false,
+      "coordinatesText": "40°47′21″N 73°55′47″W",
+      "opened": "1848",
+      "beds": "509",
+      "sourceText": "Manhattan Psychiatric Center (New York State Department of Mental Hygiene)\tNew York (county)\tNew York City: Manhattan\t40°47′21″N 73°55′47″W\t1848\t509",
+      "borough": "Manhattan"
+    },
+    {
+      "id": 8,
+      "name": "New York State Psychiatric Institute",
+      "healthSystem": null,
+      "county": "New York",
+      "city": "New York City: Manhattan",
+      "countyInherited": false,
+      "coordinatesText": "40°50′38″N 73°56′40″W",
+      "opened": "1895",
+      "beds": "21",
+      "sourceText": "New York State Psychiatric Institute\tNew York (county)\tNew York City: Manhattan\t40°50′38″N 73°56′40″W\t1895\t21[190]",
+      "borough": "Manhattan"
+    },
+    {
+      "id": 9,
+      "name": "Queens Children's Psychiatric Center",
+      "healthSystem": null,
+      "county": "Queens",
+      "city": "New York City: Queens",
+      "countyInherited": false,
+      "coordinatesText": null,
+      "opened": null,
+      "beds": null,
+      "sourceText": "Queens Children's Psychiatric Center\tQueens\tNew York City: Queens\t\t\t",
+      "borough": "Queens"
+    },
+    {
+      "id": 10,
+      "name": "South Beach Psychiatric Center",
+      "healthSystem": null,
+      "county": "Richmond",
+      "city": "New York City: Staten Island",
+      "countyInherited": false,
+      "coordinatesText": "40°35′03″N 74°04′44″W",
+      "opened": null,
+      "beds": "507",
+      "sourceText": "South Beach Psychiatric Center\tRichmond\tNew York City: Staten Island\t40°35′03″N 74°04′44″W\t\t507[200]",
+      "borough": "Staten Island"
+    },
+    {
+      "id": 11,
+      "name": "Willowbrook State School",
+      "healthSystem": null,
+      "county": "Richmond",
+      "city": "New York City: Staten Island: Willowbrook",
+      "countyInherited": false,
+      "coordinatesText": "40°35′58″N 74°09′02″W",
+      "opened": "1947–1987",
+      "beds": null,
+      "sourceText": "Willowbrook State School[Note 43]\tRichmond\tNew York City: Staten Island: Willowbrook\t40°35′58″N 74°09′02″W\t1947–1987\t",
+      "borough": "Staten Island"
+    },
+    {
+      "id": 12,
+      "name": "Zucker Hillside Hospital (Northwell Health)",
+      "healthSystem": null,
+      "county": "Queens",
+      "city": "New York City: Queens: Glen Oaks",
+      "countyInherited": false,
+      "coordinatesText": "40°45′08″N 73°42′37″W",
+      "opened": "1926",
+      "beds": "0",
+      "sourceText": "Zucker Hillside Hospital (Northwell Health)\tQueens\tNew York City: Queens: Glen Oaks\t40°45′08″N 73°42′37″W\t1926\t0[1]",
+      "borough": "Queens"
+    }
+  ]
+}

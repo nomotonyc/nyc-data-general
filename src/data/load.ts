@@ -36,7 +36,7 @@ export class DatasetStore {
     this.loading ??= Promise.all(
       builtFiles().filter(({ layer, geography }) => !this.cache.has(key(layer.id, geography))).map(async ({ layer, geography }) => {
         const res = await this.fetcher(layerFileUrl(layer.id, geography))
-        const what = geography === 'precincts' ? `${layer.label} data` : `${layer.label} data by ${geography === 'battalions' ? 'battalion' : geography}`
+        const what = geography === 'precincts' ? `${layer.label} data` : `${layer.label} data by ${geography.slice(0, -1)}`
         if (!res.ok) throw new Error(`Couldn’t load ${what} (${res.status})`)
         let file: LayerFile
         try {

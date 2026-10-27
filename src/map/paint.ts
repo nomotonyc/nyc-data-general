@@ -9,7 +9,10 @@ export type PaintableMap = Pick<MapLibreMap, 'setFeatureState' | 'setLayoutPrope
 export type Show = {
   outlines: boolean
   labels: boolean
+  hospitals: boolean
+  emsStations: boolean
   firehouses: boolean
+  hydrants: boolean
   /** The pinned area's number in the plan's geography, or none. */
   pinned: readonly number[]
 }
@@ -45,6 +48,13 @@ export function paintMap(map: PaintableMap, plan: Choropleth, show: Show, option
     map.setPaintProperty(layers.boroughFill, 'fill-opacity', shown && !covered ? 1 : 0)
     map.setPaintProperty(layers.boroughLine, 'line-opacity', shown ? 1 : 0)
     const markers = show.firehouses && shown ? 1 : 0
+    const hospitalMarkers = show.hospitals && shown ? 1 : 0
+    const emsMarkers = show.emsStations && shown ? 1 : 0
+    const hydrantMarkers = show.hydrants && shown ? 1 : 0
+    map.setPaintProperty(layers.hospital, 'icon-opacity', hospitalMarkers)
+    map.setPaintProperty(layers.emsStation, 'circle-opacity', emsMarkers)
+    map.setPaintProperty(layers.emsStation, 'circle-stroke-opacity', emsMarkers)
+    map.setPaintProperty(layers.hydrant, 'circle-opacity', hydrantMarkers)
     map.setPaintProperty(layers.firehouse, 'circle-opacity', markers)
     map.setPaintProperty(layers.firehouse, 'circle-stroke-opacity', markers)
     // The outer ring has no fill; only its stroke shows.
@@ -78,8 +88,8 @@ export function paintMap(map: PaintableMap, plan: Choropleth, show: Show, option
 export function paintFills(map: Pick<PaintableMap, 'setFeatureState'>, plan: Choropleth) {
   // Every borough and current area gets its fill (or none) each time, so nothing is left over from before.
   for (const b of BOROUGHS) map.setFeatureState({ source: SOURCES.boroughs, id: b }, { fill: plan.boroughs[b] ?? null })
-  // Only the plan's geography: the other keeps its last colours while its layers fade out,
-  // so switching precincts and battalions crossfades colour to colour, never through white.
+  // Only the plan's geography: the others keep their last colours while their layers fade out,
+  // so switching area systems crossfades colour to colour, never through white.
   for (const a of areasOf(plan.geography)) {
     map.setFeatureState({ source: GEOGRAPHY_MAP[plan.geography].source, id: a.number }, { fill: plan.areas[a.number] ?? null })
   }

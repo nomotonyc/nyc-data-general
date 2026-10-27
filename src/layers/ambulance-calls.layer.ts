@@ -9,7 +9,7 @@ export default {
   measure: 'Medical emergencies ambulances responded to',
   unit: 'responses',
   aggregation: 'sum',
-  geographies: ['precincts', 'battalions'],
+  geographies: ['divisions', 'precincts', 'battalions'],
   data: { resolution: 'month', firstYear: 2019, lastYear: 2026 },
   breakdown: {
     title: 'Call type',

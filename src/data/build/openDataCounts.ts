@@ -44,6 +44,7 @@ export function aggregateCounts(
   rows: readonly CountRow[],
   geography: Geography = 'precincts',
 ): { file: LayerFile; report: YearReport[] } {
+  if (geography === 'divisions') throw new Error(`Division files are derived from battalion files by scripts/build-divisions.mjs`)
   const build = layer.build
   if (!build || build.kind === 'census-density') throw new Error(`Layer ${layer.id} is not built from Open Data records`)
 

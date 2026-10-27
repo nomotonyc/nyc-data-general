@@ -2,7 +2,9 @@
   display: flex;
   flex-direction: column;
   gap: 22px;
+  min-height: 100%;
   padding: 16px 14px;
+  box-sizing: border-box;
 }
 
 .rail__section {
@@ -205,4 +207,57 @@
 .rail__marker .rail__marker-outer {
   fill: none;
   stroke: var(--color-firehouse-ring);
+}
+
+.rail__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.rail__save {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--story-accent);
+  border-radius: 10px;
+  background: var(--story-accent);
+  color: var(--color-background);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    border-color 450ms ease-in-out;
+}
+
+.rail__save:hover {
+  background: color-mix(in srgb, var(--story-accent) 88%, black);
+}
+
+.rail__save svg {
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.rail__save-note {
+  margin: 0;
+  color: var(--color-ink-muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+@media print {
+  .rail__actions {
+    display: none;
+  }
 }

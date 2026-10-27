@@ -1,0 +1,733 @@
+{
+  "dataset": "Health Facility General Information",
+  "dataset_id": "vn5v-hh5r",
+  "source_url": "https://health.data.ny.gov/Health/Health-Facility-General-Information/vn5v-hh5r",
+  "api_url": "https://health.data.ny.gov/resource/vn5v-hh5r.json",
+  "retrieved_at": "2026-10-22T19:13:52.734Z",
+  "source_rows_updated_at": "2026-09-01T12:21:17.000Z",
+  "filter": "cnty_cd in (7093,7094,7095,7096,7097)",
+  "county_mapping": {
+    "7093": {
+      "county": "New York",
+      "borough": "Manhattan",
+      "borough_sort_code": "031"
+    },
+    "7094": {
+      "county": "Bronx",
+      "borough": "Bronx",
+      "borough_sort_code": "032"
+    },
+    "7095": {
+      "county": "Kings",
+      "borough": "Brooklyn",
+      "borough_sort_code": "033"
+    },
+    "7096": {
+      "county": "Queens",
+      "borough": "Queens",
+      "borough_sort_code": "034"
+    },
+    "7097": {
+      "county": "Richmond",
+      "borough": "Staten Island",
+      "borough_sort_code": "035"
+    }
+  },
+  "row_count": 2137,
+  "distinct_facility_ids": 2112,
+  "source_counts_by_county_and_type": [
+    {
+      "cnty_cd": "7093",
+      "county": "New York",
+      "description": "Adult Day Health Care Program - Offsite",
+      "count": "2"
+    },
+    {
+      "cnty_cd": "7093",
+      "county": "New York",
+      "description": "Adult Home",
+      "count": "5"
+    },
+    {
+      "cnty_cd": "7093",
+      "county": "New York",
+      "description": "Certified Home Health Agency",
+      "count": "3"
+    },
+    {
+      "cnty_cd": "7093",
+      "county": "New York",
+      "description": "Diagnostic and Treatment Center",
+      "count": "80"
+    },
+    {
+      "cnty_cd": "7093",
+      "county": "New York",
+      "description": "Diagnostic and Treatment Center Extension Clinic",
+      "count": "82"
+    },
+    {
+      "cnty_cd": "7093",
+      "county": "New York",
+      "description": "Enriched Housing Program",
+      "count": "14"
+    },
+    {
+      "cnty_cd": "7093",
+      "county": "New York",
+      "description": "Hospice",
+      "count": "2"
+    },
+    {
+      "cnty_cd": "7093",
+      "county": "New York",
+      "description": "Hospital",
+      "count": "23"
+    },
+    {
+      "cnty_cd": "7093",
+      "county": "New York",
+      "description": "Hospital Extension Clinic",
+      "count": "67"
+    },
+    {
+      "cnty_cd": "7093",
+      "county": "New York",
+      "description": "Licensed Home Care Services Agency",
+      "count": "93"
+    },
+    {
+      "cnty_cd": "7093",
+      "county": "New York",
+      "description": "Long Term Home Health Care Program",
+      "count": "1"
+    },
+    {
+      "cnty_cd": "7093",
+      "county": "New York",
+      "description": "Mobile Diagnostic and Treatment Center Extension Clinic",
+      "count": "8"
+    },
+    {
+      "cnty_cd": "7093",
+      "county": "New York",
+      "description": "Mobile Hospital Extension Clinic",
+      "count": "4"
+    },
+    {
+      "cnty_cd": "7093",
+      "county": "New York",
+      "description": "Residential Health Care Facility - SNF",
+      "count": "16"
+    },
+    {
+      "cnty_cd": "7093",
+      "county": "New York",
+      "description": "School Based Diagnostic and Treatment Center Extension Clinic",
+      "count": "23"
+    },
+    {
+      "cnty_cd": "7093",
+      "county": "New York",
+      "description": "School Based Hospital Extension Clinic",
+      "count": "33"
+    },
+    {
+      "cnty_cd": "7094",
+      "county": "Bronx",
+      "description": "Adult Day Health Care Program - Offsite",
+      "count": "1"
+    },
+    {
+      "cnty_cd": "7094",
+      "county": "Bronx",
+      "description": "Adult Home",
+      "count": "9"
+    },
+    {
+      "cnty_cd": "7094",
+      "county": "Bronx",
+      "description": "Certified Home Health Agency",
+      "count": "10"
+    },
+    {
+      "cnty_cd": "7094",
+      "county": "Bronx",
+      "description": "Diagnostic and Treatment Center",
+      "count": "51"
+    },
+    {
+      "cnty_cd": "7094",
+      "county": "Bronx",
+      "description": "Diagnostic and Treatment Center Extension Clinic",
+      "count": "103"
+    },
+    {
+      "cnty_cd": "7094",
+      "county": "Bronx",
+      "description": "Enriched Housing Program",
+      "count": "4"
+    },
+    {
+      "cnty_cd": "7094",
+      "county": "Bronx",
+      "description": "Hospice",
+      "count": "1"
+    },
+    {
+      "cnty_cd": "7094",
+      "county": "Bronx",
+      "description": "Hospital",
+      "count": "12"
+    },
+    {
+      "cnty_cd": "7094",
+      "county": "Bronx",
+      "description": "Hospital Extension Clinic",
+      "count": "55"
+    },
+    {
+      "cnty_cd": "7094",
+      "county": "Bronx",
+      "description": "Licensed Home Care Services Agency",
+      "count": "68"
+    },
+    {
+      "cnty_cd": "7094",
+      "county": "Bronx",
+      "description": "Long Term Home Health Care Program",
+      "count": "5"
+    },
+    {
+      "cnty_cd": "7094",
+      "county": "Bronx",
+      "description": "Mobile Diagnostic and Treatment Center Extension Clinic",
+      "count": "7"
+    },
+    {
+      "cnty_cd": "7094",
+      "county": "Bronx",
+      "description": "Mobile Hospital Extension Clinic",
+      "count": "2"
+    },
+    {
+      "cnty_cd": "7094",
+      "county": "Bronx",
+      "description": "Residential Health Care Facility - SNF",
+      "count": "44"
+    },
+    {
+      "cnty_cd": "7094",
+      "county": "Bronx",
+      "description": "School Based Diagnostic and Treatment Center Extension Clinic",
+      "count": "33"
+    },
+    {
+      "cnty_cd": "7094",
+      "county": "Bronx",
+      "description": "School Based Hospital Extension Clinic",
+      "count": "36"
+    },
+    {
+      "cnty_cd": "7095",
+      "county": "Kings",
+      "description": "Adult Day Health Care Program - Offsite",
+      "count": "5"
+    },
+    {
+      "cnty_cd": "7095",
+      "county": "Kings",
+      "description": "Adult Home",
+      "count": "12"
+    },
+    {
+      "cnty_cd": "7095",
+      "county": "Kings",
+      "description": "Certified Home Health Agency",
+      "count": "14"
+    },
+    {
+      "cnty_cd": "7095",
+      "county": "Kings",
+      "description": "Diagnostic and Treatment Center",
+      "count": "90"
+    },
+    {
+      "cnty_cd": "7095",
+      "county": "Kings",
+      "description": "Diagnostic and Treatment Center Extension Clinic",
+      "count": "116"
+    },
+    {
+      "cnty_cd": "7095",
+      "county": "Kings",
+      "description": "Enriched Housing Program",
+      "count": "9"
+    },
+    {
+      "cnty_cd": "7095",
+      "county": "Kings",
+      "description": "Hospice",
+      "count": "1"
+    },
+    {
+      "cnty_cd": "7095",
+      "county": "Kings",
+      "description": "Hospital",
+      "count": "16"
+    },
+    {
+      "cnty_cd": "7095",
+      "county": "Kings",
+      "description": "Hospital Extension Clinic",
+      "count": "66"
+    },
+    {
+      "cnty_cd": "7095",
+      "county": "Kings",
+      "description": "Licensed Home Care Services Agency",
+      "count": "247"
+    },
+    {
+      "cnty_cd": "7095",
+      "county": "Kings",
+      "description": "Long Term Home Health Care Program",
+      "count": "2"
+    },
+    {
+      "cnty_cd": "7095",
+      "county": "Kings",
+      "description": "Mobile Diagnostic and Treatment Center Extension Clinic",
+      "count": "6"
+    },
+    {
+      "cnty_cd": "7095",
+      "county": "Kings",
+      "description": "Mobile Hospital Extension Clinic",
+      "count": "1"
+    },
+    {
+      "cnty_cd": "7095",
+      "county": "Kings",
+      "description": "Off-Campus Emergency Department",
+      "count": "1"
+    },
+    {
+      "cnty_cd": "7095",
+      "county": "Kings",
+      "description": "Residential Health Care Facility - SNF",
+      "count": "40"
+    },
+    {
+      "cnty_cd": "7095",
+      "county": "Kings",
+      "description": "School Based Diagnostic and Treatment Center Extension Clinic",
+      "count": "10"
+    },
+    {
+      "cnty_cd": "7095",
+      "county": "Kings",
+      "description": "School Based Hospital Extension Clinic",
+      "count": "49"
+    },
+    {
+      "cnty_cd": "7096",
+      "county": "Queens",
+      "description": "Adult Day Health Care Program - Offsite",
+      "count": "3"
+    },
+    {
+      "cnty_cd": "7096",
+      "county": "Queens",
+      "description": "Adult Home",
+      "count": "17"
+    },
+    {
+      "cnty_cd": "7096",
+      "county": "Queens",
+      "description": "Certified Home Health Agency",
+      "count": "2"
+    },
+    {
+      "cnty_cd": "7096",
+      "county": "Queens",
+      "description": "Diagnostic and Treatment Center",
+      "count": "49"
+    },
+    {
+      "cnty_cd": "7096",
+      "county": "Queens",
+      "description": "Diagnostic and Treatment Center Extension Clinic",
+      "count": "70"
+    },
+    {
+      "cnty_cd": "7096",
+      "county": "Queens",
+      "description": "Enriched Housing Program",
+      "count": "7"
+    },
+    {
+      "cnty_cd": "7096",
+      "county": "Queens",
+      "description": "Hospice",
+      "count": "1"
+    },
+    {
+      "cnty_cd": "7096",
+      "county": "Queens",
+      "description": "Hospital",
+      "count": "11"
+    },
+    {
+      "cnty_cd": "7096",
+      "county": "Queens",
+      "description": "Hospital Extension Clinic",
+      "count": "37"
+    },
+    {
+      "cnty_cd": "7096",
+      "county": "Queens",
+      "description": "Licensed Home Care Services Agency",
+      "count": "163"
+    },
+    {
+      "cnty_cd": "7096",
+      "county": "Queens",
+      "description": "Mobile Diagnostic and Treatment Center Extension Clinic",
+      "count": "6"
+    },
+    {
+      "cnty_cd": "7096",
+      "county": "Queens",
+      "description": "Mobile Hospital Extension Clinic",
+      "count": "5"
+    },
+    {
+      "cnty_cd": "7096",
+      "county": "Queens",
+      "description": "Residential Health Care Facility - SNF",
+      "count": "56"
+    },
+    {
+      "cnty_cd": "7096",
+      "county": "Queens",
+      "description": "School Based Diagnostic and Treatment Center Extension Clinic",
+      "count": "2"
+    },
+    {
+      "cnty_cd": "7096",
+      "county": "Queens",
+      "description": "School Based Hospital Extension Clinic",
+      "count": "20"
+    },
+    {
+      "cnty_cd": "7097",
+      "county": "Richmond",
+      "description": "Adult Day Health Care Program - Offsite",
+      "count": "1"
+    },
+    {
+      "cnty_cd": "7097",
+      "county": "Richmond",
+      "description": "Adult Home",
+      "count": "5"
+    },
+    {
+      "cnty_cd": "7097",
+      "county": "Richmond",
+      "description": "Certified Home Health Agency",
+      "count": "1"
+    },
+    {
+      "cnty_cd": "7097",
+      "county": "Richmond",
+      "description": "Diagnostic and Treatment Center",
+      "count": "10"
+    },
+    {
+      "cnty_cd": "7097",
+      "county": "Richmond",
+      "description": "Diagnostic and Treatment Center Extension Clinic",
+      "count": "13"
+    },
+    {
+      "cnty_cd": "7097",
+      "county": "Richmond",
+      "description": "Enriched Housing Program",
+      "count": "3"
+    },
+    {
+      "cnty_cd": "7097",
+      "county": "Richmond",
+      "description": "Hospice",
+      "count": "1"
+    },
+    {
+      "cnty_cd": "7097",
+      "county": "Richmond",
+      "description": "Hospital",
+      "count": "6"
+    },
+    {
+      "cnty_cd": "7097",
+      "county": "Richmond",
+      "description": "Hospital Extension Clinic",
+      "count": "15"
+    },
+    {
+      "cnty_cd": "7097",
+      "county": "Richmond",
+      "description": "Licensed Home Care Services Agency",
+      "count": "29"
+    },
+    {
+      "cnty_cd": "7097",
+      "county": "Richmond",
+      "description": "Mobile Hospital Extension Clinic",
+      "count": "2"
+    },
+    {
+      "cnty_cd": "7097",
+      "county": "Richmond",
+      "description": "Residential Health Care Facility - SNF",
+      "count": "11"
+    },
+    {
+      "cnty_cd": "7097",
+      "county": "Richmond",
+      "description": "School Based Diagnostic and Treatment Center Extension Clinic",
+      "count": "1"
+    },
+    {
+      "cnty_cd": "7097",
+      "county": "Richmond",
+      "description": "School Based Hospital Extension Clinic",
+      "count": "8"
+    }
+  ],
+  "source_columns": [
+    {
+      "field": "fac_id",
+      "name": "Facility ID",
+      "type": "number",
+      "description": "Site specific facility identification number."
+    },
+    {
+      "field": "facility_name",
+      "name": "Facility Name",
+      "type": "text",
+      "description": "Current facility name. \n"
+    },
+    {
+      "field": "fac_desc_short",
+      "name": "Short Description",
+      "type": "text",
+      "description": "Abbreviated name for type of facility.\n"
+    },
+    {
+      "field": "description",
+      "name": "Description",
+      "type": "text",
+      "description": "Type of facility."
+    },
+    {
+      "field": "fac_opn_dat",
+      "name": "Facility Open Date",
+      "type": "calendar_date",
+      "description": "Date facility opened."
+    },
+    {
+      "field": "address1",
+      "name": "Facility Address 1",
+      "type": "text",
+      "description": "Address Line 1 of facility."
+    },
+    {
+      "field": "address2",
+      "name": "Facility Address 2",
+      "type": "text",
+      "description": "Address Line 2 of facility (if applicable). \n"
+    },
+    {
+      "field": "city",
+      "name": "Facility City",
+      "type": "text",
+      "description": "City of facility."
+    },
+    {
+      "field": "state",
+      "name": "Facility State",
+      "type": "text",
+      "description": "State of facility (always New York State).\n"
+    },
+    {
+      "field": "fac_zip",
+      "name": "Facility Zip Code",
+      "type": "text",
+      "description": "Zip Code of facility."
+    },
+    {
+      "field": "fac_phone",
+      "name": "Facility Phone Number",
+      "type": "text",
+      "description": "Phone Number of facility."
+    },
+    {
+      "field": "fac_fax",
+      "name": "Facility Fax Number",
+      "type": "text",
+      "description": "Fax Number of facility.\n"
+    },
+    {
+      "field": "web_site",
+      "name": "Facility Website",
+      "type": "text",
+      "description": "Website of Facility. \n"
+    },
+    {
+      "field": "cnty_cd",
+      "name": "Facility County Code",
+      "type": "number",
+      "description": "Gazetteer Code for County facility is located in."
+    },
+    {
+      "field": "county",
+      "name": "Facility County",
+      "type": "text",
+      "description": "County where facility is located. \n"
+    },
+    {
+      "field": "ro_id",
+      "name": "Regional Office ID",
+      "type": "number",
+      "description": "Identification number of NYSDOH Regional Office."
+    },
+    {
+      "field": "region_office",
+      "name": "Regional Office",
+      "type": "text",
+      "description": "Name of NYSDOH Regional Office for facility."
+    },
+    {
+      "field": "main_site_name",
+      "name": "Main Site Name",
+      "type": "text",
+      "description": "Name of facility's main site, if facility is an extension clinic. \n"
+    },
+    {
+      "field": "main_site_facid",
+      "name": "Main Site Facility ID",
+      "type": "number",
+      "description": "Facility identification number of main site, if facility is an extension clinic."
+    },
+    {
+      "field": "opcert_num",
+      "name": "Operating Certificate Number",
+      "type": "text",
+      "description": "Operating Certificate number for facility. \n"
+    },
+    {
+      "field": "operator_name",
+      "name": "Operator Name",
+      "type": "text",
+      "description": "Name of the current operator of facility."
+    },
+    {
+      "field": "operator_address1",
+      "name": "Operator Address 1",
+      "type": "text",
+      "description": "Address Line 1 of the current operator."
+    },
+    {
+      "field": "operator_address2",
+      "name": "Operator Address 2",
+      "type": "text",
+      "description": "Address Line 2 of the current operator (if applicable). \n"
+    },
+    {
+      "field": "operator_city",
+      "name": "Operator City",
+      "type": "text",
+      "description": "City of current operator."
+    },
+    {
+      "field": "operator_state",
+      "name": "Operator State",
+      "type": "text",
+      "description": "State of current operator. \n"
+    },
+    {
+      "field": "operator_zip",
+      "name": "Operator Zip Code",
+      "type": "text",
+      "description": "Zip Code of current operator."
+    },
+    {
+      "field": "cooperator_name",
+      "name": "Cooperator Name",
+      "type": "text",
+      "description": "Name of current cooperator (if applicable). \n"
+    },
+    {
+      "field": "cooperator_address1",
+      "name": "Cooperator Address",
+      "type": "text",
+      "description": "Address Line 1 of current cooperator (if applicable)."
+    },
+    {
+      "field": "cooperator_address_2",
+      "name": "Cooperator Address 2",
+      "type": "text",
+      "description": ""
+    },
+    {
+      "field": "cooperator_city",
+      "name": "Cooperator City",
+      "type": "text",
+      "description": "City of current cooperator (if applicable).\n"
+    },
+    {
+      "field": "cooperator_state",
+      "name": "Cooperator State",
+      "type": "text",
+      "description": "State of current cooperator (if applicable).\n"
+    },
+    {
+      "field": "cooperator_zip",
+      "name": "Cooperator Zip Code",
+      "type": "text",
+      "description": "Zip Code of current cooperator (if applicable)."
+    },
+    {
+      "field": "ownership_type",
+      "name": "Ownership Type",
+      "type": "text",
+      "description": "Type of Legal Ownership"
+    },
+    {
+      "field": "latitude",
+      "name": "Facility Latitude",
+      "type": "number",
+      "description": "System for representing healthcare facilities on map. Geo-coded to mailing address."
+    },
+    {
+      "field": "longitude",
+      "name": "Facility Longitude",
+      "type": "number",
+      "description": "System for representing healthcare facilities on map. Geo-coded to mailing address. \n"
+    },
+    {
+      "field": "facility_location",
+      "name": "Facility Location",
+      "type": "location",
+      "description": ""
+    }
+  ],
+  "notes": [
+    "All source rows and fields are retained, including duplicates, absent fields and original string encodings of numbers.",
+    "cnty_cd is the original Facility County Code. Codes 7093–7097 identify NYC in this dataset; 31–35 identify Niagara, Oneida, Onondaga, Ontario and Orange.",
+    "borough and borough_sort_code are local additions. Codes 031–035 are sorting labels only, not source county codes.",
+    "No facility type filter is applied. Source metadata describes narrower coverage than the live rows; the export includes every returned facility type.",
+    "Counts are validated independently by county and facility description before any output is written."
+  ]
+}

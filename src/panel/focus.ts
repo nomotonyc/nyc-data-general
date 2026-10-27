@@ -48,7 +48,7 @@ export function focusSummary(state: Input, ds: LayerDataset): FocusSummary {
     const area = areaById(ds.areas, state.pinnedArea)
     const own = value([area.id])
     const cityValues = cityIds.map((id) => value([id]))
-    const boroughValuesOfAreas = areaIdsIn(ds, area.borough).map((id) => value([id]))
+    const boroughValuesOfAreas = ds.areas.filter((candidate) => candidate.borough === area.borough).map((candidate) => value([candidate.id]))
     const comparison = compareSigned(own, average(cityIds, cityValues), `the citywide ${noun.one} average`)
     return {
       name: area.label,

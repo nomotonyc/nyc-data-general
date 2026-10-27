@@ -6,9 +6,11 @@ import { cardAction, clickAction, hitKind, hoverTarget, liveTarget, nearestFirst
 const borough = (name: string) => ({ kind: 'borough' as const, properties: { borough: name } })
 const precinct = (n: number, b: string) => ({ kind: 'precincts' as const, properties: { precinct: n, borough: b } })
 const battalion = (n: number, b: string) => ({ kind: 'battalions' as const, properties: { battalion: n, borough: b } })
+const division = (n: number, b: string) => ({ kind: 'divisions' as const, properties: { division: n, borough: b } })
 // Precinct view, explicitly: the app opens on battalions.
 const city = { ...initialExplorerState, geography: 'precincts' as const }
 const battalions = { ...city, geography: 'battalions' as const }
+const divisions = { ...city, geography: 'divisions' as const }
 
 describe('clickAction', () => {
   it('focuses the borough clicked at borough level', () => {
@@ -25,6 +27,10 @@ describe('clickAction', () => {
 
   it('pins the battalion clicked when showing battalions', () => {
     expect(clickAction({ ...battalions, borough: 'Bronx' }, [battalion(14, 'Bronx'), borough('Bronx')])).toEqual({ type: 'pinArea', id: 'bn14' })
+  })
+
+  it('pins the division clicked when showing divisions', () => {
+    expect(clickAction({ ...divisions, borough: 'Queens' }, [division(14, 'Queens'), borough('Queens')])).toEqual({ type: 'pinArea', id: 'div14' })
   })
 
   it('ignores the other geography’s shapes', () => {
@@ -121,16 +127,32 @@ describe('placeAction', () => {
 })
 
 describe('hoverTarget', () => {
+  it('shows a hospital marker only while hospitals are enabled', () => {
+    const hospital = { kind: 'hospital' as const, properties: { id: '1438', name: 'Bellevue Hospital Center', address: '462 First Avenue', borough: 'Manhattan' } }
+    expect(hoverTarget({ ...city, showHospitals: true }, [hospital, borough('Manhattan')])).toEqual({ kind: 'hospital', id: '1438', name: 'Bellevue Hospital Center', address: '462 First Avenue', borough: 'Manhattan' })
+    expect(hoverTarget(city, [hospital, borough('Manhattan')])).toEqual({ kind: 'borough', borough: 'Manhattan' })
+    expect(hitKind(boroughLayers('Manhattan').hospital)).toBe('hospital')
+    expect(liveTarget({ kind: 'hospital', id: '1438', name: 'Bellevue', address: '', borough: 'Manhattan' }, 'precincts', false, false)).toBeNull()
+  })
+
+  it('shows an EMS station marker only while EMS stations are enabled', () => {
+    const station = { kind: 'emsStation' as const, properties: { id: 'abc', name: 'EMS STATION 35', address: '332 METROPOLITAN AVENUE', borough: 'Brooklyn' } }
+    expect(hoverTarget({ ...city, showEmsStations: true }, [station, borough('Brooklyn')])).toEqual({ kind: 'emsStation', id: 'abc', name: 'EMS STATION 35', address: '332 METROPOLITAN AVENUE', borough: 'Brooklyn' })
+    expect(hoverTarget(city, [station, borough('Brooklyn')])).toEqual({ kind: 'borough', borough: 'Brooklyn' })
+    expect(hitKind(boroughLayers('Brooklyn').emsStation)).toBe('emsStation')
+    expect(liveTarget({ kind: 'emsStation', id: 'abc', name: 'EMS 35', address: '', borough: 'Brooklyn' }, 'precincts', false, false, false)).toBeNull()
+  })
   it('names the battalion under the pointer by its id', () => {
     expect(hoverTarget({ ...battalions, detail: 'area' }, [battalion(3, 'Bronx')])).toEqual({ kind: 'area', id: 'bn3' })
   })
 })
 
 describe('hitKind', () => {
-  it('tells borough layers from precinct and battalion layers', () => {
+  it('tells borough layers from division, precinct and battalion layers', () => {
     expect(hitKind(boroughLayers('Queens').boroughFill)).toBe('borough')
     expect(hitKind(boroughLayers('Queens').precinctFill)).toBe('precincts')
     expect(hitKind(boroughLayers('Queens').battalionFill)).toBe('battalions')
+    expect(hitKind(boroughLayers('Queens').divisionFill)).toBe('divisions')
     expect(hitKind(LAYERS.boroughLabel)).toBeNull()
   })
 })

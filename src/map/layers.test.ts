@@ -13,6 +13,7 @@ describe('mapSources', () => {
     expect(sources[SOURCES.precincts]).toMatchObject({ type: 'geojson', promoteId: 'precinct' })
     expect(sources[SOURCES.divisions]).toMatchObject({ type: 'geojson', promoteId: 'division' })
     expect(sources[SOURCES.precinctLabels]).toMatchObject({ type: 'geojson' })
+    expect(sources[SOURCES.neighborhoods]).toMatchObject({ type: 'geojson' })
     expect(sources[SOURCES.firehouses]).toMatchObject({ type: 'geojson', promoteId: 'id' })
     expect(sources[SOURCES.hospitals]).toMatchObject({ type: 'geojson', promoteId: 'id' })
     expect(sources[SOURCES.emsStations]).toMatchObject({ type: 'geojson', promoteId: 'id' })
@@ -31,9 +32,11 @@ describe('mapLayers', () => {
       ...perBorough('divisionFill'),
       ...perBorough('precinctFill'),
       ...perBorough('battalionFill'),
+      ...perBorough('neighborhoodFill'),
       ...perBorough('divisionLine'),
       ...perBorough('precinctLine'),
       ...perBorough('battalionLine'),
+      ...perBorough('neighborhoodLine'),
       ...perBorough('boroughLine'),
       LAYERS.boroughHover,
       LAYERS.divisionHover,
@@ -42,6 +45,8 @@ describe('mapLayers', () => {
       LAYERS.precinctHighlight,
       LAYERS.battalionHover,
       LAYERS.battalionHighlight,
+      'neighborhood-hover',
+      'neighborhood-highlight',
       ...perBorough('firehouseRing'),
       ...perBorough('hospital'),
       ...perBorough('emsStation'),
@@ -52,6 +57,7 @@ describe('mapLayers', () => {
       LAYERS.divisionLabel,
       LAYERS.precinctLabel,
       LAYERS.battalionLabel,
+      LAYERS.neighborhoodLabel,
     ])
   })
 
@@ -73,7 +79,12 @@ describe('mapLayers', () => {
       expect(byId(ids.precinctLine).paint).toMatchObject({ 'line-opacity-transition': { duration: FADE_DURATION } })
       expect(byId(ids.boroughLine).paint).toMatchObject({ 'line-opacity-transition': { duration: FADE_DURATION } })
     }
-    for (const id of [LAYERS.boroughLabel, LAYERS.divisionLabel, LAYERS.precinctLabel]) {
+    expect(byId(boroughLayers('Bronx').neighborhoodLine).paint).toMatchObject({
+      'line-color': lightTheme.color.boroughLine,
+      'line-width': 0.8,
+      'line-opacity-transition': { duration: FADE_DURATION },
+    })
+    for (const id of [LAYERS.boroughLabel, LAYERS.neighborhoodLabel, LAYERS.divisionLabel, LAYERS.precinctLabel]) {
       expect(byId(id).paint, id).toMatchObject({ 'text-opacity-transition': { duration: FADE_DURATION } })
     }
   })

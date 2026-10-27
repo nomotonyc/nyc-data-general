@@ -18,7 +18,7 @@ export type LayerDataset = {
   isSample: boolean
   /** When real data was built (ISO timestamp); null for sample data. */
   asOf: string | null
-  /** For areas the source doesn't record (battalions), how records were placed; null otherwise. */
+  /** How records were placed where a source doesn't directly record the selected area. */
   placement: readonly Placement[] | null
   /** Every period covered, oldest first. */
   periods: readonly Period[]

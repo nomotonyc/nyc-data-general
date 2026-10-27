@@ -39,6 +39,8 @@ export const lightTheme = {
     /** Firehouse markers: a white dot ringed in ink, so one of the two stands out on every map colour. */
     firehouse: '#ffffff',
     firehouseRing: '#16202b',
+    /** EMS station triangles, shared by the map and its marker key. */
+    emsStation: '#16202b',
     /** The dimmed New York City line behind a focused place's trend. */
     trendCity: '#a7afb8',
   },

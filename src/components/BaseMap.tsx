@@ -11,6 +11,7 @@ import { choropleth } from '../map/choropleth'
 import { FADE_DURATION, FIXED_VIEW, FLY_DURATION, HOVER_DELAY, HYDRANTS_URL, NYC_BOUNDS, SOURCES, STACKED_LAYOUT, areaLayers, boroughLayers } from '../map/config'
 import { cameraEasing } from '../map/easing'
 import { hoverDetails } from '../map/hover'
+import { EMS_STATION_MARKER, emsStationMarkerImage } from '../map/emsStationMarker'
 import { HOSPITAL_MARKER, hospitalMarkerImage } from '../map/hospitalMarker'
 import { legendDetails } from '../map/legend'
 import { cardAction, clickAction, hitKind, hoverTarget, liveTarget, nearestFirst, sameTarget, tapResult, type Hit, type Target } from '../map/interaction'
@@ -108,6 +109,7 @@ export default function BaseMap() {
     map.on('style.load', () => {
       for (const [id, source] of Object.entries(mapSources())) map.addSource(id, source)
       map.addImage(HOSPITAL_MARKER, hospitalMarkerImage(), { pixelRatio: 2 })
+      map.addImage(EMS_STATION_MARKER, emsStationMarkerImage(themeRef.current.color.emsStation), { pixelRatio: 2 })
       for (const layer of mapLayers(themeRef.current)) map.addLayer(layer)
     })
     map.once('load', () => setReady(true))

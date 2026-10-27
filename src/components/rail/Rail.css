@@ -209,6 +209,15 @@
   stroke: var(--color-firehouse-ring);
 }
 
+.rail__ems-marker {
+  flex: none;
+  fill: var(--color-ems-station);
+  stroke: var(--color-background);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  paint-order: stroke fill;
+}
+
 .rail__actions {
   display: flex;
   flex-direction: column;

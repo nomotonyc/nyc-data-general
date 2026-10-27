@@ -52,8 +52,7 @@ export function paintMap(map: PaintableMap, plan: Choropleth, show: Show, option
     const emsMarkers = show.emsStations && shown ? 1 : 0
     const hydrantMarkers = show.hydrants && shown ? 1 : 0
     map.setPaintProperty(layers.hospital, 'icon-opacity', hospitalMarkers)
-    map.setPaintProperty(layers.emsStation, 'circle-opacity', emsMarkers)
-    map.setPaintProperty(layers.emsStation, 'circle-stroke-opacity', emsMarkers)
+    map.setPaintProperty(layers.emsStation, 'icon-opacity', emsMarkers)
     map.setPaintProperty(layers.hydrant, 'circle-opacity', hydrantMarkers)
     map.setPaintProperty(layers.firehouse, 'circle-opacity', markers)
     map.setPaintProperty(layers.firehouse, 'circle-stroke-opacity', markers)

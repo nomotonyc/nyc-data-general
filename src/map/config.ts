@@ -42,6 +42,7 @@ export const BATTALIONS_URL = `${import.meta.env.BASE_URL}data/nyc-battalions.ge
 export const BATTALION_LABELS_URL = `${import.meta.env.BASE_URL}data/nyc-battalion-labels.geojson`
 export const DIVISIONS_URL = `${import.meta.env.BASE_URL}data/nyc-divisions.geojson`
 export const DIVISION_LABELS_URL = `${import.meta.env.BASE_URL}data/nyc-division-labels.geojson`
+export const NEIGHBORHOODS_URL = `${import.meta.env.BASE_URL}data/nyc-neighborhoods.geojson`
 export const HOSPITALS_URL = `${import.meta.env.BASE_URL}data/reference_data/open_ny/hospitals_nyc.geojson`
 export const EMS_STATIONS_URL = `${import.meta.env.BASE_URL}data/reference_data/ems_stations.geojson`
 export const HYDRANTS_URL = `${import.meta.env.BASE_URL}data/reference_data/hydrants.geojson`
@@ -62,6 +63,7 @@ export const SOURCES = {
   battalionLabels: 'battalion-labels',
   divisions: 'divisions',
   divisionLabels: 'division-labels',
+  neighborhoods: 'neighborhoods',
   firehouses: 'firehouses',
   hospitals: 'hospitals',
   emsStations: 'ems-stations',
@@ -80,6 +82,7 @@ export const LAYERS = {
   divisionHover: 'division-hover',
   divisionHighlight: 'division-highlight',
   divisionLabel: 'division-label',
+  neighborhoodLabel: 'neighborhood-label',
   firehouseHover: 'firehouse-hover',
 } as const
 
@@ -115,6 +118,16 @@ export const GEOGRAPHY_MAP = {
     highlight: LAYERS.battalionHighlight,
     label: LAYERS.battalionLabel,
   },
+  neighborhoods: {
+    source: SOURCES.neighborhoods,
+    labelSource: SOURCES.neighborhoods,
+    url: NEIGHBORHOODS_URL,
+    labelsUrl: NEIGHBORHOODS_URL,
+    property: 'neighborhood',
+    hover: 'neighborhood-hover',
+    highlight: 'neighborhood-highlight',
+    label: LAYERS.neighborhoodLabel,
+  },
 } as const satisfies Record<Geography, unknown>
 
 /** Each borough's own layers, so it can fade in and out by itself. */
@@ -128,6 +141,8 @@ export function boroughLayers(borough: string) {
     battalionLine: `battalion-line-${slug}`,
     divisionFill: `division-fill-${slug}`,
     divisionLine: `division-line-${slug}`,
+    neighborhoodFill: `neighborhood-fill-${slug}`,
+    neighborhoodLine: `neighborhood-line-${slug}`,
     boroughLine: `borough-line-${slug}`,
     firehouse: `firehouse-${slug}`,
     hospital: `hospital-${slug}`,
@@ -141,6 +156,7 @@ export function boroughLayers(borough: string) {
 export function areaLayers(borough: string, geography: Geography) {
   const layers = boroughLayers(borough)
   if (geography === 'divisions') return { fill: layers.divisionFill, line: layers.divisionLine }
+  if (geography === 'neighborhoods') return { fill: layers.neighborhoodFill, line: layers.neighborhoodLine }
   return geography === 'battalions'
     ? { fill: layers.battalionFill, line: layers.battalionLine }
     : { fill: layers.precinctFill, line: layers.precinctLine }

@@ -6,12 +6,12 @@ type Ring = number[][]
 /** Precinct or battalion shapes: each feature carries its number under `precinct` or `battalion`. */
 export type AreaShapes = {
   type: 'FeatureCollection'
-  features: { type: 'Feature'; properties: { division?: number; precinct?: number; battalion?: number }; geometry: { type: 'MultiPolygon'; coordinates: Ring[][] } }[]
+  features: { type: 'Feature'; properties: { division?: number; precinct?: number; battalion?: number; neighborhood?: number }; geometry: { type: 'MultiPolygon'; coordinates: Ring[][] } }[]
 }
 export type PrecinctShapes = AreaShapes
 
 /** The feature property holding each geography's area number. */
-export const NUMBER_PROPERTY = { divisions: 'division', precincts: 'precinct', battalions: 'battalion' } as const satisfies Record<Geography, string>
+export const NUMBER_PROPERTY = { divisions: 'division', precincts: 'precinct', battalions: 'battalion', neighborhoods: 'neighborhood' } as const satisfies Record<Geography, string>
 
 /** One fetched record: when, where (as the API returns numbers, text) and its breakdown part. */
 export type PointRow = { date: string; lat?: string; lon?: string; part: string }

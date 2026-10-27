@@ -22,7 +22,7 @@ and the Where list. Nothing else needs editing. The file holds:
 | `unit` | Shown after values: "fires", "people per sq mi" |
 | `aggregation` | `sum` for counts; `ratio` for rates like density (numerator ÷ denominator) |
 | `data` | Monthly or yearly, first and last year |
-| `geographies` | Precincts, and battalions if the layer can be placed in them (precincts only when omitted) |
+| `geographies` | Precincts, battalions and/or neighborhoods when the layer has data for them (precincts only when omitted) |
 | `breakdown` | The panel's breakdown title and parts |
 | `sources` | This layer's own data sources (boundary credits are added for every layer) |
 | `method` | Caveats specific to this layer, in plain sentences |
@@ -122,6 +122,14 @@ borough's colour. In all, borough land outside every battalion comes to about
 
 Records with no precinct are left out of both views, so both count the same
 records.
+
+## Neighborhood estimates
+
+Neighborhood boundaries and names use the GeoJSON in [veltman/snd3](https://github.com/veltman/snd3/blob/master/data/nyc-neighborhoods.geo.json), supplied in `public/data/reference_data/nyc-neighborhoods.geo.json`. `npm run data:neighborhoods` normalizes those 188 shapes with stable IDs and borough names, then writes the map source, neighborhood metadata and one neighborhood data file per built layer.
+
+The input metric files report values by precinct, not neighborhood. To estimate neighborhood values, each precinct's value is split among neighborhoods in proportion to the 2020 Census population living in each neighborhood/precinct intersection, using cached census-block interior points. Blocks whose interior points fall outside every neighborhood polygon are assigned to the nearest neighborhood center so precinct totals are retained. If a precinct has no resident weight, its totals fall back to census-block land-area shares. Count breakdowns use the same allocation shares. For ratios, numerator and denominator are split consistently: population by resident share and land area by each intersection's census-block land area. A response-time numerator and its response count use the same resident share, preserving the weighted mean. The Data sources panel and map legend mark these neighborhood values as estimated.
+
+The Census population is a weighting surface, not a claim that incidents follow residents exactly. Neighborhood-level operational differences are not represented because the published metric files do not locate records within precincts. The boundary source is credited in each layer's Data sources list.
 
 Records are placed in the original NYC Open Data boundaries, downloaded by the
 build to `.cache/shapes/`, not the simplified ones the map draws: simplifying
@@ -466,6 +474,17 @@ same way (total ÷ total), never by averaging averages. Built with
 
 **Breakdown:** responses by how long they took (under 5, 5–10, 10–15, 15–20,
 20 minutes or more), bucketed by the API with a SoQL `case()`.
+
+## 03 Medical — Non-life-threatening response time
+
+Average minutes for an ambulance to reach a non-life-threatening emergency,
+using the same source, response-time definition, valid-time requirement,
+dispositions and breakdown as the life-threatening response-time layer above.
+
+**Filter:** calls dispatched with `initial_severity_level_code` 4, 5, 6, 7 or
+8. The initial code preserves the priority known when the ambulance was sent,
+including when the call was upgraded later. Built with
+`npm run data:layer -- non-life-threatening-response-time`.
 
 ## Show on map — Firehouses
 

@@ -39,6 +39,13 @@ const BOROUGH_BOUNDARIES: Source = {
   used: 'Borough outlines',
 }
 
+const NEIGHBORHOOD_BOUNDARIES: Source = {
+  name: 'NYC neighborhood boundaries',
+  publisher: 'veltman/snd3',
+  url: 'https://github.com/veltman/snd3/blob/master/data/nyc-neighborhoods.geo.json',
+  used: 'Neighborhood boundaries and names',
+}
+
 export const BATTALION_BOUNDARIES: Source = {
   name: 'Fire Battalions',
   publisher: 'FDNY, via NYC Open Data',
@@ -73,7 +80,7 @@ const RESIDENT_SOURCES: Source[] = [
     name: '2020 Census Redistricting Data (P.L. 94-171)',
     publisher: 'U.S. Census Bureau',
     url: 'https://www2.census.gov/programs-surveys/decennial/2020/data/01-Redistricting_File--PL_94-171/New_York/ny2020.pl.zip',
-    used: 'Battalion estimates: residents of each census block',
+    used: 'Battalion and neighborhood estimates: residents of each census block',
   },
   {
     name: 'Modified ZIP Code Tabulation Areas (MODZCTA)',
@@ -108,7 +115,9 @@ function placementSources(layer: Metric): Source[] {
 export function layerSources(layer: Metric): Source[] {
   const battalions = layerGeographies(layer).includes('battalions') ? [BATTALION_BOUNDARIES] : []
   const divisions = layerGeographies(layer).includes('divisions') ? [DIVISION_BOUNDARIES] : []
-  const all = [...layer.sources, PRECINCT_BOUNDARIES, ...divisions, ...battalions, BOROUGH_BOUNDARIES, ...placementSources(layer)]
+  const neighborhoods = layerGeographies(layer).includes('neighborhoods') ? [NEIGHBORHOOD_BOUNDARIES] : []
+  const neighborhoodWeights = layerGeographies(layer).includes('neighborhoods') ? [RESIDENT_SOURCES[0]] : []
+  const all = [...layer.sources, PRECINCT_BOUNDARIES, ...divisions, ...battalions, ...neighborhoods, BOROUGH_BOUNDARIES, ...placementSources(layer), ...neighborhoodWeights]
   return all.filter((s, i) => all.findIndex((o) => o.url === s.url) === i)
 }
 
@@ -119,6 +128,9 @@ export function layerMethod(layer: Metric): string[] {
   const method = [...layer.method]
   if (layer.build?.kind === 'open-data-counts') {
     method.push('Precincts 105 and 116 are told apart by ZIP code: NYPD created 116 from 105 in late 2024, and older records still say 105.')
+  }
+  if (layer.geographies?.includes('neighborhoods')) {
+    method.push('Neighborhood estimates split precinct totals among neighborhoods in proportion to their share of the precinct’s 2020 census-block population. Census blocks whose interior points fall outside a neighborhood polygon are assigned to the nearest neighborhood center; if a precinct has no resident weight, its totals fall back to census-block land-area shares. These are modeled allocations, not neighborhood-tagged source records; response-time numerators and denominators are split by the same share.')
   }
   if (layer.data.lastYear === FINAL_YEAR) {
     method.push(`${FINAL_YEAR} covers January to ${MONTH_NAMES[FINAL_YEAR_LAST_MONTH]}.`)

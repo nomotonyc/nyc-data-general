@@ -5,7 +5,7 @@
   "source": "NYC Facilities Database",
   "datasetId": "67g2-p84d",
   "sourceUrl": "https://data.cityofnewyork.us/City-Government/Facilities-Database-Shapefile/2fpa-bnsx",
-  "retrievedAt": "2026-10-25T20:24:01.074Z",
+  "retrievedAt": "2026-10-27T17:09:18.100Z",
   "features": [
     {
       "type": "Feature",
@@ -47,7 +47,8 @@
         "uid": "e4b55f26ef9840429feb3da6ee9451b4",
         "id": "e4b55f26ef9840429feb3da6ee9451b4",
         "name": "EMS STATION 15",
-        "borough": "Bronx"
+        "borough": "Bronx",
+        "hospitalAttached": false
       },
       "geometry": {
         "type": "Point",
@@ -97,7 +98,8 @@
         "uid": "5122abacc039f0b9859adb766109b30b",
         "id": "5122abacc039f0b9859adb766109b30b",
         "name": "EMS STATION 17",
-        "borough": "Bronx"
+        "borough": "Bronx",
+        "hospitalAttached": false
       },
       "geometry": {
         "type": "Point",
@@ -146,7 +148,8 @@
         "uid": "e91d3b0c46baf7d6b43c34fbc597f60a",
         "id": "e91d3b0c46baf7d6b43c34fbc597f60a",
         "name": "EMS STATION 18",
-        "borough": "Bronx"
+        "borough": "Bronx",
+        "hospitalAttached": false
       },
       "geometry": {
         "type": "Point",
@@ -196,7 +199,8 @@
         "uid": "02ea63fc923b354b462f0bc0cdb4b537",
         "id": "02ea63fc923b354b462f0bc0cdb4b537",
         "name": "EMS STATION 19  DO 7",
-        "borough": "Bronx"
+        "borough": "Bronx",
+        "hospitalAttached": false
       },
       "geometry": {
         "type": "Point",
@@ -246,7 +250,8 @@
         "uid": "1fc4797366fc227cce3fdc58b0babdd5",
         "id": "1fc4797366fc227cce3fdc58b0babdd5",
         "name": "EMS STATION 26",
-        "borough": "Bronx"
+        "borough": "Bronx",
+        "hospitalAttached": false
       },
       "geometry": {
         "type": "Point",
@@ -296,7 +301,8 @@
         "uid": "fc708c7803856aa7d0ca9b23a68fe254",
         "id": "fc708c7803856aa7d0ca9b23a68fe254",
         "name": "EMS STATION 27",
-        "borough": "Bronx"
+        "borough": "Bronx",
+        "hospitalAttached": false
       },
       "geometry": {
         "type": "Point",
@@ -346,7 +352,8 @@
         "uid": "20f20a814ee96b1bb461fdccdebf5858",
         "id": "20f20a814ee96b1bb461fdccdebf5858",
         "name": "EMS STATION 3/HAVEMEYER GARDEN",
-        "borough": "Bronx"
+        "borough": "Bronx",
+        "hospitalAttached": false
       },
       "geometry": {
         "type": "Point",
@@ -396,7 +403,8 @@
         "uid": "461fefb901105562ad72dc350078fb4c",
         "id": "461fefb901105562ad72dc350078fb4c",
         "name": "EMS STATION 55",
-        "borough": "Bronx"
+        "borough": "Bronx",
+        "hospitalAttached": false
       },
       "geometry": {
         "type": "Point",
@@ -446,7 +454,8 @@
         "uid": "3c7b30a2edc738865f3c81450c873a96",
         "id": "3c7b30a2edc738865f3c81450c873a96",
         "name": "JACOBI MED CTR/49TH PCT/EMS 20",
-        "borough": "Bronx"
+        "borough": "Bronx",
+        "hospitalAttached": true
       },
       "geometry": {
         "type": "Point",
@@ -496,7 +505,8 @@
         "uid": "efd6ed5a6ad8c9f078011d8d92d44c30",
         "id": "efd6ed5a6ad8c9f078011d8d92d44c30",
         "name": "LINCOLN MEDICAL/EMS 14",
-        "borough": "Bronx"
+        "borough": "Bronx",
+        "hospitalAttached": true
       },
       "geometry": {
         "type": "Point",
@@ -545,7 +555,8 @@
         "uid": "28275261dccca58b1a3661507ebb5b69",
         "id": "28275261dccca58b1a3661507ebb5b69",
         "name": "CONEY ISLAND HOSPITAL/EMS 43",
-        "borough": "Brooklyn"
+        "borough": "Brooklyn",
+        "hospitalAttached": true
       },
       "geometry": {
         "type": "Point",
@@ -594,7 +605,8 @@
         "uid": "9d4f11bc0ddf93974ba85748b6962114",
         "id": "9d4f11bc0ddf93974ba85748b6962114",
         "name": "CUMBERLAND HOSP/EMS STATION 31",
-        "borough": "Brooklyn"
+        "borough": "Brooklyn",
+        "hospitalAttached": true
       },
       "geometry": {
         "type": "Point",
@@ -643,7 +655,8 @@
         "uid": "dd695554e3dc67d6df76d36b9b5c9e57",
         "id": "dd695554e3dc67d6df76d36b9b5c9e57",
         "name": "EMS STATION 32",
-        "borough": "Brooklyn"
+        "borough": "Brooklyn",
+        "hospitalAttached": false
       },
       "geometry": {
         "type": "Point",
@@ -693,7 +706,8 @@
         "uid": "00e74f939c70ae6e9a4426dd7925896f",
         "id": "00e74f939c70ae6e9a4426dd7925896f",
         "name": "EMS STATION 35",
-        "borough": "Brooklyn"
+        "borough": "Brooklyn",
+        "hospitalAttached": false
       },
       "geometry": {
         "type": "Point",
@@ -743,7 +757,8 @@
         "uid": "f2d02cd0a3ec00513b4231079eb4313f",
         "id": "f2d02cd0a3ec00513b4231079eb4313f",
         "name": "EMS STATION 39",
-        "borough": "Brooklyn"
+        "borough": "Brooklyn",
+        "hospitalAttached": false
       },
       "geometry": {
         "type": "Point",
@@ -793,7 +808,8 @@
         "uid": "ac80f2d45195aa8059402ada60b435ec",
         "id": "ac80f2d45195aa8059402ada60b435ec",
         "name": "EMS STATION 40",
-        "borough": "Brooklyn"
+        "borough": "Brooklyn",
+        "hospitalAttached": false
       },
       "geometry": {
         "type": "Point",
@@ -843,7 +859,8 @@
         "uid": "cf7e4c30cdb8c35cea3a390c3a13997c",
         "id": "cf7e4c30cdb8c35cea3a390c3a13997c",
         "name": "EMS STATION 44",
-        "borough": "Brooklyn"
+        "borough": "Brooklyn",
+        "hospitalAttached": false
       },
       "geometry": {
         "type": "Point",
@@ -893,7 +910,8 @@
         "uid": "eaa6c8a07a19b3a48d5c298d1eb7b7f6",
         "id": "eaa6c8a07a19b3a48d5c298d1eb7b7f6",
         "name": "EMS STATION 58/DIVISION 3",
-        "borough": "Brooklyn"
+        "borough": "Brooklyn",
+        "hospitalAttached": false
       },
       "geometry": {
         "type": "Point",
@@ -943,7 +961,8 @@
         "uid": "b406cd05a2cc0752c868b71dd269ef74",
         "id": "b406cd05a2cc0752c868b71dd269ef74",
         "name": "EMS STATION 59  SOC STORAGE",
-        "borough": "Brooklyn"
+        "borough": "Brooklyn",
+        "hospitalAttached": false
       },
       "geometry": {
         "type": "Point",
@@ -993,7 +1012,8 @@
         "uid": "d7fb7fcc206a5341f4c7d0dbedaf0034",
         "id": "d7fb7fcc206a5341f4c7d0dbedaf0034",
         "name": "KINGS COUNTY HOSP./EMS ST. 38",
-        "borough": "Brooklyn"
+        "borough": "Brooklyn",
+        "hospitalAttached": true
       },
       "geometry": {
         "type": "Point",
@@ -1043,7 +1063,8 @@
         "uid": "6cf601629383514904a4fe521c54aa3d",
         "id": "6cf601629383514904a4fe521c54aa3d",
         "name": "WOODHULL HOSP/EMS STATION 57",
-        "borough": "Brooklyn"
+        "borough": "Brooklyn",
+        "hospitalAttached": true
       },
       "geometry": {
         "type": "Point",
@@ -1092,7 +1113,8 @@
         "uid": "b0abc557ff1ed93c42eb7b5b2dfd052b",
         "id": "b0abc557ff1ed93c42eb7b5b2dfd052b",
         "name": "BELVUE HOSP/OCME/EMS STATION 8",
-        "borough": "Manhattan"
+        "borough": "Manhattan",
+        "hospitalAttached": true
       },
       "geometry": {
         "type": "Point",
@@ -1142,7 +1164,8 @@
         "uid": "ec433ee14807c4afa48586ad0815e2e8",
         "id": "ec433ee14807c4afa48586ad0815e2e8",
         "name": "EMS STATION 13",
-        "borough": "Manhattan"
+        "borough": "Manhattan",
+        "hospitalAttached": false
       },
       "geometry": {
         "type": "Point",
@@ -1191,7 +1214,8 @@
         "uid": "09a9423dd2fb12c9a03ecb264ac166f8",
         "id": "09a9423dd2fb12c9a03ecb264ac166f8",
         "name": "HARLEM HOSPITAL/EMS STATION 16",
-        "borough": "Manhattan"
+        "borough": "Manhattan",
+        "hospitalAttached": true
       },
       "geometry": {
         "type": "Point",
@@ -1241,7 +1265,8 @@
         "uid": "f5f7f5438b0abf9f5a3ea6a3e639accf",
         "id": "f5f7f5438b0abf9f5a3ea6a3e639accf",
         "name": "METROPOLITAN HOSP./ EMS ST.10",
-        "borough": "Manhattan"
+        "borough": "Manhattan",
+        "hospitalAttached": true
       },
       "geometry": {
         "type": "Point",
@@ -1291,7 +1316,8 @@
         "uid": "2a0e754b83f23880e1451ba0f4fc3dbb",
         "id": "2a0e754b83f23880e1451ba0f4fc3dbb",
         "name": "PIERS 35 AND 36  EMS ST.4/DIV.1",
-        "borough": "Manhattan"
+        "borough": "Manhattan",
+        "hospitalAttached": false
       },
       "geometry": {
         "type": "Point",
@@ -1340,7 +1366,8 @@
         "uid": "b6d3c5a5830d1c1e0a8aad89e9679cc5",
         "id": "b6d3c5a5830d1c1e0a8aad89e9679cc5",
         "name": "THE HIGH LINE/EMS STATION 7",
-        "borough": "Manhattan"
+        "borough": "Manhattan",
+        "hospitalAttached": false
       },
       "geometry": {
         "type": "Point",
@@ -1390,7 +1417,8 @@
         "uid": "e1aaab1bb3652a26f8ba6689ec347852",
         "id": "e1aaab1bb3652a26f8ba6689ec347852",
         "name": "ELMHURST HOSPITAL CNTER/EMS 46",
-        "borough": "Queens"
+        "borough": "Queens",
+        "hospitalAttached": true
       },
       "geometry": {
         "type": "Point",
@@ -1440,7 +1468,8 @@
         "uid": "f07a4b682ff309accde9a56300182b4c",
         "id": "f07a4b682ff309accde9a56300182b4c",
         "name": "EMS ST.  45/RADIO REPAIR SHOP",
-        "borough": "Queens"
+        "borough": "Queens",
+        "hospitalAttached": false
       },
       "geometry": {
         "type": "Point",
@@ -1490,7 +1519,8 @@
         "uid": "33a5b2161358936971b42959fff5ddc4",
         "id": "33a5b2161358936971b42959fff5ddc4",
         "name": "EMS STATION 52",
-        "borough": "Queens"
+        "borough": "Queens",
+        "hospitalAttached": false
       },
       "geometry": {
         "type": "Point",
@@ -1540,7 +1570,8 @@
         "uid": "1801601d438fbe77159e219b8abb4e3f",
         "id": "1801601d438fbe77159e219b8abb4e3f",
         "name": "EMS STATION 54",
-        "borough": "Queens"
+        "borough": "Queens",
+        "hospitalAttached": false
       },
       "geometry": {
         "type": "Point",
@@ -1590,7 +1621,8 @@
         "uid": "c2a8dd3e86aabe0dfe9dba1704a5e749",
         "id": "c2a8dd3e86aabe0dfe9dba1704a5e749",
         "name": "QUEENS HOSPITAL CTR/GATEWAY HS",
-        "borough": "Queens"
+        "borough": "Queens",
+        "hospitalAttached": true
       },
       "geometry": {
         "type": "Point",
@@ -1638,7 +1670,8 @@
         "uid": "2d8e7ed66118fb0852057c0a6d53090a",
         "id": "2d8e7ed66118fb0852057c0a6d53090a",
         "name": "TRIBOROUGH BRIDGE PLAYGROUND.E",
-        "borough": "Queens"
+        "borough": "Queens",
+        "hospitalAttached": false
       },
       "geometry": {
         "type": "Point",
@@ -1687,7 +1720,8 @@
         "uid": "16b6cda1ba87f8527aaeb9d481891147",
         "id": "16b6cda1ba87f8527aaeb9d481891147",
         "name": "FDNY EMS CMND - SEAVIEW CAMPUS",
-        "borough": "Staten Island"
+        "borough": "Staten Island",
+        "hospitalAttached": false
       },
       "geometry": {
         "type": "Point",

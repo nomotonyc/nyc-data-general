@@ -28,7 +28,7 @@ export default {
   measure: 'Police-reported crashes involving an FDNY fire truck, engine or ladder',
   unit: 'crashes',
   aggregation: 'sum',
-  geographies: ['divisions', 'precincts', 'battalions'],
+  geographies: ['divisions', 'precincts', 'battalions', 'neighborhoods'],
   data: { resolution: 'month', firstYear: 2019, lastYear: 2026 },
   breakdown: { title: 'Injuries', parts: ['No one hurt', 'Someone injured', 'Someone killed'] },
   sources: [

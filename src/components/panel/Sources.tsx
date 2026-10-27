@@ -1,13 +1,14 @@
 import type { Placement } from '../../data/dataset'
 import { useId } from 'react'
 import { METHOD_URL } from '../../domain/stories'
+import { areaNoun } from '../../domain/geography'
 import { useDataset, useExplorerState } from '../../explorer/context'
 import { shownSources } from '../../panel/sources'
 
 const asOfDate = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
 
-const placementText = (placement: readonly Placement[]) =>
-  `By battalion: ${placement.map((p) => `${sharePercent(p.share)} placed by ${p.method} (${p.exact ? 'exact' : 'estimated'})`).join('; ')}.`
+const placementText = (placement: readonly Placement[], geography: 'battalions' | 'neighborhoods') =>
+  `By ${areaNoun(geography).many}: ${placement.map((p) => `${sharePercent(p.share)} placed by ${p.method} (${p.exact ? 'exact' : 'estimated'})`).join('; ')}.`
 
 /** A share as a whole percent; a real but tiny share reads "<1%", never "0%". */
 const sharePercent = (share: number) => (share > 0 && share < 0.005 ? '<1%' : `${Math.round(share * 100)}%`)
@@ -28,7 +29,7 @@ export function Sources() {
         </summary>
         <div className="panel__sources-body">
           {ds.asOf && <p className="panel__as-of">Data as of {asOfDate(ds.asOf)}</p>}
-          {ds.geography === 'battalions' && ds.placement && <p className="panel__placement">{placementText(ds.placement)}</p>}
+          {(ds.geography === 'battalions' || ds.geography === 'neighborhoods') && ds.placement && <p className="panel__placement">{placementText(ds.placement, ds.geography)}</p>}
           {ds.isSample && (
             <p className="panel__sample">
               These values are samples, generated to show how the page works. Real data from the sources below is on the way.

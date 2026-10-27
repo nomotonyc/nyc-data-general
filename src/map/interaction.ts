@@ -11,6 +11,7 @@ export function hitKind(layerId: string): Hit['kind'] | null {
   if (layerId.startsWith('precinct-fill-')) return 'precincts'
   if (layerId.startsWith('battalion-fill-')) return 'battalions'
   if (layerId.startsWith('division-fill-')) return 'divisions'
+  if (layerId.startsWith('neighborhood-fill-')) return 'neighborhoods'
   if (layerId.startsWith('firehouse-') && layerId !== 'firehouse-hover') return 'firehouse'
   if (layerId.startsWith('hospital-')) return 'hospital'
   if (layerId.startsWith('ems-station-')) return 'emsStation'
@@ -24,7 +25,7 @@ export type Target = PlaceTarget | { kind: 'firehouse'; id: number; firehouse: F
 /** A borough or an area: what a click acts on and the place hover card describes. */
 export type PlaceTarget = { kind: 'borough'; borough: Borough } | { kind: 'area'; id: string }
 
-const NUMBER_PROPERTY: Record<Geography, string> = { divisions: 'division', precincts: 'precinct', battalions: 'battalion' }
+const NUMBER_PROPERTY: Record<Geography, string> = { divisions: 'division', precincts: 'precinct', battalions: 'battalion', neighborhoods: 'neighborhood' }
 
 /**
  * A shown firehouse, in view (the whole city, or the focused borough), comes first. Otherwise,

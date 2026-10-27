@@ -56,6 +56,7 @@ export type ExplorerAction =
   | { type: 'selectStory'; storyId: StoryId }
   | { type: 'selectMetric'; metricId: string }
   | { type: 'focusBorough'; borough: Borough | null }
+  | { type: 'resetCityView' }
   | { type: 'setGeography'; geography: Geography }
   | { type: 'pinArea'; id: string }
   | { type: 'unpinArea' }
@@ -86,6 +87,9 @@ export function explorerReducer(state: ExplorerState, action: ExplorerAction): E
       return { ...state, geography: action.geography, pinnedArea: null }
     case 'focusBorough':
       return { ...state, borough: action.borough, pinnedArea: null }
+    case 'resetCityView':
+      if (state.borough === null && state.pinnedArea === null && state.detail === 'borough') return state
+      return { ...state, borough: null, pinnedArea: null, detail: 'borough' }
     case 'pinArea': {
       const area = areasOf(state.geography).find((a) => a.id === action.id)
       if (!area) return state

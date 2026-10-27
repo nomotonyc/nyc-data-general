@@ -20,7 +20,7 @@ export type LayerFile = {
   denominators?: Record<string, number[]>
   /** areaId -> per period -> one count per breakdown part. */
   parts: Record<string, number[][]>
-  /** Battalion files: how records were placed (shares add to 1). */
+  /** How records were placed in a geography when not directly recorded there (shares add to 1). */
   placement?: Placement[]
 }
 

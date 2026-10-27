@@ -262,7 +262,11 @@ describe('ambulance response time', () => {
   })
 
   it('is the Medical story’s second layer', () => {
-    expect(layersOf('medical').map((l) => l.id)).toEqual(['ambulance-calls', 'ambulance-response-time'])
+    expect(layersOf('medical').map((l) => l.id)).toEqual([
+      'ambulance-calls',
+      'ambulance-response-time',
+      'non-life-threatening-response-time',
+    ])
     expect(layer).toMatchObject({
       label: 'Life-threatening response time',
       note: 'Average minutes for an ambulance to reach a life-threatening emergency',

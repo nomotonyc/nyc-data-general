@@ -91,6 +91,14 @@ describe('paintMap', () => {
     expect(opacity(paint(base), boroughLayers('Bronx').battalionLine)).toBe(0)
   })
 
+  it('colors and outlines neighborhoods as the selected data geography', () => {
+    const neighborhoodPlan = { ...base, geography: 'neighborhoods' as const, level: 'area' as const, focus: 'Queens' as const }
+    expect(opacity(paint(neighborhoodPlan), boroughLayers('Queens').neighborhoodFill)).toBe(1)
+    expect(opacity(paint(neighborhoodPlan), boroughLayers('Queens').neighborhoodLine)).toBe(0.8)
+    expect(opacity(paint(neighborhoodPlan), LAYERS.neighborhoodLabel)).toBe(1)
+    expect(paint(neighborhoodPlan).setFilter).toHaveBeenCalledWith(LAYERS.neighborhoodLabel, ['==', ['get', 'borough'], 'Queens'])
+  })
+
   it('always shows area lines at area level, where they separate the colours', () => {
     expect(opacity(paint(areaLevel, { ...show, outlines: false }), boroughLayers('Bronx').precinctLine)).toBe(0.8)
   })

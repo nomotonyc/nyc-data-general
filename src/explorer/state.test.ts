@@ -74,6 +74,13 @@ describe('focusBorough', () => {
   })
 })
 
+describe('resetCityView', () => {
+  it('returns the logo destination to the whole-city borough view', () => {
+    const s = reduce(at({ borough: 'Bronx', pinnedArea: '44', detail: 'area' }), { type: 'resetCityView' })
+    expect(s).toMatchObject({ borough: null, pinnedArea: null, detail: 'borough' })
+  })
+})
+
 describe('pinArea', () => {
   it('zooms into the borough of a precinct pinned from the city view', () => {
     const s = reduce(at({ detail: 'area' }), { type: 'pinArea', id: '14' })

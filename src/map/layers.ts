@@ -3,6 +3,7 @@ import type { GeoJSONSourceSpecification, LayerSpecification, SourceSpecificatio
 import { FIREHOUSE_COLLECTION } from '../data/firehouses'
 import { BOROUGHS, GEOGRAPHIES } from '../domain/geography'
 import type { Theme } from '../theme/tokens'
+import { EMS_STATION_MARKER } from './emsStationMarker'
 import { HOSPITAL_MARKER } from './hospitalMarker'
 import {
   ATTRIBUTION,
@@ -32,8 +33,8 @@ export function mapSources(): Record<string, SourceSpecification> {
   }
   for (const g of GEOGRAPHIES) {
     const { source, labelSource, url, labelsUrl, property } = GEOGRAPHY_MAP[g]
-    sources[source] = { type: 'geojson', data: url, promoteId: property }
-    sources[labelSource] = { type: 'geojson', data: labelsUrl }
+    sources[source] = { type: 'geojson', data: url, promoteId: property, attribution: ATTRIBUTION }
+    if (labelSource !== source) sources[labelSource] = { type: 'geojson', data: labelsUrl }
   }
   return sources
 }
@@ -131,18 +132,24 @@ export function mapLayers(theme: Theme): LayerSpecification[] {
   }))
   const emsStations = BOROUGHS.map((b): LayerSpecification => ({
     id: boroughLayers(b).emsStation,
-    type: 'circle',
+    type: 'symbol',
     source: SOURCES.emsStations,
     filter: inBorough(b),
+    layout: {
+      'icon-image': EMS_STATION_MARKER,
+      // Hospital-based stations are 35% larger at every zoom level.
+      'icon-size': [
+        'interpolate', ['linear'], ['zoom'],
+        10, ['case', ['get', 'hospitalAttached'], 0.486, 0.36],
+        12, ['case', ['get', 'hospitalAttached'], 0.675, 0.5],
+        14, ['case', ['get', 'hospitalAttached'], 0.864, 0.64],
+      ],
+      'icon-allow-overlap': true,
+      'icon-ignore-placement': true,
+    },
     paint: {
-      'circle-color': theme.color.firehouse,
-      'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 4, 12, 5.5, 14, 7],
-      'circle-stroke-color': theme.story.medical.accent,
-      'circle-stroke-width': 2,
-      'circle-opacity': 0,
-      'circle-stroke-opacity': 0,
-      'circle-opacity-transition': fade,
-      'circle-stroke-opacity-transition': fade,
+      'icon-opacity': 0,
+      'icon-opacity-transition': fade,
     },
   }))
   const hydrants = BOROUGHS.map((b): LayerSpecification => ({
@@ -244,9 +251,9 @@ export function mapLayers(theme: Theme): LayerSpecification[] {
       type: 'symbol',
       source: GEOGRAPHY_MAP[g].labelSource,
       layout: {
-        'text-field': ['to-string', ['get', GEOGRAPHY_MAP[g].property]],
+        'text-field': g === 'neighborhoods' ? ['get', 'name'] : ['to-string', ['get', GEOGRAPHY_MAP[g].property]],
         'text-font': LABEL_FONT,
-        'text-size': 12,
+        'text-size': g === 'neighborhoods' ? 10 : 12,
         // Fading numbers never stop the borough names from being placed.
         'text-ignore-placement': true,
       },

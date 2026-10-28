@@ -38,9 +38,10 @@ export function legendDetails(
   }
   // Estimates must show on the map itself, not only in the collapsed Data sources.
   // Only where battalions are on the map: borough figures are the same in both views.
-  const estimated = plan.geography === 'battalions' && plan.level === 'area' && placement ? placement.filter((p) => !p.exact).reduce((s, p) => s + p.share, 0) : 0
+  const estimated = (plan.geography === 'battalions' || plan.geography === 'neighborhoods') && plan.level === 'area' && placement ? placement.filter((p) => !p.exact).reduce((s, p) => s + p.share, 0) : 0
   if (estimated > 0) {
-    const part = estimated >= 0.995 ? 'By battalion: estimates · see Data sources' : `By battalion: ${Math.max(1, Math.round(estimated * 100))}% estimated · see Data sources`
+    const geography = areaNoun(plan.geography).many
+    const part = estimated >= 0.995 ? `By ${geography}: estimates · see Data sources` : `By ${geography}: ${Math.max(1, Math.round(estimated * 100))}% estimated · see Data sources`
     note = note ? `${note} · ${part}` : part
   }
   return {

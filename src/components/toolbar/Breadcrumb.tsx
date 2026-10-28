@@ -20,7 +20,7 @@ export function Breadcrumb() {
   const dispatch = useExplorerDispatch()
   const ds = useDataset()
 
-  const crumbs: Crumb[] = [{ label: 'New York City', go: () => dispatch({ type: 'focusBorough', borough: null }) }]
+  const crumbs: Crumb[] = [{ label: 'New York City', go: () => dispatch({ type: 'resetCityView' }) }]
   if (borough) crumbs.push({ label: borough, go: () => dispatch({ type: 'unpinArea' }) })
   if (pinnedArea !== null) crumbs.push({ label: areaById(ds.areas, pinnedArea).label, go: () => {} })
 
@@ -34,12 +34,12 @@ export function Breadcrumb() {
                 /
               </span>
             )}
-            {i === crumbs.length - 1 ? (
+            {i === crumbs.length - 1 && i !== 0 ? (
               <span className={`breadcrumb__current${i === 0 ? ' breadcrumb__brand' : ''}`} aria-current="location">
                 {i === 0 ? <CityBrand /> : crumb.label}
               </span>
             ) : (
-              <button type="button" onClick={crumb.go} className={i === 0 ? 'breadcrumb__brand' : undefined}>
+              <button type="button" aria-current={i === 0 && crumbs.length === 1 ? 'location' : undefined} onClick={crumb.go} className={i === 0 ? 'breadcrumb__brand' : undefined}>
                 {i === 0 ? <CityBrand /> : crumb.label}
               </button>
             )}

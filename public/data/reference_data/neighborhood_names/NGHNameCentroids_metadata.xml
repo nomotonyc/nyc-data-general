@@ -1,0 +1,389 @@
+﻿<MD_Metadata xmlns="http://www.isotc211.org/2005/gmd" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:gts="http://www.isotc211.org/2005/gts" xmlns:srv="http://www.isotc211.org/2005/srv" xmlns:gml="http://www.opengis.net/gml" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <language>
+    <LanguageCode codeList="http://www.loc.gov/standards/iso639-2/php/code_list.php" codeListValue="eng" codeSpace="ISO639-2">eng</LanguageCode>
+  </language>
+  <characterSet>
+    <MD_CharacterSetCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_CharacterSetCode" codeListValue="utf8" codeSpace="ISOTC211/19115">utf8</MD_CharacterSetCode>
+  </characterSet>
+  <hierarchyLevel>
+    <MD_ScopeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ScopeCode" codeListValue="dataset" codeSpace="ISOTC211/19115">dataset</MD_ScopeCode>
+  </hierarchyLevel>
+  <hierarchyLevelName>
+    <gco:CharacterString>dataset</gco:CharacterString>
+  </hierarchyLevelName>
+  <contact>
+    <CI_ResponsibleParty>
+      <individualName>
+        <gco:CharacterString>Population Division</gco:CharacterString>
+      </individualName>
+      <organisationName>
+        <gco:CharacterString>New York City Department of City Planning</gco:CharacterString>
+      </organisationName>
+      <contactInfo>
+        <CI_Contact>
+          <address>
+            <CI_Address>
+              <deliveryPoint>
+                <gco:CharacterString>22 Reade St, 4W</gco:CharacterString>
+              </deliveryPoint>
+              <city>
+                <gco:CharacterString>New York</gco:CharacterString>
+              </city>
+              <administrativeArea>
+                <gco:CharacterString>NY</gco:CharacterString>
+              </administrativeArea>
+              <postalCode>
+                <gco:CharacterString>10007</gco:CharacterString>
+              </postalCode>
+              <country>
+                <Country codeList="http://www.iso.org/iso/country_codes/iso_3166_code_lists.htm" codeListValue="US" codeSpace="ISO3166-1">US</Country>
+              </country>
+            </CI_Address>
+          </address>
+        </CI_Contact>
+      </contactInfo>
+      <role>
+        <CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="originator" codeSpace="ISOTC211/19115">originator</CI_RoleCode>
+      </role>
+    </CI_ResponsibleParty>
+  </contact>
+  <dateStamp>
+    <gco:Date>2014-08-19</gco:Date>
+  </dateStamp>
+  <metadataStandardName>
+    <gco:CharacterString>ISO 19139 Geographic Information - Metadata - Implementation Specification</gco:CharacterString>
+  </metadataStandardName>
+  <metadataStandardVersion>
+    <gco:CharacterString>2007</gco:CharacterString>
+  </metadataStandardVersion>
+  <spatialRepresentationInfo>
+    <MD_VectorSpatialRepresentation>
+      <topologyLevel>
+        <MD_TopologyLevelCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_TopologyLevelCode" codeListValue="geometryOnly" codeSpace="ISOTC211/19115">geometryOnly</MD_TopologyLevelCode>
+      </topologyLevel>
+      <geometricObjects>
+        <MD_GeometricObjects>
+          <geometricObjectType>
+            <MD_GeometricObjectTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_GeometricObjectTypeCode" codeListValue="point" codeSpace="ISOTC211/19115">point</MD_GeometricObjectTypeCode>
+          </geometricObjectType>
+          <geometricObjectCount>
+            <gco:Integer>306</gco:Integer>
+          </geometricObjectCount>
+        </MD_GeometricObjects>
+      </geometricObjects>
+    </MD_VectorSpatialRepresentation>
+  </spatialRepresentationInfo>
+  <referenceSystemInfo>
+    <MD_ReferenceSystem>
+      <referenceSystemIdentifier>
+        <RS_Identifier>
+          <code>
+            <gco:CharacterString>2263</gco:CharacterString>
+          </code>
+          <codeSpace>
+            <gco:CharacterString>EPSG</gco:CharacterString>
+          </codeSpace>
+          <version>
+            <gco:CharacterString>7.11.2</gco:CharacterString>
+          </version>
+        </RS_Identifier>
+      </referenceSystemIdentifier>
+    </MD_ReferenceSystem>
+  </referenceSystemInfo>
+  <identificationInfo>
+    <MD_DataIdentification>
+      <citation>
+        <CI_Citation>
+          <title>
+            <gco:CharacterString>New York City Neighborhood Name Centroids</gco:CharacterString>
+          </title>
+          <date gco:nilReason="missing" />
+          <citedResponsibleParty>
+            <CI_ResponsibleParty>
+              <individualName>
+                <gco:CharacterString>Population Division</gco:CharacterString>
+              </individualName>
+              <organisationName>
+                <gco:CharacterString>New York City Department of City Planning</gco:CharacterString>
+              </organisationName>
+              <contactInfo>
+                <CI_Contact>
+                  <address>
+                    <CI_Address>
+                      <deliveryPoint>
+                        <gco:CharacterString>22 Reade St, 4W</gco:CharacterString>
+                      </deliveryPoint>
+                      <city>
+                        <gco:CharacterString>New York</gco:CharacterString>
+                      </city>
+                      <administrativeArea>
+                        <gco:CharacterString>NY</gco:CharacterString>
+                      </administrativeArea>
+                      <postalCode>
+                        <gco:CharacterString>10007</gco:CharacterString>
+                      </postalCode>
+                      <country>
+                        <Country codeList="http://www.iso.org/iso/country_codes/iso_3166_code_lists.htm" codeListValue="US" codeSpace="ISO3166-1">US</Country>
+                      </country>
+                    </CI_Address>
+                  </address>
+                </CI_Contact>
+              </contactInfo>
+              <role>
+                <CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="originator" codeSpace="ISOTC211/19115">originator</CI_RoleCode>
+              </role>
+            </CI_ResponsibleParty>
+          </citedResponsibleParty>
+          <citedResponsibleParty>
+            <CI_ResponsibleParty>
+              <organisationName>
+                <gco:CharacterString>New York City Department of City Planning</gco:CharacterString>
+              </organisationName>
+              <role>
+                <CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="publisher" codeSpace="ISOTC211/19115">publisher</CI_RoleCode>
+              </role>
+            </CI_ResponsibleParty>
+          </citedResponsibleParty>
+          <presentationForm>
+            <CI_PresentationFormCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_PresentationFormCode" codeListValue="mapDigital" codeSpace="ISOTC211/19115">mapDigital</CI_PresentationFormCode>
+          </presentationForm>
+        </CI_Citation>
+      </citation>
+      <abstract>
+        <gco:CharacterString>The New York City Neighborhood Names point file was created as a guide to New York City’s neighborhoods that appear in the “New York: A City of Neighborhoods” map poster and webpage. Best estimates of label centroids were established at a 1:1,000 scale, but are ideally viewed at a 1:50,000 scale.</gco:CharacterString>
+      </abstract>
+      <purpose>
+        <gco:CharacterString>These points were created by the Department of City Planning as a guide to the locations of neighborhood labels found on the Department of City Planning's "New York: A City of Neighborhoods" poster and webpage.</gco:CharacterString>
+      </purpose>
+      <credit>
+        <gco:CharacterString>Population Division, New York City Department of City Planning</gco:CharacterString>
+      </credit>
+      <status>
+        <MD_ProgressCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ProgressCode" codeListValue="completed" codeSpace="ISOTC211/19115">completed</MD_ProgressCode>
+      </status>
+      <pointOfContact>
+        <CI_ResponsibleParty>
+          <organisationName>
+            <gco:CharacterString>New York City Department of City Planning</gco:CharacterString>
+          </organisationName>
+          <positionName>
+            <gco:CharacterString>BYTES of the BIG APPLE Coordinator</gco:CharacterString>
+          </positionName>
+          <contactInfo>
+            <CI_Contact>
+              <phone>
+                <CI_Telephone>
+                  <voice>
+                    <gco:CharacterString>212.720.3505</gco:CharacterString>
+                  </voice>
+                </CI_Telephone>
+              </phone>
+              <address>
+                <CI_Address>
+                  <deliveryPoint>
+                    <gco:CharacterString>22 Reade St, 5E</gco:CharacterString>
+                  </deliveryPoint>
+                  <city>
+                    <gco:CharacterString>New York</gco:CharacterString>
+                  </city>
+                  <administrativeArea>
+                    <gco:CharacterString>NY</gco:CharacterString>
+                  </administrativeArea>
+                  <postalCode>
+                    <gco:CharacterString>10007</gco:CharacterString>
+                  </postalCode>
+                  <country>
+                    <Country codeList="http://www.iso.org/iso/country_codes/iso_3166_code_lists.htm" codeListValue="US" codeSpace="ISO3166-1">US</Country>
+                  </country>
+                </CI_Address>
+              </address>
+            </CI_Contact>
+          </contactInfo>
+          <role>
+            <CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="pointOfContact" codeSpace="ISOTC211/19115">pointOfContact</CI_RoleCode>
+          </role>
+        </CI_ResponsibleParty>
+      </pointOfContact>
+      <resourceMaintenance>
+        <MD_MaintenanceInformation>
+          <maintenanceAndUpdateFrequency gco:nilReason="missing" />
+          <contact>
+            <CI_ResponsibleParty>
+              <individualName>
+                <gco:CharacterString>Population Division</gco:CharacterString>
+              </individualName>
+              <organisationName>
+                <gco:CharacterString>New York City Department of City Planning</gco:CharacterString>
+              </organisationName>
+              <contactInfo>
+                <CI_Contact>
+                  <address>
+                    <CI_Address>
+                      <deliveryPoint>
+                        <gco:CharacterString>22 Reade St, 4W</gco:CharacterString>
+                      </deliveryPoint>
+                      <city>
+                        <gco:CharacterString>New York</gco:CharacterString>
+                      </city>
+                      <administrativeArea>
+                        <gco:CharacterString>NY</gco:CharacterString>
+                      </administrativeArea>
+                      <postalCode>
+                        <gco:CharacterString>10007</gco:CharacterString>
+                      </postalCode>
+                      <country>
+                        <Country codeList="http://www.iso.org/iso/country_codes/iso_3166_code_lists.htm" codeListValue="US" codeSpace="ISO3166-1">US</Country>
+                      </country>
+                    </CI_Address>
+                  </address>
+                </CI_Contact>
+              </contactInfo>
+              <role>
+                <CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="originator" codeSpace="ISOTC211/19115">originator</CI_RoleCode>
+              </role>
+            </CI_ResponsibleParty>
+          </contact>
+        </MD_MaintenanceInformation>
+      </resourceMaintenance>
+      <descriptiveKeywords>
+        <MD_Keywords>
+          <keyword>
+            <gco:CharacterString>Downloadable Data</gco:CharacterString>
+          </keyword>
+          <thesaurusName uuidref="723f6998-058e-11dc-8314-0800200c9a66" />
+        </MD_Keywords>
+      </descriptiveKeywords>
+      <descriptiveKeywords>
+        <MD_Keywords>
+          <keyword>
+            <gco:CharacterString>Neighborhood</gco:CharacterString>
+          </keyword>
+          <keyword>
+            <gco:CharacterString>Label</gco:CharacterString>
+          </keyword>
+          <keyword>
+            <gco:CharacterString>Centroid</gco:CharacterString>
+          </keyword>
+        </MD_Keywords>
+      </descriptiveKeywords>
+      <resourceConstraints>
+        <MD_Constraints>
+          <useLimitation>
+            <gco:CharacterString>While all possible measures have been taken to ensure the accuracy of this data, the New York City Department of City Planning and the City of New York assume no responsibility for the accuracy of this data. All users should independently verify the accuracy of the data for their purposes.</gco:CharacterString>
+          </useLimitation>
+        </MD_Constraints>
+      </resourceConstraints>
+      <spatialRepresentationType>
+        <MD_SpatialRepresentationTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="vector" codeSpace="ISOTC211/19115">vector</MD_SpatialRepresentationTypeCode>
+      </spatialRepresentationType>
+      <language>
+        <LanguageCode codeList="http://www.loc.gov/standards/iso639-2/php/code_list.php" codeListValue="eng" codeSpace="ISO639-2">eng</LanguageCode>
+      </language>
+      <characterSet>
+        <MD_CharacterSetCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_CharacterSetCode" codeListValue="utf8" codeSpace="ISOTC211/19115">utf8</MD_CharacterSetCode>
+      </characterSet>
+      <environmentDescription>
+        <gco:CharacterString>Microsoft Windows 7 Version 6.1 (Build 7601) Service Pack 1; Esri ArcGIS 10.1.1.3143</gco:CharacterString>
+      </environmentDescription>
+      <extent>
+        <EX_Extent>
+          <geographicElement>
+            <EX_GeographicBoundingBox>
+              <extentTypeCode>
+                <gco:Boolean>true</gco:Boolean>
+              </extentTypeCode>
+              <westBoundLongitude>
+                <gco:Decimal>-74.248064</gco:Decimal>
+              </westBoundLongitude>
+              <eastBoundLongitude>
+                <gco:Decimal>-73.708116</gco:Decimal>
+              </eastBoundLongitude>
+              <southBoundLatitude>
+                <gco:Decimal>40.505232</gco:Decimal>
+              </southBoundLatitude>
+              <northBoundLatitude>
+                <gco:Decimal>40.908582</gco:Decimal>
+              </northBoundLatitude>
+            </EX_GeographicBoundingBox>
+          </geographicElement>
+        </EX_Extent>
+      </extent>
+    </MD_DataIdentification>
+  </identificationInfo>
+  <contentInfo>
+    <MD_FeatureCatalogueDescription>
+      <complianceCode>
+        <gco:Boolean>false</gco:Boolean>
+      </complianceCode>
+      <includedWithDataset>
+        <gco:Boolean>false</gco:Boolean>
+      </includedWithDataset>
+      <featureCatalogueCitation gco:nilReason="missing" />
+    </MD_FeatureCatalogueDescription>
+  </contentInfo>
+  <distributionInfo>
+    <MD_Distribution>
+      <distributionFormat>
+        <MD_Format>
+          <name>
+            <gco:CharacterString>File Geodatabase Feature Class</gco:CharacterString>
+          </name>
+          <version gco:nilReason="missing" />
+        </MD_Format>
+      </distributionFormat>
+      <distributor>
+        <MD_Distributor>
+          <distributorContact gco:nilReason="missing" />
+          <distributorFormat>
+            <MD_Format>
+              <name>
+                <gco:CharacterString>File Geodatabase Feature Class</gco:CharacterString>
+              </name>
+              <version gco:nilReason="missing" />
+            </MD_Format>
+          </distributorFormat>
+          <distributorTransferOptions>
+            <MD_DigitalTransferOptions>
+              <transferSize>
+                <gco:Real>0.008</gco:Real>
+              </transferSize>
+            </MD_DigitalTransferOptions>
+          </distributorTransferOptions>
+        </MD_Distributor>
+      </distributor>
+    </MD_Distribution>
+  </distributionInfo>
+  <dataQualityInfo>
+    <DQ_DataQuality>
+      <scope>
+        <DQ_Scope>
+          <level>
+            <MD_ScopeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ScopeCode" codeListValue="attributeType" codeSpace="ISOTC211/19115">attributeType</MD_ScopeCode>
+          </level>
+        </DQ_Scope>
+      </scope>
+      <lineage>
+        <LI_Lineage>
+          <statement>
+            <gco:CharacterString>The “New York: A City of Neighborhoods” Neighborhood Names point file has undergone minor revisions since the 2010 release. These revisions include the addition of new neighborhood name labels, modification of existing neighborhood names centroids positions, deletion of neighborhood name labels, or updates to neighborhood names. A description of the changes is detailed below:
+
+Additions: Nine new neighborhood names appear on the 2014 edition of the City of Neighborhoods Poster. These names include Allerton, Bronxdale, and Kingsbridge Heights in the Bronx; Erasmus in Brooklyn; Hudson Yards in Manhattan; Bayswater, Hammels, and Queensbridge in Queens; and Fox Hills in Staten Island. 
+
+Modified Positions: For increased positional accuracy, label centroids for the following neighborhood name labels were modified to coincide with the approximate center of the feature: Carroll Gardens and Cypress Hills in Brooklyn; Flushing in Queens; and Greenridge and Woodrow in Staten Island. 
+
+Deletions: Navy Yard in Brooklyn is now a place name and not a neighborhood name.
+
+Name Updates: Four neighborhood names have been updated. South Corona in Queens is identified by Corona. The neighborhood located between Rockaway Park and Arverne in Queens CD 14 is identified as Rockaway Beach. Downtown Flushing, also in Queens, was changed to Flushing. High Bridge in the Bronx is now identified as Highbridge.</gco:CharacterString>
+          </statement>
+        </LI_Lineage>
+      </lineage>
+    </DQ_DataQuality>
+  </dataQualityInfo>
+  <metadataMaintenance>
+    <MD_MaintenanceInformation>
+      <maintenanceAndUpdateFrequency>
+        <MD_MaintenanceFrequencyCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_MaintenanceFrequencyCode" codeListValue="asNeeded" codeSpace="ISOTC211/19115">asNeeded</MD_MaintenanceFrequencyCode>
+      </maintenanceAndUpdateFrequency>
+    </MD_MaintenanceInformation>
+  </metadataMaintenance>
+</MD_Metadata>

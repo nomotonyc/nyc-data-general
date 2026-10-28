@@ -108,13 +108,14 @@ export function boroughBars(state: Input, ds: LayerDataset, ramp: readonly strin
 
 export type TopArea = { id: string; label: string; borough: Borough; value: string; rank: number; pinned: boolean }
 
-/** The highest areas in the focused borough, or the city. */
+/** The highest areas, or the fastest for response times, in the focused borough or city. */
 export function topAreas(state: Input, ds: LayerDataset, count = 5): TopArea[] {
-  const { value, show } = reader(state, ds)
+  const { metric, value, show } = reader(state, ds)
+  const fastest = metric.format === 'minutes'
   return ds.areas
     .filter((a) => state.borough === null || a.borough === state.borough)
     .map((area) => ({ area, v: value([area.id]) }))
-    .sort((a, b) => b.v - a.v)
+    .sort((a, b) => fastest ? a.v - b.v : b.v - a.v)
     .slice(0, count)
     .map(({ area, v }, i) => ({
       id: area.id,

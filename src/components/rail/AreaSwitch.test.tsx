@@ -9,14 +9,21 @@ const areas = () => screen.getByRole('group', { name: 'Areas' })
 const detail = () => screen.getByRole('group', { name: 'Detail' })
 
 describe('AreaSwitch', () => {
-  it('shows Division, Precinct and Battalion in order and follows the selected area in Detail', async () => {
+  it('shows Division, Precinct, Battalion and Neighborhoods in order and follows the selected data area in Detail', async () => {
     renderWithExplorer(<Rail />, { geography: 'precincts', storyId: 'fire', metricId: 'fire-apparatus-accidents' })
-    expect(within(areas()).getAllByRole('button').map((button) => button.textContent)).toEqual(['Division', 'Precinct', 'Battalion'])
+    expect(within(areas()).getAllByRole('button').map((button) => button.textContent)).toEqual(['Division', 'Precinct', 'Battalion', 'Neighborhoods'])
     expect(within(areas()).getByRole('button', { name: 'Precinct' })).toHaveAttribute('aria-pressed', 'true')
     await userEvent.click(within(areas()).getByRole('button', { name: 'Division' }))
     expect(within(areas()).getByRole('button', { name: 'Division' })).toHaveAttribute('aria-pressed', 'true')
     expect(within(detail()).getByRole('button', { name: 'Division' })).toBeInTheDocument()
     expect(within(detail()).queryByRole('button', { name: 'Precinct' })).not.toBeInTheDocument()
+  })
+
+  it('selects Neighborhoods as a data geography with neighborhood-level analytics', async () => {
+    renderWithExplorer(<Rail />, { geography: 'battalions' })
+    await userEvent.click(within(areas()).getByRole('button', { name: 'Neighborhoods' }))
+    expect(within(areas()).getByRole('button', { name: 'Neighborhoods' })).toHaveAttribute('aria-pressed', 'true')
+    expect(within(detail()).getByRole('button', { name: 'Neighborhood' })).toBeInTheDocument()
   })
 
   // Every layer has battalions today; a new layer without them must say so rather than show an empty map.

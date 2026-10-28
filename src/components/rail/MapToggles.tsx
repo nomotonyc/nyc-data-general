@@ -29,6 +29,22 @@ export function MapToggles() {
         <input type="checkbox" checked={showEmsStations} onChange={() => dispatch({ type: 'toggleEmsStations' })} />
         EMS stations
       </label>
+      {showEmsStations && (
+        <ul className="rail__key" aria-label="EMS station markers">
+          <li>
+            <svg className="rail__ems-marker" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M10 5.2 15 14.2H5Z" />
+            </svg>
+            EMS station
+          </li>
+          <li>
+            <svg className="rail__ems-marker" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M10 3.52 16.75 15.67H3.25Z" />
+            </svg>
+            EMS station at hospital
+          </li>
+        </ul>
+      )}
       <label className="rail__check">
         <input type="checkbox" checked={showFirehouses} onChange={() => dispatch({ type: 'toggleFirehouses' })} />
         Firehouses

@@ -11,6 +11,8 @@ const boroughs = {
   QUEENS: 'Queens', 'STATEN ISLAND': 'Staten Island',
 }
 
+export const hospitalAttached = (name) => /\b(?:HOSP(?:ITAL)?|MED CTR|MEDICAL)\b/i.test(name)
+
 export function buildEmsStations(rows, retrievedAt = new Date().toISOString()) {
   const ids = new Set()
   const features = rows.map((row) => {
@@ -24,7 +26,7 @@ export function buildEmsStations(rows, retrievedAt = new Date().toISOString()) {
     if (!borough) throw new Error(`Unexpected borough: ${row.boro}`)
     return {
       type: 'Feature',
-      properties: { ...row, id: row.uid, name: row.facname, borough },
+      properties: { ...row, id: row.uid, name: row.facname, borough, hospitalAttached: hospitalAttached(row.facname) },
       geometry: { type: 'Point', coordinates: [longitude, latitude] },
     }
   }).sort((a, b) => a.properties.borough.localeCompare(b.properties.borough)
@@ -42,7 +44,8 @@ async function main() {
   const fileIndex = process.argv.indexOf('--from-file')
   let rows
   if (fileIndex !== -1) {
-    rows = JSON.parse(readFileSync(process.argv[fileIndex + 1], 'utf8'))
+    const input = JSON.parse(readFileSync(process.argv[fileIndex + 1], 'utf8'))
+    rows = input.type === 'FeatureCollection' ? input.features.map((feature) => feature.properties) : input
   } else {
     const url = new URL(endpoint)
     url.search = new URLSearchParams({

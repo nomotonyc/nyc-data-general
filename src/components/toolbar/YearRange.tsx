@@ -1,5 +1,5 @@
 import { useId, type ReactNode } from 'react'
-import { YEARS, yearLabel } from '../../domain/stories'
+import { FINAL_YEAR, YEARS } from '../../domain/stories'
 import { useExplorerDispatch, useExplorerState } from '../../explorer/context'
 import { yearToOptions } from '../../explorer/state'
 import './YearRange.css'
@@ -17,7 +17,7 @@ export function YearRange() {
         <select id={fromId} value={state.yearFrom} onChange={(e) => dispatch({ type: 'setYearFrom', year: Number(e.target.value) })}>
           {YEARS.map((y) => (
             <option key={y} value={y}>
-              {yearLabel(y)}
+              {y === FINAL_YEAR ? `${y}*` : y}
             </option>
           ))}
         </select>
@@ -27,7 +27,7 @@ export function YearRange() {
         <select id={toId} value={state.yearTo} onChange={(e) => dispatch({ type: 'setYearTo', year: Number(e.target.value) })}>
           {yearToOptions(state).map((y) => (
             <option key={y} value={y}>
-              {yearLabel(y)}
+              {y === FINAL_YEAR ? `${y}*` : y}
             </option>
           ))}
         </select>

@@ -11,7 +11,7 @@ describe('Breadcrumb', () => {
     renderWithExplorer(<Breadcrumb />)
     expect(current()).toHaveTextContent('New York City')
     expect(current()?.querySelector('img')).toHaveAttribute('src', expect.stringContaining('nyc-brand.png'))
-    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'New York City' })).toBeInTheDocument()
   })
 
   it('shows the focused borough after the city', () => {

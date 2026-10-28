@@ -1,15 +1,17 @@
 import { useDataset, useExplorerDispatch, useExplorerState } from '../../explorer/context'
 import { areaNoun } from '../../domain/geography'
+import { activeMetric } from '../../explorer/state'
 import { topAreas } from '../../panel/focus'
 import { SaveableSection } from './SaveableSection'
 
-/** The highest precincts or battalions in the focused borough, or the city; clicking one pins it. */
+/** The leading precincts or battalions in the focused borough, or the city; clicking one pins it. */
 export function TopAreas() {
   const state = useExplorerState()
   const dispatch = useExplorerDispatch()
   const top = topAreas(state, useDataset())
+  const superlative = activeMetric(state).format === 'minutes' ? 'Fastest' : 'Highest'
   return (
-    <SaveableSection of="areas" title={`Highest ${areaNoun(state.geography).many} in ${state.borough ?? 'the city'}`}>
+    <SaveableSection of="areas" title={`${superlative} ${areaNoun(state.geography).many} in ${state.borough ?? 'the city'}`}>
       {top.map((area) => (
         <button
           key={area.id}

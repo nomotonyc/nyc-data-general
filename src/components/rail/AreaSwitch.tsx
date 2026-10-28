@@ -4,7 +4,7 @@ import { useExplorerDispatch, useExplorerState } from '../../explorer/context'
 import { activeMetric } from '../../explorer/state'
 import { layerGeographies } from '../../layers'
 
-/** Divisions, precincts or battalions: the areas the map, panel and lists use below the boroughs. */
+/** Selects the geography used by the map and the accompanying analytics. */
 export function AreaSwitch() {
   const headingId = useId()
   const state = useExplorerState()

@@ -1,4 +1,5 @@
 export const BOROUGHS = ['Manhattan', 'Bronx', 'Brooklyn', 'Queens', 'Staten Island'] as const
+import { NEIGHBORHOOD_AREAS } from './neighborhoods.generated'
 export type Borough = (typeof BOROUGHS)[number]
 
 /** NYPD precincts as published in NYC Open Data dataset y76i-bdw7. */
@@ -39,15 +40,15 @@ export function boroughInSentence(borough: Borough): string {
 }
 
 /** How the city is divided below the boroughs: FDNY divisions or battalions, or NYPD precincts. */
-export type Geography = 'divisions' | 'precincts' | 'battalions'
+export type Geography = 'divisions' | 'precincts' | 'battalions' | 'neighborhoods'
 /** The order shown in the Areas control. */
-export const GEOGRAPHIES: readonly Geography[] = ['divisions', 'precincts', 'battalions']
+export const GEOGRAPHIES: readonly Geography[] = ['divisions', 'precincts', 'battalions', 'neighborhoods']
 
 /** A unit values are reported for: one division, precinct or battalion. */
 export type Area = {
   /** Unique across geographies: "14" is precinct 14, "bn14" is battalion 14, "div14" is division 14. */
   id: string
-  kind: 'division' | 'precinct' | 'battalion'
+  kind: 'division' | 'precinct' | 'battalion' | 'neighborhood'
   number: number
   label: string
   borough: Borough
@@ -112,13 +113,17 @@ export const DIVISION_AREAS: readonly Area[] = DIVISIONS.map(({ number, borough 
   borough,
 }))
 
+export { NEIGHBORHOOD_AREAS }
+
 /** The id of a geography's area from its number, as map features carry it. */
 export function areaIdOf(geography: Geography, number: number): string {
+  if (geography === 'neighborhoods') return `hood${number}`
   if (geography === 'divisions') return `div${number}`
   return geography === 'battalions' ? `bn${number}` : String(number)
 }
 
 export function areasOf(geography: Geography): readonly Area[] {
+  if (geography === 'neighborhoods') return NEIGHBORHOOD_AREAS
   if (geography === 'divisions') return DIVISION_AREAS
   return geography === 'battalions' ? BATTALION_AREAS : PRECINCT_AREAS
 }
@@ -131,6 +136,7 @@ export function areaById(areas: readonly Area[], id: string): Area {
 
 /** How to name a geography's areas in sentences and controls. */
 export function areaNoun(geography: Geography): { one: string; many: string; title: string } {
+  if (geography === 'neighborhoods') return { one: 'neighborhood', many: 'neighborhoods', title: 'Neighborhood' }
   if (geography === 'divisions') return { one: 'division', many: 'divisions', title: 'Division' }
   return geography === 'battalions'
     ? { one: 'battalion', many: 'battalions', title: 'Battalion' }

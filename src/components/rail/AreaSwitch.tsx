@@ -27,7 +27,7 @@ export function AreaSwitch() {
             disabled={!available.includes(g)}
             onClick={() => dispatch({ type: 'setGeography', geography: g })}
           >
-            {areaNoun(g).title}
+            {g === 'neighborhoods' ? 'Neighborhoods' : areaNoun(g).title}
           </button>
         ))}
       </div>

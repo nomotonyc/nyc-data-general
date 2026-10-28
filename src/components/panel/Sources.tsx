@@ -8,7 +8,7 @@ import { shownSources } from '../../panel/sources'
 const asOfDate = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
 
 const placementText = (placement: readonly Placement[], geography: 'battalions' | 'neighborhoods') =>
-  `By ${areaNoun(geography).many}: ${placement.map((p) => `${sharePercent(p.share)} placed by ${p.method} (${p.exact ? 'exact' : 'estimated'})`).join('; ')}.`
+  `By ${areaNoun(geography).one}: ${placement.map((p) => `${sharePercent(p.share)} placed by ${p.method} (${p.exact ? 'exact' : 'estimated'})`).join('; ')}.`
 
 /** A share as a whole percent; a real but tiny share reads "<1%", never "0%". */
 const sharePercent = (share: number) => (share > 0 && share < 0.005 ? '<1%' : `${Math.round(share * 100)}%`)

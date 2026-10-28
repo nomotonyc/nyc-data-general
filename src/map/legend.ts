@@ -40,7 +40,7 @@ export function legendDetails(
   // Only where battalions are on the map: borough figures are the same in both views.
   const estimated = (plan.geography === 'battalions' || plan.geography === 'neighborhoods') && plan.level === 'area' && placement ? placement.filter((p) => !p.exact).reduce((s, p) => s + p.share, 0) : 0
   if (estimated > 0) {
-    const geography = areaNoun(plan.geography).many
+    const geography = areaNoun(plan.geography).one
     const part = estimated >= 0.995 ? `By ${geography}: estimates · see Data sources` : `By ${geography}: ${Math.max(1, Math.round(estimated * 100))}% estimated · see Data sources`
     note = note ? `${note} · ${part}` : part
   }

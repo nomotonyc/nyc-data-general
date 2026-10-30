@@ -7,6 +7,9 @@ import './ExplorerLayout.css'
 type Props = {
   /** The current story's accent, exposed to all descendants as --story-accent. */
   accent: string
+  /** Analysis is an intentionally empty workspace without the explorer's map or sidebars. */
+  analysis?: boolean
+  analysisBackground?: string
   toolbar: ReactNode
   rail: ReactNode
   /** On a phone, in place of the rail: its controls, behind a button on the map. */
@@ -19,7 +22,7 @@ type Props = {
  * Fills the window with no page scroll; below 1100px the columns stack, map first, and the page
  * scrolls. On a phone the page is the map and the panel; the rail's controls open from the map.
  */
-export function ExplorerLayout({ accent, toolbar, rail, settings, map, panel }: Props) {
+export function ExplorerLayout({ accent, analysis = false, analysisBackground, toolbar, rail, settings, map, panel }: Props) {
   // Rendered in one place or the other, never both: the rail's radio group is named.
   const phone = useMediaQuery(PHONE_LAYOUT)
 
@@ -42,9 +45,15 @@ export function ExplorerLayout({ accent, toolbar, rail, settings, map, panel }: 
   }, [crossing])
 
   return (
-    <div ref={root} className="explorer" style={{ '--story-accent': accent } as CSSProperties}>
+    <div
+      ref={root}
+      className={`explorer${analysis ? ' explorer--analysis' : ''}`}
+      style={{ '--story-accent': accent, '--analysis-background': analysisBackground } as CSSProperties}
+    >
       <header className="explorer__toolbar">{toolbar}</header>
-      <div className="explorer__body">
+      {analysis ? (
+        <main className="explorer__analysis" aria-label="Analysis" />
+      ) : <div className="explorer__body">
         {!phone && (
           <aside ref={railRef} className="explorer__rail" aria-label="Map controls" tabIndex={-1}>
             {rail}
@@ -57,7 +66,7 @@ export function ExplorerLayout({ accent, toolbar, rail, settings, map, panel }: 
         <aside className="explorer__panel" aria-label="In focus">
           {panel}
         </aside>
-      </div>
+      </div>}
     </div>
   )
 }

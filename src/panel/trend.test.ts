@@ -5,11 +5,40 @@ import { series } from '../data/selectors'
 import { initialExplorerState, type ExplorerState } from '../explorer/state'
 import { getLayer } from '../layers'
 import { lightTheme } from '../theme/tokens'
+import { BOROUGHS, DIVISIONS } from '../domain/geography'
+import { expandedTrend } from './expandedTrend'
 import { trend } from './trend'
 
 const fire: ExplorerState = { ...initialExplorerState, storyId: 'fire', metricId: 'structural-fires' }
 const ds = getDataset('structural-fires')
 const palette = { accent: lightTheme.story.fire.accent, ramp: lightTheme.story.fire.ramp, city: lightTheme.color.trendCity }
+
+describe('division count trends', () => {
+  it.each(['ambulance-calls', 'structural-fires', 'fire-apparatus-accidents'])('compares %s on one battalion scale across borough and division boundaries', (metricId) => {
+    const metric = getLayer(metricId)
+    const divisions = getDataset(metricId, 'divisions')
+    const battalions = getDataset(metricId, 'battalions')
+    const range = { from: 2025, to: 2025 } as const
+    const state = { ...initialExplorerState, storyId: metric.story, metricId, geography: 'divisions' as const }
+    const city = series(battalions, metric, areaIdsIn(battalions, null), range, true)
+    for (const borough of BOROUGHS) {
+      const t = trend({ ...state, borough }, divisions, palette)
+      expect(t.values[0]).toEqual(city.map((value) => expect.closeTo(value, 8)))
+      expect(t.values[1]).toEqual(series(battalions, metric, areaIdsIn(battalions, borough), range, true))
+      expect(t.note).toBe('Average per battalion, so the lines compare fairly')
+    }
+    for (const division of DIVISIONS) {
+      const pinned = { ...state, borough: division.borough, pinnedArea: `div${division.number}` }
+      const t = trend(pinned, divisions, palette)
+      expect(t.values[0]).toEqual(city.map((value) => expect.closeTo(value, 8)))
+      expect(t.values[2]).toEqual(series(battalions, metric, division.battalions.map((n) => `bn${n}`), range, true))
+      const expanded = expandedTrend(pinned, divisions, palette, null)!
+      expect(expanded.note).toBe(t.note)
+      expect(expanded.stats[0].note).toBe('per battalion')
+      expect(expanded.lines.every((line) => line.points.every((p) => Number.isFinite(p.y)))).toBe(true)
+    }
+  })
+})
 
 describe('trend', () => {
   it('draws the city alone, in the story colour, month by month for the chosen year', () => {

@@ -53,8 +53,19 @@ async function fetchMonth(url, attempts = 5) {
 const SHAPE_SOURCES = {
   precincts: { url: 'https://data.cityofnewyork.us/resource/y76i-bdw7.geojson?$limit=200', field: 'precinct', property: 'precinct', count: 78 },
   battalions: { url: 'https://data.cityofnewyork.us/resource/xzng-ft6f.geojson?$limit=200', field: 'fire_bn', property: 'battalion', count: 49 },
+  neighborhoods: { path: 'public/data/reference_data/nyc-neighborhoods.geo.json', property: 'neighborhood' },
 }
 async function shapesOf(geography) {
+  if (geography === 'neighborhoods') {
+    const raw = JSON.parse(await readFile(SHAPE_SOURCES.neighborhoods.path, 'utf8'))
+    return {
+      type: 'FeatureCollection',
+      features: raw.features.map((f, i) => ({
+        type: 'Feature', properties: { neighborhood: i + 1 },
+        geometry: f.geometry.type === 'MultiPolygon' ? f.geometry : { type: 'MultiPolygon', coordinates: [f.geometry.coordinates] },
+      })),
+    }
+  }
   const { url, field, property, count } = SHAPE_SOURCES[geography]
   const path = `.cache/shapes/${geography}.geojson`
   let raw = refresh ? null : await readFile(path, 'utf8').then(JSON.parse, () => null)
@@ -87,8 +98,11 @@ async function writeLayerFile(layer, geography, file) {
 }
 
 if (layer.build?.kind === 'census-density') {
-  await buildCensus(layer)
-  await import('./build-divisions.mjs')
+  if (layer.build.indicator) await buildCensusTable(layer)
+  else {
+    await buildCensus(layer)
+    await import('./build-divisions.mjs')
+  }
   process.exit(0)
 }
 
@@ -321,4 +335,114 @@ async function buildCensus(layer) {
     for (const r of report) console.log(`| ${r.year} | ${fmt(r.counted)} | ${fmt(r.unplaced)} |`)
     console.log(`Wrote ${path}`)
   }
+}
+
+/** Roll up a Census metric from battalions without loading the full map domain. */
+async function buildCensusDivisions(layer) {
+  const source = await readFile('src/domain/geography.ts', 'utf8')
+  const start = source.indexOf('export const DIVISIONS:')
+  const expressionStart = source.indexOf('[', source.indexOf(' = ', start))
+  let depth = 0, end = -1
+  for (let i = expressionStart; i < source.length; i++) {
+    if (source[i] === '[') depth++
+    if (source[i] === ']' && --depth === 0) { end = i + 1; break }
+  }
+  if (start < 0 || expressionStart < 0 || end < 0) throw new Error('Cannot read division definitions')
+  const DIVISIONS = Function(`return ${source.slice(expressionStart, end)}`)()
+  const filePath = `public/data/layers/${layer.id}.battalions.json`
+  const file = JSON.parse(await readFile(filePath, 'utf8'))
+  const sum = (rows) => rows[0].map((_, i) => Math.round(rows.reduce((n, row) => n + row[i], 0) * 100) / 100)
+  const sumParts = (rows) => rows[0].map((period, i) => period.map((_, j) => Math.round(rows.reduce((n, row) => n + row[i][j], 0) * 100) / 100))
+  const output = {
+    ...file, geography: 'divisions',
+    values: { ...file.values, ...Object.fromEntries(DIVISIONS.map((d) => [`div${d.number}`, sum(d.battalions.map((b) => file.values[`bn${b}`]))])) },
+    denominators: { ...file.denominators, ...Object.fromEntries(DIVISIONS.map((d) => [`div${d.number}`, sum(d.battalions.map((b) => file.denominators[`bn${b}`]))])) },
+    parts: { ...file.parts, ...Object.fromEntries(DIVISIONS.map((d) => [`div${d.number}`, sumParts(d.battalions.map((b) => file.parts[`bn${b}`]))])) },
+  }
+  const path = `public/data/layers/${layer.id}.divisions.json`
+  await writeFile(path, JSON.stringify(output))
+  console.log(`Wrote ${path}`)
+}
+
+/** Income and insurance ACS tables allocated to mapped areas with 2020 census-block residents. */
+async function buildCensusTable(layer) {
+  const { parseBlock, parseIncomeTracts, parseInsuranceTracts, apportion, tableRatioFile } = await load('/src/data/build/census.ts')
+  const { execFile } = await import('node:child_process')
+  const { createInterface } = await import('node:readline')
+  const { Readable } = await import('node:stream')
+  const dir = '.cache/census'
+  await mkdir(dir, { recursive: true })
+  const cachedJson = async (path, make) => {
+    const hit = refresh ? null : await readFile(path, 'utf8').then(JSON.parse, () => null)
+    if (hit) return hit
+    const value = await make()
+    await writeFile(path, JSON.stringify(value))
+    return value
+  }
+  async function filterLines(url, keep) {
+    const res = await fetch(url)
+    if (!res.ok) throw new Error(`${url}: ${res.status}`)
+    const kept = []
+    for await (const line of createInterface({ input: Readable.fromWeb(res.body) })) if (keep(line, kept.length)) kept.push(line)
+    return kept
+  }
+  const blocks = await cachedJson(`${dir}/nyc-blocks-2020.json`, async () => {
+    const zip = `${dir}/ny2020.pl.zip`
+    if (!(await readFile(zip).then(() => true, () => false))) {
+      console.log(`Downloading ${layer.build.blocks}`)
+      const res = await fetch(layer.build.blocks)
+      if (!res.ok) throw new Error(`${layer.build.blocks}: ${res.status}`)
+      await writeFile(zip, Buffer.from(await res.arrayBuffer()))
+    }
+    const unzip = execFile('unzip', ['-p', zip, 'nygeo2020.pl'], { maxBuffer: 1 << 30, encoding: 'latin1' })
+    const found = []
+    for await (const line of createInterface({ input: unzip.stdout })) {
+      const block = parseBlock(line)
+      if (block) found.push(block)
+    }
+    return found
+  })
+  console.log(`2020 blocks in the city: ${blocks.length}, ${blocks.reduce((s, b) => s + b.population, 0).toLocaleString('en-US')} residents`)
+
+  const year = layer.data.firstYear
+  const tableUrl = (url) => url.replaceAll('{year}', String(year))
+  const readTable = async (name, url) => cachedJson(`${dir}/${name}-${year}.json`, async () => {
+    console.log(`Downloading ${tableUrl(url)}`)
+    return filterLines(tableUrl(url), (line, n) => n === 0 || /^1400000US36(005|047|061|081|085)/.test(line))
+  })
+  let tracts
+  if (layer.build.indicator === 'income') {
+    tracts = parseIncomeTracts(
+      await readTable('b19013', layer.build.acs),
+      await readTable('b11001', layer.build.tables.households),
+      await readTable('b19001', layer.build.tables.distribution),
+    )
+  } else {
+    tracts = parseInsuranceTracts(await readTable('b27001', layer.build.acs))
+  }
+  console.log(`NYC tracts with estimates: ${tracts.size}`)
+
+  const neighborhoodShapes = await shapesOf('neighborhoods')
+  const neighborhoodCenters = neighborhoodShapes.features.map((feature) => {
+    const ring = feature.geometry.coordinates[0]?.[0] ?? []
+    const center = ring.reduce((sum, point) => [sum[0] + point[0] / ring.length, sum[1] + point[1] / ring.length], [0, 0])
+    return { number: feature.properties.neighborhood, center }
+  })
+  const nearestNeighborhood = (lon, lat) => neighborhoodCenters.reduce((best, item) => {
+    const distance = Math.hypot(item.center[0] - lon, item.center[1] - lat)
+    return distance < best.distance ? { number: item.number, distance } : best
+  }, { number: null, distance: Infinity }).number
+
+  for (const geography of layerGeographies(layer)) {
+    if (geography === 'divisions') continue
+    const shapes = geography === 'neighborhoods' ? neighborhoodShapes : await shapesOf(geography)
+    const weights = apportion(blocks, shapes, geography, geography === 'neighborhoods' ? nearestNeighborhood : undefined)
+    const { file, report } = tableRatioFile(layer, weights, tracts, { geography })
+    const path = await writeLayerFile(layer, geography, file)
+    console.log(`\n${layer.label} by ${geography}\n| Year | Tract population/households accounted for | In tracts with no 2020 residents |\n|---|---|---|`)
+    for (const r of report) console.log(`| ${r.year} | ${fmt(r.counted)} | ${fmt(r.unplaced)} |`)
+    console.log(`Blocks outside every ${geography} boundary: ${weights.unplacedBlocks.blocks} (${fmt(weights.unplacedBlocks.population)} residents)`)
+    console.log(`Wrote ${path}`)
+  }
+  await buildCensusDivisions(layer)
 }

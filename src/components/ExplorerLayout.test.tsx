@@ -49,6 +49,28 @@ describe('ExplorerLayout', () => {
     expect(screen.getByRole('complementary', { name: 'In focus' })).toHaveTextContent('the panel')
   })
 
+  it('renders Analysis as a blank workspace without map UI', () => {
+    widthMatching(null)
+    render(
+      <ExplorerLayout
+        accent="#8a6500"
+        analysis
+        analysisBackground="#fff8d8"
+        toolbar="toolbar"
+        rail="the rail"
+        settings="settings"
+        map="the map"
+        panel="the panel"
+      />,
+    )
+    const workspace = screen.getByRole('main', { name: 'Analysis' })
+    const explorer = workspace.closest<HTMLElement>('.explorer')!
+    expect(workspace).toBeEmptyDOMElement()
+    expect(explorer.style.getPropertyValue('--analysis-background')).toBe('#fff8d8')
+    expect(screen.queryByText('the map')).not.toBeInTheDocument()
+    expect(screen.queryByRole('complementary')).not.toBeInTheDocument()
+  })
+
   describe('crossing the phone width, as when a phone turns', () => {
     const withControls = () =>
       render(

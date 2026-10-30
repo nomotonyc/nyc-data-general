@@ -27,6 +27,12 @@
   grid-template-columns: 272px minmax(0, 1fr) 340px;
 }
 
+.explorer__analysis {
+  flex-grow: 1;
+  min-height: 0;
+  background: var(--analysis-background, var(--color-background));
+}
+
 .explorer__rail,
 .explorer__panel {
   min-height: 0;

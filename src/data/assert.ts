@@ -29,7 +29,14 @@ export function assertDataset(ds: LayerDataset, layer: Metric): void {
   if (layer.aggregation === 'ratio' && !denominators) fail(`has no denominators for ratio layer ${layer.id}`)
   for (const area of ds.areas) {
     checkSeries(layer.id, area.id, values[area.id], false)
-    if (layer.aggregation === 'ratio') checkSeries(`${layer.id} denominator`, area.id, denominators[area.id], true)
+    if (layer.aggregation === 'ratio') {
+      const values = denominators[area.id]
+      if (layer.zeroDenominator) {
+        if (!values) fail(`${layer.id} denominator has no values for area ${area.id}`)
+        if (values.length !== length) fail(`${layer.id} denominator for area ${area.id} has length ${values.length}, expected ${length}`)
+        values.forEach((v, i) => { if (!Number.isFinite(v) || v < 0) fail(`${layer.id} denominator for area ${area.id} has ${v} at period ${i}`) })
+      } else checkSeries(`${layer.id} denominator`, area.id, values, true)
+    }
   }
 
   const width = layer.breakdown.parts.length

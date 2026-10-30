@@ -13,13 +13,16 @@ import { useTheme } from './theme/context'
 function Explorer() {
   const { storyId } = useExplorerState()
   const theme = useTheme()
+  const [analysis, setAnalysis] = useState(false)
   // The map's picture, which BaseMap takes and the toolbar's Save view uses.
   const [shooter] = useState(mapShooter)
   return (
     <MapShotContext.Provider value={shooter}>
     <ExplorerLayout
-      accent={theme.story[storyId].accent}
-      toolbar={<Toolbar />}
+      accent={analysis ? theme.color.analysisAccent : theme.story[storyId].accent}
+      analysis={analysis}
+      analysisBackground={theme.color.analysisBackground}
+      toolbar={<Toolbar analysis={analysis} onAnalysis={() => setAnalysis(true)} onStory={() => setAnalysis(false)} />}
       rail={<Rail />}
       settings={<Rail places={false} />}
       map={<BaseMap />}

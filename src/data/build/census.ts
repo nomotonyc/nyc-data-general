@@ -56,6 +56,80 @@ export function parseAcsTracts(lines: readonly string[]): Map<string, TractEstim
   return tracts
 }
 
+export type TractTableEstimate = { numerator: number; denominator: number; parts: number[] }
+
+function tableRows(lines: readonly string[], callback: (tract: string, cells: string[], header: Map<string, number>) => TractTableEstimate | null): Map<string, TractTableEstimate> {
+  const [head, ...rows] = lines
+  if (!head) throw new Error('ACS table file is empty')
+  const header = new Map(head.split('|').map((name, i) => [name, i]))
+  const out = new Map<string, TractTableEstimate>()
+  for (const row of rows) {
+    if (!row.startsWith('1400000US36')) continue
+    const cells = row.split('|')
+    const tract = cells[0].slice(-11)
+    if (!NYC_COUNTIES.has(tract.slice(2, 5))) continue
+    const estimate = callback(tract, cells, header)
+    if (estimate) out.set(tract, estimate)
+  }
+  return out
+}
+
+function tableColumn(header: Map<string, number>, name: string): number {
+  const index = header.get(name)
+  if (index === undefined) throw new Error('ACS table is missing ' + name)
+  return index
+}
+
+function estimate(cells: string[], index: number): number {
+  const value = Number(cells[index])
+  return Number.isFinite(value) ? value : 0
+}
+
+/** B19013 median, B11001 households and four grouped B19001 income bands. */
+export function parseIncomeTracts(median: readonly string[], households: readonly string[], distribution: readonly string[]): Map<string, TractTableEstimate> {
+  const medians = tableRows(median, (_tract, cells, header) => {
+    const value = estimate(cells, tableColumn(header, 'B19013_E001'))
+    return value > 0 ? { numerator: value, denominator: 1, parts: [] } : null
+  })
+  const householdCounts = tableRows(households, (_tract, cells, header) => ({
+    numerator: estimate(cells, tableColumn(header, 'B11001_E001')), denominator: 1, parts: [],
+  }))
+  const incomeBands = tableRows(distribution, (_tract, cells, header) => {
+    const bands: number[] = []
+    for (const [from, to] of [[2, 5], [6, 10], [11, 14], [15, 17]]) {
+      let total = 0
+      for (let code = from; code <= to; code++) {
+        const variable = 'B19001_E' + String(code).padStart(3, '0')
+        total += estimate(cells, tableColumn(header, variable))
+      }
+      bands.push(total)
+    }
+    return { numerator: 0, denominator: 1, parts: bands }
+  })
+  const out = new Map<string, TractTableEstimate>()
+  for (const [tract, med] of medians) {
+    const count = householdCounts.get(tract)?.numerator ?? 0
+    const bands = incomeBands.get(tract)?.parts ?? []
+    if (count > 0 && bands.length === 4) out.set(tract, { numerator: med.numerator * count, denominator: count, parts: bands })
+  }
+  return out
+}
+
+const UNINSURED_CODES = [5, 8, 11, 14, 17, 20, 23, 26, 29, 33, 36, 39, 42, 45, 48, 51, 54, 57]
+
+/** B27001 total civilian noninstitutionalized population and uninsured counts. */
+export function parseInsuranceTracts(lines: readonly string[]): Map<string, TractTableEstimate> {
+  return tableRows(lines, (_tract, cells, header) => {
+    const population = estimate(cells, tableColumn(header, 'B27001_E001'))
+    const uninsured = UNINSURED_CODES.reduce((sum, code) => {
+      const variable = 'B27001_E' + String(code).padStart(3, '0')
+      return sum + estimate(cells, tableColumn(header, variable))
+    }, 0)
+    const insured = Math.max(0, population - uninsured)
+    return { numerator: insured, denominator: population, parts: [insured, uninsured] }
+  })
+}
+
 export type Weights = {
   /** Which areas the weights place people in. */
   geography: Geography
@@ -68,14 +142,14 @@ export type Weights = {
 }
 
 /** Places each block in the precinct (or battalion) containing its interior point, and weighs tracts by where their people live. */
-export function apportion(blocks: readonly Block[], shapes: AreaShapes, geography: Geography = 'precincts'): Weights {
+export function apportion(blocks: readonly Block[], shapes: AreaShapes, geography: Geography = 'precincts', fallback?: (lon: number, lat: number) => number | null): Weights {
   const landSqMi = new Map<number, number>()
   const tractPop = new Map<string, number>()
   const inPrecinct = new Map<string, Map<number, number>>()
   const unplacedBlocks = { blocks: 0, population: 0 }
   for (const b of blocks) {
     tractPop.set(b.tract, (tractPop.get(b.tract) ?? 0) + b.population)
-    const precinct = areaNumberAt(shapes, b.lon, b.lat, geography)
+    const precinct = areaNumberAt(shapes, b.lon, b.lat, geography) ?? fallback?.(b.lon, b.lat) ?? null
     if (precinct === null) {
       unplacedBlocks.blocks++
       unplacedBlocks.population += b.population
@@ -154,4 +228,56 @@ export function densityFile(
       built: new Date().toISOString(), from: periodKey(periods[0]), to: periodKey(periods[periods.length - 1]), values, denominators, parts },
     report,
   }
+}
+
+/** Allocate a tract-level ratio and its supporting breakdown counts to a mapped geography. */
+export function tableRatioFile(
+  layer: Metric,
+  weights: Weights,
+  tracts: ReadonlyMap<string, TractTableEstimate>,
+  options: { geography?: Geography; areaIds?: readonly string[] } = {},
+): { file: LayerFile; report: { year: number; counted: number; unplaced: number }[] } {
+  const geography = options.geography ?? weights.geography
+  const areaIds = options.areaIds ?? areasOf(geography).map((area) => area.id)
+  const periods = layerPeriods(layer)
+  const values: Record<string, number[]> = {}
+  const denominators: Record<string, number[]> = {}
+  const parts: Record<string, number[][]> = {}
+  for (const id of areaIds) {
+    values[id] = periods.map(() => 0)
+    denominators[id] = periods.map(() => 0)
+    parts[id] = periods.map(() => layer.breakdown.parts.map(() => 0))
+  }
+  let counted = 0
+  let unplaced = 0
+  for (const [tract, row] of tracts) {
+    const shares = weights.tractShares.get(tract)
+    if (!shares) {
+      unplaced += row.denominator
+      continue
+    }
+    for (const [number, share] of shares) {
+      const id = areaIdOf(geography, number)
+      if (!(id in values)) continue
+      values[id][0] += row.numerator * share
+      denominators[id][0] += row.denominator * share
+      row.parts.forEach((n, part) => { parts[id][0][part] += n * share })
+    }
+    counted += row.denominator
+  }
+  for (const id of areaIds) {
+    values[id] = values[id].map((n) => Math.round(n * 100) / 100)
+    denominators[id] = denominators[id].map((n) => Math.round(n * 100) / 100)
+    parts[id] = parts[id].map((row) => row.map((n) => Math.round(n * 100) / 100))
+  }
+  const report = [{ year: periods[0].year, counted, unplaced }]
+  const file: LayerFile = {
+    layerId: layer.id,
+    ...(geography === 'precincts' ? {} : { geography, placement: [{ method: '2020 census-block residents within each area', share: 1, exact: false }] }),
+    built: new Date().toISOString(),
+    from: periodKey(periods[0]),
+    to: periodKey(periods[periods.length - 1]),
+    values, denominators, parts,
+  }
+  return { file, report }
 }

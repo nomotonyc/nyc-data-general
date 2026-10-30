@@ -238,8 +238,8 @@ export function mapLayers(theme: Theme): LayerSpecification[] {
         'text-transform': 'uppercase',
       },
       paint: {
-        'text-color': theme.color.boroughLabel,
-        'text-halo-color': theme.color.boroughLabelHalo,
+        'text-color': theme.color.boroughNameFill,
+        'text-halo-color': theme.color.boroughNameStroke,
         'text-halo-width': 1.2,
         'text-opacity': 1,
         'text-opacity-transition': fade,
@@ -258,8 +258,8 @@ export function mapLayers(theme: Theme): LayerSpecification[] {
         'text-ignore-placement': true,
       },
       paint: {
-        'text-color': theme.color.boroughLabel,
-        'text-halo-color': theme.color.boroughLabelHalo,
+        'text-color': theme.color.boroughNameFill,
+        'text-halo-color': theme.color.boroughNameStroke,
         'text-halo-width': 1.5,
         'text-opacity': 0,
         'text-opacity-transition': fade,

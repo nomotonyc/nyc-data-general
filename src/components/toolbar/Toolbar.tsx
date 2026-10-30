@@ -4,16 +4,24 @@ import './Toolbar.css'
 import { YearRange } from './YearRange'
 import { SaveView } from '../SaveView'
 
-export function Toolbar() {
+type Props = {
+  analysis?: boolean
+  onAnalysis?: () => void
+  onStory?: () => void
+}
+
+export function Toolbar({ analysis = false, onAnalysis, onStory }: Props) {
   return (
-    <div className="toolbar">
+    <div className={`toolbar${analysis ? ' toolbar--analysis' : ''}`}>
       <h1 className="visually-hidden">NYC Data Atlas</h1>
-      <Breadcrumb />
-      <StoryTabs />
-      <div className="toolbar__end">
-        <YearRange />
-        <SaveView />
-      </div>
+      {!analysis && <Breadcrumb />}
+      <StoryTabs analysis={analysis} onAnalysis={onAnalysis} onStory={onStory} />
+      {!analysis && (
+        <div className="toolbar__end">
+          <YearRange />
+          <SaveView />
+        </div>
+      )}
     </div>
   )
 }

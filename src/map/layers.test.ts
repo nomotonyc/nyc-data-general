@@ -108,6 +108,15 @@ describe('mapLayers', () => {
     expect(byId(LAYERS.precinctLabel).layout).toMatchObject({ 'text-ignore-placement': true })
   })
 
+  it('uses the white-fill black-stroke treatment for every area label', () => {
+    for (const id of [LAYERS.boroughLabel, LAYERS.divisionLabel, LAYERS.precinctLabel, LAYERS.battalionLabel, LAYERS.neighborhoodLabel]) {
+      expect(byId(id).paint, id).toMatchObject({
+        'text-color': lightTheme.color.boroughNameFill,
+        'text-halo-color': lightTheme.color.boroughNameStroke,
+      })
+    }
+  })
+
   it('starts with the pin highlight hidden', () => {
     expect(byId(LAYERS.precinctHighlight).layout).toMatchObject({ visibility: 'none' })
   })

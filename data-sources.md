@@ -186,7 +186,9 @@ Checked against FDNY's own tagging: 99.9% of 2025+ fire records agree, and the
 ZIP split reproduces the 2025 fire counts above exactly (105: 373, 116: 447).
 So every layer shows all 78 precincts.
 
-## 01 Demographic — Population density
+## 01 Demographic
+
+### Population density
 
 Residents per square mile of land, by precinct, per year.
 
@@ -243,6 +245,107 @@ from B01001: under 18 (cells 003–006, 027–030), 18–34 (007–012, 031–03
   December 2026. Years outside 2021–2024 show the nearest available year, with
   a note.
 - Precinct 22 (Central Park) has 129 residents in the 2020 Census and 0 in ACS.
+
+### Median household income
+
+Household-weighted average of census-tract median household incomes, shown in
+2024 inflation-adjusted dollars. It is not a newly calculated statistical
+median for a precinct, battalion, division, neighborhood, borough or the city.
+
+| Source | Publisher | Link | Used |
+|---|---|---|---|
+| American Community Survey 5-year estimates, table B19013 (median household income) | U.S. Census Bureau | https://api.census.gov/data/2024/acs/acs5/groups/B19013.html | Tract median household income, in 2024 inflation-adjusted dollars |
+| American Community Survey 5-year estimates, table B11001 (household type) | U.S. Census Bureau | https://api.census.gov/data/2024/acs/acs5/groups/B11001.html | Number of households used to weight each tract median |
+| American Community Survey 5-year estimates, table B19001 (household income) | U.S. Census Bureau | https://api.census.gov/data/2024/acs/acs5/groups/B19001.html | Income-band breakdown counts |
+| 2020 Census Redistricting Data (P.L. 94-171), census blocks | U.S. Census Bureau | https://www2.census.gov/programs-surveys/decennial/2020/data/01-Redistricting_File--PL_94-171/New_York/ny2020.pl.zip | Block population and interior point for tract-to-area allocation |
+
+**Method**
+
+1. For each NYC tract, multiply its B19013 median household income by its
+   B11001 household count. Allocate this weighted amount and the household
+   count among precincts, battalions and neighborhoods according to each
+   area's share of the tract's 2020 census-block population. A block whose
+   interior point falls outside every neighborhood polygon is assigned to the
+   nearest neighborhood center. Divisions sum battalion numerators and
+   denominators; boroughs and the city sum their component areas.
+2. Divide the allocated weighted income amounts by allocated household counts.
+   This gives a household-weighted average of tract medians, not the exact
+   median of all households in the combined geography: the ACS table does not
+   provide the household-level income distribution needed to recompute that
+   median for these boundaries.
+3. The breakdown groups tract B19001 households into under $25,000,
+   $25,000–$49,999, $50,000–$99,999, and $100,000 or more, allocated with the
+   same tract population shares. Breakdowns are counts, not percentages.
+4. Areas with no allocated households have no measurable income estimate; the
+   application represents that undefined value as $0.
+
+**Coverage and build**
+
+Uses the 2024 ACS 5-year release (responses averaged over 2020–2024), the
+latest release used here; one release is shown, not an annual series. The
+bulk table-based files are downloaded once to `.cache/census/` and filtered to
+the five NYC counties. Build with
+`npm run data:layer -- median-household-income`. The generated files cover
+precincts, battalions and neighborhoods; divisions are rolled up from
+battalions. The measure and its estimate limitation are also declared in
+`src/layers/median-household-income.layer.ts`.
+
+Built 2026-10-29 from the 2,199 NYC tracts with valid B19013, B11001 and
+B19001 estimates. The precinct and battalion allocations account for
+3,318,030 households, with 67 households in tracts with no 2020 block
+residents. Neighborhoods use nearest-center fallback for blocks outside their
+polygons and account for the same 3,318,030 households; 67 are in tracts with
+no 2020 block residents.
+
+### Health insurance coverage
+
+Share of the civilian noninstitutionalized population with health insurance,
+from the American Community Survey. The numerator and denominator are
+aggregated as counts before calculating the percentage.
+
+| Source | Publisher | Link | Used |
+|---|---|---|---|
+| American Community Survey 5-year estimates, table B27001 (health insurance coverage by sex and age) | U.S. Census Bureau | https://api.census.gov/data/2024/acs/acs5/groups/B27001.html | Insured and uninsured estimates and civilian noninstitutionalized population by tract |
+| 2020 Census Redistricting Data (P.L. 94-171), census blocks | U.S. Census Bureau | https://www2.census.gov/programs-surveys/decennial/2020/data/01-Redistricting_File--PL_94-171/New_York/ny2020.pl.zip | Block population and interior point for tract-to-area allocation |
+
+**Method**
+
+1. For each tract, B27001_E001 is the total civilian noninstitutionalized
+   population. Sum the uninsured cells (the “No health insurance coverage”
+   cells for each sex and age group); insured population is the total minus
+   uninsured.
+2. Allocate insured, uninsured and total population to precincts, battalions
+   and neighborhoods using each area's share of the tract's 2020 census-block
+   population. Divisions sum battalion estimates. Percentages for larger areas
+   divide total insured by total population; they are not averages of smaller
+   area percentages.
+3. The breakdown reports insured and uninsured population counts. Central Park
+   and any other area with a zero ACS population denominator have no measurable
+   coverage rate; the application represents that undefined rate as 0%.
+
+**Coverage and build**
+
+Uses the 2024 ACS 5-year release, averaging responses from 2020–2024. The
+published table universe is the civilian noninstitutionalized population, so
+the percentage should not be read as coverage among every NYC resident. This
+is one release, not a year-over-year trend. Bulk table-based files are cached
+in `.cache/census/`; build with
+`npm run data:layer -- health-insurance-coverage`. The output includes
+precincts, battalions and neighborhoods, with divisions rolled up from
+battalions. The layer configuration is
+`src/layers/health-insurance-coverage.layer.ts`.
+
+Built 2026-10-29 from all 2,327 NYC tracts in B27001. The precinct and
+battalion allocations account for 8,428,941 people, with 136 people in tracts
+with no 2020 block residents. Neighborhoods use nearest-center fallback for
+blocks outside their polygons and account for the same 8,428,941 people; 136
+are in tracts with no 2020 block residents.
+
+**ACS estimate caveat:** the ACS 5-year estimates are overlapping periods and
+are not independent annual snapshots. Do not interpret changes between
+adjacent release years as annual changes. Both layers currently use only the
+2024 release. Summary-file tables contain estimates; margins of error are not
+currently propagated through the geographic allocation or displayed.
 
 ## 02 Fire — Structural fires
 

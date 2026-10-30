@@ -1,10 +1,11 @@
-import { act, screen, waitFor } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { BOROUGH_BOUNDS, cameraPadding } from '../map/camera'
-import { FADE_DURATION, FLY_DURATION, HOVER_DELAY, LAYERS, NYC_BOUNDS, SOURCES, boroughLayers } from '../map/config'
+import { FADE_DURATION, FLY_DURATION, GEOGRAPHY_MAP, HOVER_DELAY, LAYERS, NYC_BOUNDS, SOURCES, areaLayers, boroughLayers } from '../map/config'
 import { cameraEasing } from '../map/easing'
 import { useExplorerDispatch } from '../explorer/context'
+import { GEOGRAPHIES, areasOf } from '../domain/geography'
 import { renderWithExplorer } from '../test/renderWithExplorer'
 import { lightTheme } from '../theme/tokens'
 import BaseMap from './BaseMap'
@@ -12,8 +13,12 @@ import { saveImage } from './saveImage'
 import { MapShotContext, SHOT_PIXEL_RATIO, mapShooter } from './mapShot'
 import { MapToggles } from './rail/MapToggles'
 import { PlaceList } from './rail/PlaceList'
+import { Rail } from './rail/Rail'
+import { FocusPanel } from './panel/FocusPanel'
 import { Breadcrumb } from './toolbar/Breadcrumb'
 import { StoryTabs } from './toolbar/StoryTabs'
+import { YearRange } from './toolbar/YearRange'
+import { layersOf } from '../layers'
 
 type Handler = (event?: unknown) => void
 type Mock = ReturnType<typeof vi.fn>
@@ -245,6 +250,82 @@ describe('BaseMap', () => {
     expect(current()).toHaveTextContent('Precinct 114')
     expect(lastFilter(LAYERS.precinctHighlight)).toEqual(['in', ['get', 'precinct'], ['literal', [114]]])
   })
+
+  for (const [storyId, metricId] of [['demographic', 'population-density'], ['medical', 'ambulance-calls']] as const) {
+    for (const geography of GEOGRAPHIES) {
+      it(`${storyId}: focuses and pins ${geography} from map clicks`, () => {
+        renderWithExplorer(
+          <>
+            <BaseMap />
+            <Breadcrumb />
+          </>,
+          { storyId, metricId, geography },
+        )
+        load()
+        clickMapOn(feature(boroughLayers('Queens').boroughFill, { borough: 'Queens' }))
+        expect(current()).toHaveTextContent('Queens')
+        const area = areasOf(geography).find((candidate) => candidate.borough === 'Queens')!
+        clickMapOn(feature(areaLayers('Queens', geography).fill, { [GEOGRAPHY_MAP[geography].property]: area.number, borough: 'Queens' }))
+        expect(current()).toHaveTextContent(area.label)
+        expect(lastFilter(GEOGRAPHY_MAP[geography].highlight)).toEqual(['in', ['get', GEOGRAPHY_MAP[geography].property], ['literal', [area.number]]])
+      })
+    }
+  }
+
+  for (const storyId of ['demographic', 'medical'] as const) {
+    for (const layer of layersOf(storyId)) {
+      it(`${storyId}/${layer.id}: changes every map geography with facilities and a focused borough`, async () => {
+        renderWithExplorer(
+          <>
+            <BaseMap />
+            <aside aria-label="Map controls"><Rail /></aside>
+            <YearRange />
+            <FocusPanel />
+          </>,
+          { storyId, metricId: layer.id, geography: 'battalions' },
+        )
+        load()
+        const controls = screen.getByRole('complementary', { name: 'Map controls' })
+        for (const marker of ['Firehouses', 'EMS stations', 'Hospitals']) await userEvent.click(within(controls).getByRole('checkbox', { name: marker }))
+        await userEvent.click(within(controls).getByRole('button', { name: /^Bronx/ }))
+        for (const [index, geography] of GEOGRAPHIES.entries()) {
+          const label = ['Division', 'Precinct', 'Battalion', 'Neighborhoods'][index]
+          await userEvent.click(within(screen.getByRole('group', { name: 'Areas' })).getByRole('button', { name: label }))
+          expect(screen.getByRole('region', { name: 'Map legend' })).toHaveTextContent(layer.label)
+          expect(screen.getByRole('region', { name: 'In focus' })).toHaveTextContent('Bronx')
+          expect(map().setFilter).toHaveBeenCalledWith(GEOGRAPHY_MAP[geography].label, ['==', ['get', 'borough'], 'Bronx'])
+          for (const marker of ['Firehouses', 'EMS stations', 'Hospitals']) expect(within(controls).getByRole('checkbox', { name: marker })).toBeChecked()
+        }
+      })
+    }
+
+    it(`${storyId}: switches every layer inside each area type with all facility markers visible`, async () => {
+      const layers = layersOf(storyId)
+      renderWithExplorer(
+        <>
+          <BaseMap />
+          <aside aria-label="Map controls"><Rail /></aside>
+          <FocusPanel />
+        </>,
+        { storyId, metricId: layers[0].id, geography: 'battalions' },
+      )
+      load()
+      const controls = screen.getByRole('complementary', { name: 'Map controls' })
+      for (const marker of ['Firehouses', 'EMS stations', 'Hospitals']) await userEvent.click(within(controls).getByRole('checkbox', { name: marker }))
+      await userEvent.click(within(controls).getByRole('button', { name: /^Queens/ }))
+      for (const [index, geography] of GEOGRAPHIES.entries()) {
+        await userEvent.click(within(screen.getByRole('group', { name: 'Areas' })).getByRole('button', { name: ['Division', 'Precinct', 'Battalion', 'Neighborhoods'][index] }))
+        const top = screen.getByRole('region', { name: new RegExp(`^5 (Highest|Fastest) .* in Queens$`) })
+        await userEvent.click(within(top).getAllByRole('button').find((button) => button.hasAttribute('aria-pressed'))!)
+        for (const layer of layers) {
+          await userEvent.click(within(controls).getByRole('radio', { name: new RegExp(`^${layer.label}`) }))
+          expect(screen.getByRole('region', { name: 'Map legend' })).toHaveTextContent(layer.label)
+          expect(screen.getByRole('region', { name: 'In focus' })).toHaveTextContent(layer.measure)
+          expect(map().setFilter).toHaveBeenCalledWith(GEOGRAPHY_MAP[geography].highlight, ['in', ['get', GEOGRAPHY_MAP[geography].property], expect.any(Array)])
+        }
+      }
+    })
+  }
 
   it('zooms when a borough is chosen from the Where list', async () => {
     renderWithExplorer(

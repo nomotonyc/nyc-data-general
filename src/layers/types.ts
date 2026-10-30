@@ -72,6 +72,9 @@ export type OpenDataPointsBuild = {
  */
 export type CensusDensityBuild = {
   kind: 'census-density'
+  /** Other tract-level Census indicators built with the same 2020 block weights. */
+  indicator?: 'income' | 'insurance'
+  tables?: Readonly<Record<string, string>>
   /** The 2020 P.L. 94-171 redistricting file for New York State (zip). */
   blocks: string
   /** An ACS table-based summary file for B01001, with {year} for the release year. */
@@ -110,6 +113,8 @@ export type Metric = {
    * across places, so show an average instead).
    */
   aggregation: 'sum' | 'ratio'
+  /** Allow zero-denominator areas (for example, places with no residents). */
+  zeroDenominator?: boolean
   /**
    * Ratio layers only: multiply the ratio, e.g. 100 for a percentage share,
    * 10000 for "per 10k residents", 1/60 for seconds shown as minutes.

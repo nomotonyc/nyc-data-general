@@ -30,11 +30,11 @@
   left: -10000px;
 }
 
-/* The map in a picture (MapPicture): its pixels, then its legend under them. */
+/* The map in a picture (MapPicture): its pixels with the compact legend inset over them. */
 .map-picture {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
 }
 
 .map-picture img {
@@ -45,49 +45,101 @@
 }
 
 .map-picture .map-legend {
-  position: static;
-  width: auto;
-  max-width: none;
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 360px;
+  max-width: calc(100% - 24px);
   margin: 0;
 }
 
-/* The whole view in a picture (SaveView): the details in two columns as wide as the panel's,
-   the trend across both, then the map, as tall as the details (SaveView sizes it). As wide as
-   that makes it. Its sizes come from SaveView, as --view-column, --view-gap and --view-legend-gap. */
+/* The saved view places focus/comparison left of the map and building type, battalions and trend
+   to the right. Its sizes come from SaveView as custom properties. */
 .view-picture {
   width: max-content;
 }
 
+.view-picture__header,
 .view-picture__body {
-  display: flex;
+  display: grid;
+  grid-template-columns: var(--view-left-column) var(--view-map-width) var(--view-right-column);
   gap: var(--view-gap);
   align-items: flex-start;
 }
 
-.view-picture .map-picture {
-  gap: var(--view-legend-gap);
+.view-picture__header {
+  align-items: center;
+  min-height: 42px;
+}
+
+.view-picture__header .picture__title {
+  grid-row: 1;
+  grid-column: 1 / 3;
+  text-align: center;
+}
+
+.view-picture__brand {
+  z-index: 1;
+  grid-row: 1;
+  grid-column: 1;
+  display: block;
+  width: 180px;
+  max-width: 100%;
+  height: auto;
+}
+
+.view-picture__map,
+.view-picture__column {
+  min-width: 0;
+}
+
+/* The left findings float over the map's grey field. The white analytics panel remains separate. */
+.view-picture__body {
+  background: var(--color-background);
+}
+
+.view-picture__column--left {
+  z-index: 1;
+  grid-row: 1;
+  grid-column: 1;
+  background: transparent;
+}
+
+.view-picture__map {
+  grid-row: 1;
+  grid-column: 1 / 3;
+  overflow: hidden;
+  background: var(--color-map-water);
+}
+
+.view-picture__map .map-picture {
+  background: var(--color-map-water);
+}
+
+/* Keep the saved legend the same compact size as the live map legend. */
+.view-picture .map-picture .map-legend {
+  width: 360px;
+  max-width: calc(100% - 24px);
 }
 
 /* At the width SaveView gives it, which makes the image the height it wants. */
 .view-picture__map img {
-  width: 100%;
+  width: var(--view-map-full-width);
+  max-width: none;
+  margin-left: calc((var(--view-left-column) + var(--view-gap) + var(--view-map-width) - var(--view-map-full-width)) / 2);
 }
 
-.view-picture__details {
-  display: grid;
-  grid-template-columns: var(--view-column) var(--view-column);
-  gap: var(--view-gap);
-  align-items: start;
+.view-picture__column--right {
+  z-index: 1;
+  grid-row: 1;
+  grid-column: 3;
+  align-self: stretch;
+  width: var(--view-right-column);
+  background: var(--color-background);
 }
 
-/* The panel's own padding (Panel.css, which may load after this) has no place here: the
-   columns line up with the trend under them. */
+/* The saved sidebars use their full assigned widths. */
 .view-picture .view-picture__column,
 .view-picture .view-picture__trend {
   padding: 0;
-}
-
-/* Across both columns: TREND_WIDTH wide. */
-.view-picture__trend {
-  grid-column: 1 / -1;
 }

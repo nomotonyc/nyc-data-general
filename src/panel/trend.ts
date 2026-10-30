@@ -1,7 +1,7 @@
 import type { LayerDataset } from '../data/dataset'
 import { areaIdsIn } from '../data/places'
 import { effectiveRange, periodIndices, series } from '../data/selectors'
-import { areaById, areaNoun } from '../domain/geography'
+import { BATTALION_AREAS, DIVISIONS, areaById, areaNoun } from '../domain/geography'
 import { yearLabel } from '../domain/stories'
 import { activeMetric, type ExplorerState } from '../explorer/state'
 
@@ -62,8 +62,17 @@ export function trendSeries(state: Input, ds: LayerDataset, palette: TrendPalett
   places[places.length - 1].colour = palette.accent
   // Counts over places of different sizes only compare fairly per area (precinct or battalion).
   const perArea = places.length > 1 && metric.aggregation === 'sum'
-  const values = indices.length < 2 ? [] : places.map((p) => series(ds, metric, p.ids, range, perArea))
-  return { metric, range, periods, monthly, places, values, perArea, noun: areaNoun(ds.geography) }
+  // Divisions cross borough lines: borough totals use the retained battalion rows, while
+  // city and pinned-division totals use div* rows. Compare all three per battalion using
+  // those same retained rows, so every line has the same unit and no areas are counted twice.
+  const byBattalion = perArea && ds.geography === 'divisions'
+  const comparisonDataset = byBattalion ? { ...ds, geography: 'battalions' as const, areas: BATTALION_AREAS } : ds
+  const comparisonIds = (ids: string[]) => byBattalion ? ids.flatMap((id) => {
+    const division = DIVISIONS.find((d) => id === `div${d.number}`)
+    return division ? division.battalions.map((n) => `bn${n}`) : [id]
+  }) : ids
+  const values = indices.length < 2 ? [] : places.map((p) => series(comparisonDataset, metric, comparisonIds(p.ids), range, perArea))
+  return { metric, range, periods, monthly, places, values, perArea, noun: areaNoun(comparisonDataset.geography) }
 }
 
 /** "Mar 2025" for a month, "2023" for a yearly estimate. */

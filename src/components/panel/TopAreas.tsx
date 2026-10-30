@@ -10,8 +10,10 @@ export function TopAreas() {
   const dispatch = useExplorerDispatch()
   const top = topAreas(state, useDataset())
   const superlative = activeMetric(state).format === 'minutes' ? 'Fastest' : 'Highest'
+  const place = state.borough ?? 'the city'
+  const title = `5 ${superlative} ${areaNoun(state.geography).many} in ${place}`
   return (
-    <SaveableSection of="areas" title={`${superlative} ${areaNoun(state.geography).many} in ${state.borough ?? 'the city'}`}>
+    <SaveableSection of="areas" title={title}>
       {top.map((area) => (
         <button
           key={area.id}

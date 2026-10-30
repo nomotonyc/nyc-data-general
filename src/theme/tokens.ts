@@ -8,6 +8,9 @@ export const lightTheme = {
     boroughLine: '#ffffff',
     boroughLabel: '#39414c',
     boroughLabelHalo: '#ffffff',
+    /** Citywide borough names: white letter fill with a black outline. */
+    boroughNameFill: '#ffffff',
+    boroughNameStroke: '#000000',
 
     ink: '#16202b',
     inkSecondary: '#45505c',
@@ -43,6 +46,9 @@ export const lightTheme = {
     emsStation: '#16202b',
     /** The dimmed New York City line behind a focused place's trend. */
     trendCity: '#a7afb8',
+    /** Accent and empty workspace used by the top-level Analysis view. */
+    analysisAccent: '#8a6500',
+    analysisBackground: '#fff8d8',
   },
   /** Accent for text and the focused trend line; ramp for choropleths, light to dark. */
   story: {

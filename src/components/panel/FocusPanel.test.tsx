@@ -50,8 +50,8 @@ describe('FocusPanel', () => {
 
   it('pins a precinct from the highest list, zooming into its borough', async () => {
     renderWithExplorer(<FocusPanel />, { ...fire, geography: 'precincts' })
-    await userEvent.click(rows(section('Highest precincts in the city'))[0])
-    const list = screen.getByRole('region', { name: /^Highest precincts in (Manhattan|Bronx|Brooklyn|Queens|Staten Island)$/ })
+    await userEvent.click(rows(section('5 Highest precincts in the city'))[0])
+    const list = screen.getByRole('region', { name: /^5 Highest precincts in (Manhattan|Bronx|Brooklyn|Queens|Staten Island)$/ })
     expect(rows(list)[0]).toHaveAttribute('aria-pressed', 'true')
   })
 })
@@ -158,13 +158,13 @@ describe('by battalion', () => {
   it('counts battalions and lists the highest ones', () => {
     renderWithExplorer(<FocusPanel />, battalions)
     expect(section('In focus')).toHaveTextContent('All five boroughs · 49 battalions')
-    const top = section('Highest battalions in the city')
+    const top = section('5 Highest battalions in the city')
     for (const button of rows(top)) expect(button).toHaveTextContent(/^\dBattalion \d+/)
   })
 
   it('pins a battalion from the highest list and ranks it', async () => {
     renderWithExplorer(<FocusPanel />, battalions)
-    await userEvent.click(rows(section('Highest battalions in the city'))[0])
+    await userEvent.click(rows(section('5 Highest battalions in the city'))[0])
     expect(within(section('In focus')).getByRole('heading', { name: /^Battalion \d+$/ })).toBeInTheDocument()
     expect(section('In focus')).toHaveTextContent(/of \d+ in .* · \d+(st|nd|rd|th) of 49 citywide/)
     expect(section('In focus')).toHaveTextContent(/the citywide battalion average/)

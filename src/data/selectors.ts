@@ -53,7 +53,10 @@ function total(ds: LayerDataset, table: Table, metric: Metric, areaIds: readonly
 
 function ratio(ds: LayerDataset, metric: Metric, areaIds: readonly string[], indices: readonly number[]) {
   const denominator = total(ds, ds.denominators, metric, areaIds, indices)
-  if (denominator === 0) throw new Error(`Dataset ${ds.layerId}: ${metric.id} denominator is 0 for ${areaIds.join(', ')}`)
+  if (denominator === 0) {
+    if (metric.zeroDenominator && total(ds, ds.values, metric, areaIds, indices) === 0) return 0
+    throw new Error(`Dataset ${ds.layerId}: ${metric.id} denominator is 0 for ${areaIds.join(', ')}`)
+  }
   return (total(ds, ds.values, metric, areaIds, indices) / denominator) * (metric.scale ?? 1)
 }
 

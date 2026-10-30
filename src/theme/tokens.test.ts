@@ -46,6 +46,7 @@ describe('lightTheme', () => {
     for (const [story, p] of Object.entries(lightTheme.story)) {
       expect(contrastRatio(p.accent, lightTheme.color.tabTrack), story).toBeGreaterThanOrEqual(4.5)
     }
+    expect(contrastRatio(lightTheme.color.analysisAccent, lightTheme.color.tabTrack), 'analysis').toBeGreaterThanOrEqual(4.5)
   })
 
   it('keeps non-text UI colours at 3:1 or better on the background', () => {

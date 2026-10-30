@@ -15,6 +15,14 @@
   gap: 12px;
 }
 
+.toolbar--analysis {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.toolbar--analysis > .story-tabs {
+  justify-self: center;
+}
+
 @media (max-width: 1099px) {
   .toolbar {
     grid-template-columns: minmax(0, 1fr);

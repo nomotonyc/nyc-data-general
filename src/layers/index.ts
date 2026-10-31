@@ -25,14 +25,14 @@ export function layersOf(story: StoryId): Metric[] {
   return LAYERS.filter((l) => l.story === story)
 }
 
-const PRECINCT_BOUNDARIES: Source = {
+export const PRECINCT_BOUNDARIES: Source = {
   name: 'Police Precincts',
   publisher: 'NYPD, via NYC Open Data',
   url: 'https://data.cityofnewyork.us/d/y76i-bdw7',
   used: 'Precinct boundaries',
 }
 
-const BOROUGH_BOUNDARIES: Source = {
+export const BOROUGH_BOUNDARIES: Source = {
   name: 'Borough Boundaries',
   publisher: 'NYC Department of City Planning',
   url: 'https://www.nyc.gov/site/planning/',
@@ -40,9 +40,9 @@ const BOROUGH_BOUNDARIES: Source = {
 }
 
 const NEIGHBORHOOD_BOUNDARIES: Source = {
-  name: 'NYC neighborhood boundaries',
-  publisher: 'veltman/snd3',
-  url: 'https://github.com/veltman/snd3/blob/master/data/nyc-neighborhoods.geo.json',
+  name: 'San Francisco prototype neighborhoods',
+  publisher: 'Prototype geometry',
+  url: './data/san-francisco-neighborhoods.geojson',
   used: 'Neighborhood boundaries and names',
 }
 
@@ -113,11 +113,7 @@ function placementSources(layer: Metric): Source[] {
  * when it has them), then whatever places its records in battalions. Each dataset is listed once.
  */
 export function layerSources(layer: Metric): Source[] {
-  const battalions = layerGeographies(layer).includes('battalions') ? [BATTALION_BOUNDARIES] : []
-  const divisions = layerGeographies(layer).includes('divisions') ? [DIVISION_BOUNDARIES] : []
-  const neighborhoods = layerGeographies(layer).includes('neighborhoods') ? [NEIGHBORHOOD_BOUNDARIES] : []
-  const neighborhoodWeights = layerGeographies(layer).includes('neighborhoods') ? [RESIDENT_SOURCES[0]] : []
-  const all = [...layer.sources, PRECINCT_BOUNDARIES, ...divisions, ...battalions, ...neighborhoods, BOROUGH_BOUNDARIES, ...placementSources(layer), ...neighborhoodWeights]
+  const all = [...layer.sources, BATTALION_BOUNDARIES, NEIGHBORHOOD_BOUNDARIES, ...placementSources(layer)]
   return all.filter((s, i) => all.findIndex((o) => o.url === s.url) === i)
 }
 
@@ -126,12 +122,7 @@ const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'Ju
 /** The layer's own caveats, then the standard ones its data settings call for. */
 export function layerMethod(layer: Metric): string[] {
   const method = [...layer.method]
-  if (layer.build?.kind === 'open-data-counts') {
-    method.push('Precincts 105 and 116 are told apart by ZIP code: NYPD created 116 from 105 in late 2024, and older records still say 105.')
-  }
-  if (layer.geographies?.includes('neighborhoods')) {
-    method.push('Neighborhood estimates split precinct totals among neighborhoods in proportion to their share of the precinct’s 2020 census-block population. Census blocks whose interior points fall outside a neighborhood polygon are assigned to the nearest neighborhood center; if a precinct has no resident weight, its totals fall back to census-block land-area shares. These are modeled allocations, not neighborhood-tagged source records; response-time numerators and denominators are split by the same share.')
-  }
+  method.unshift('Prototype values pair San Francisco neighborhoods 1–23 with the first 23 available NYC fire battalion series. NYC has no Battalion 5, so the sequence continues with Battalion 6 and ends with Battalion 26.')
   if (layer.data.lastYear === FINAL_YEAR) {
     method.push(`${FINAL_YEAR} covers January to ${MONTH_NAMES[FINAL_YEAR_LAST_MONTH]}.`)
   }
@@ -140,5 +131,6 @@ export function layerMethod(layer: Metric): string[] {
 
 /** The geographies a layer can be shown in. */
 export function layerGeographies(layer: Pick<Metric, 'geographies'>): readonly Geography[] {
-  return layer.geographies ?? ['precincts']
+  void layer
+  return ['neighborhoods']
 }

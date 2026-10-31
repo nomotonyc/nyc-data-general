@@ -6,6 +6,7 @@ type Bounds = [[number, number], [number, number]]
 
 /** South-west and north-east corners of each borough outline (checked against the GeoJSON by a test). */
 export const BOROUGH_BOUNDS: Record<Borough, Bounds> = {
+  'San Francisco': [[-122.514948, 37.708089], [-122.356967, 37.811574]],
   Manhattan: [[-74.0477, 40.6829], [-73.9104, 40.8776]],
   Bronx: [[-73.9336, 40.7966], [-73.7653, 40.9155]],
   Brooklyn: [[-74.0419, 40.5695], [-73.8362, 40.7391]],

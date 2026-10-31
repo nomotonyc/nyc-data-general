@@ -382,7 +382,7 @@ export default function BaseMap() {
               <path d="M10 3L5 8l5 5" />
             </svg>
             <span>
-              <span className="map__back-all">All of</span> New York City
+              <span className="map__back-all">All of</span> San Francisco
             </span>
           </button>
         )}

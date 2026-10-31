@@ -86,7 +86,7 @@ export function expandedTrend(state: Input, ds: LayerDataset, palette: TrendPale
   if (places.length > 1) {
     const diff = ((mean(main) - mean(values[0])) / mean(values[0])) * 100
     lastStat = {
-      label: 'Compared with New York City',
+      label: 'Compared with San Francisco',
       value: Math.abs(diff) < 0.5 ? 'Level' : `${Math.abs(diff).toFixed(0)}% ${diff > 0 ? 'higher' : 'lower'}`,
       note: perArea ? `per-${noun.one} average` : 'period average',
     }

@@ -1,10 +1,10 @@
 import type { LngLatBoundsLike } from 'maplibre-gl'
 import type { Geography } from '../domain/geography'
 
-/** Bounding box of the NYC borough geometry: the view the map fits. */
+/** Bounding box of San Francisco: the view the map fits in this prototype. */
 export const NYC_BOUNDS: LngLatBoundsLike = [
-  [-74.2556, 40.4961], // south-west
-  [-73.7, 40.9155], // north-east
+  [-122.514948, 37.708089], // south-west
+  [-122.356967, 37.811574], // north-east
 ]
 
 /** Room around the whole city. The land nearest the legend's corner (the Rockaways) sits well above its lowest point. */
@@ -34,15 +34,15 @@ export const FIXED_VIEW = {
   touchPitch: false,
 } as const
 
-export const BOROUGHS_URL = `${import.meta.env.BASE_URL}data/nyc-boroughs.geojson`
-export const BOROUGH_LABELS_URL = `${import.meta.env.BASE_URL}data/nyc-borough-labels.geojson`
+export const BOROUGHS_URL = `${import.meta.env.BASE_URL}data/san-francisco-city.geojson`
+export const BOROUGH_LABELS_URL = `${import.meta.env.BASE_URL}data/san-francisco-city-label.geojson`
 export const PRECINCTS_URL = `${import.meta.env.BASE_URL}data/nyc-precincts.geojson`
 export const PRECINCT_LABELS_URL = `${import.meta.env.BASE_URL}data/nyc-precinct-labels.geojson`
 export const BATTALIONS_URL = `${import.meta.env.BASE_URL}data/nyc-battalions.geojson`
 export const BATTALION_LABELS_URL = `${import.meta.env.BASE_URL}data/nyc-battalion-labels.geojson`
 export const DIVISIONS_URL = `${import.meta.env.BASE_URL}data/nyc-divisions.geojson`
 export const DIVISION_LABELS_URL = `${import.meta.env.BASE_URL}data/nyc-division-labels.geojson`
-export const NEIGHBORHOODS_URL = `${import.meta.env.BASE_URL}data/nyc-neighborhoods.geojson`
+export const NEIGHBORHOODS_URL = `${import.meta.env.BASE_URL}data/san-francisco-neighborhoods.geojson`
 export const HOSPITALS_URL = `${import.meta.env.BASE_URL}data/reference_data/open_ny/hospitals_nyc.geojson`
 export const EMS_STATIONS_URL = `${import.meta.env.BASE_URL}data/reference_data/ems_stations.geojson`
 export const HYDRANTS_URL = `${import.meta.env.BASE_URL}data/reference_data/hydrants.geojson`
@@ -51,8 +51,7 @@ export const HYDRANTS_URL = `${import.meta.env.BASE_URL}data/reference_data/hydr
 export const GLYPHS = `${import.meta.env.BASE_URL}fonts/{fontstack}/{range}.pbf`
 export const LABEL_FONT = ['Montserrat']
 
-export const ATTRIBUTION =
-  '<a href="https://www.nyc.gov/site/planning/">NYC Dept. of City Planning</a>'
+export const ATTRIBUTION = 'San Francisco prototype geometry'
 
 export const SOURCES = {
   boroughs: 'boroughs',

@@ -4,15 +4,8 @@ import './Breadcrumb.css'
 
 type Crumb = { label: string; go: () => void }
 
-const BRAND_IMAGE = `${import.meta.env.BASE_URL}nyc-brand.png`
-
 function CityBrand() {
-  return (
-    <>
-      <img className="breadcrumb__brand-image" src={BRAND_IMAGE} alt="" aria-hidden="true" />
-      <span className="visually-hidden">New York City</span>
-    </>
-  )
+  return <span className="breadcrumb__city-name">San Francisco</span>
 }
 
 export function Breadcrumb() {
@@ -20,7 +13,7 @@ export function Breadcrumb() {
   const dispatch = useExplorerDispatch()
   const ds = useDataset()
 
-  const crumbs: Crumb[] = [{ label: 'New York City', go: () => dispatch({ type: 'resetCityView' }) }]
+  const crumbs: Crumb[] = [{ label: 'San Francisco', go: () => dispatch({ type: 'resetCityView' }) }]
   if (borough) crumbs.push({ label: borough, go: () => dispatch({ type: 'unpinArea' }) })
   if (pinnedArea !== null) crumbs.push({ label: areaById(ds.areas, pinnedArea).label, go: () => {} })
 

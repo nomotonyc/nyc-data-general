@@ -7,6 +7,8 @@ import type { LayerDataset, Placement } from './dataset'
 /** A built layer as stored in public/data/layers/<id>.json. Periods are the layer's, from `from` to `to`. */
 export type LayerFile = {
   layerId: string
+  /** Prototype files can carry real source series while presenting them as synthetic values. */
+  synthetic?: boolean
   /** Precincts when omitted. */
   geography?: Geography
   /** When the build ran (ISO timestamp). */
@@ -43,8 +45,8 @@ export function datasetFromFile(layer: Metric, file: LayerFile, areaIds?: readon
   const ds: LayerDataset = {
     layerId: layer.id,
     geography,
-    isSample: false,
-    asOf: file.built,
+    isSample: file.synthetic === true,
+    asOf: file.synthetic === true ? null : file.built,
     placement: file.placement ?? null,
     periods,
     areas,

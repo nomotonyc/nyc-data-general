@@ -37,10 +37,10 @@ export const initialExplorerState: ExplorerState = {
   storyId: STORIES[0].id,
   metricId: firstLayer.id,
   borough: null,
-  // Battalions first, as FDNY organises; precincts if the first layer has no battalion data.
-  geography: layerGeographies(firstLayer).includes('battalions') ? 'battalions' : 'precincts',
+  // The San Francisco prototype opens at neighborhood level.
+  geography: layerGeographies(firstLayer).includes('neighborhoods') ? 'neighborhoods' : 'precincts',
   pinnedArea: null,
-  detail: 'borough',
+  detail: 'area',
   showOutlines: true,
   showLabels: true,
   showHospitals: false,

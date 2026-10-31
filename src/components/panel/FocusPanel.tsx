@@ -1,6 +1,4 @@
-import { BoroughBars } from './BoroughBars'
 import { Breakdown } from './Breakdown'
-import { Firehouses } from './Firehouses'
 import { FocusSummary } from './FocusSummary'
 import './Panel.css'
 import { Sources } from './Sources'
@@ -12,11 +10,9 @@ export function FocusPanel() {
   return (
     <div className="panel">
       <FocusSummary />
-      <BoroughBars />
       <Trend />
       <Breakdown />
       <TopAreas />
-      <Firehouses />
       <Sources />
     </div>
   )

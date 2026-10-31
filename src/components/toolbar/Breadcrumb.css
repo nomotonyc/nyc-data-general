@@ -54,3 +54,9 @@
   max-width: 100%;
   height: auto;
 }
+
+.breadcrumb__city-name {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}

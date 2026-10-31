@@ -2,7 +2,7 @@ import type { LayerDataset } from '../data/dataset'
 import { areaIdsIn } from '../data/places'
 import { areaValue, effectiveRange, rankOf } from '../data/selectors'
 import { compareSigned, formatValue, ordinal, unitAfter } from '../domain/format'
-import { BOROUGHS, areaById, areaNoun, boroughInSentence, type Borough } from '../domain/geography'
+import { BOROUGHS, areaById, areaNoun, type Borough } from '../domain/geography'
 import { rangeLabel } from '../domain/stories'
 import { activeMetric, type ExplorerState } from '../explorer/state'
 
@@ -40,7 +40,6 @@ export function focusSummary(state: Input, ds: LayerDataset): FocusSummary {
   const years = rangeLabel(range)
   const measure = `${metric.measure} · ${years}`
   const cityIds = areaIdsIn(ds, null)
-  const boroughValues = BOROUGHS.map((b) => value(areaIdsIn(ds, b)))
   const tone = (comparison: string) => (comparison.startsWith('+') ? 'accent' : 'neutral')
   const noun = areaNoun(ds.geography)
 
@@ -48,11 +47,10 @@ export function focusSummary(state: Input, ds: LayerDataset): FocusSummary {
     const area = areaById(ds.areas, state.pinnedArea)
     const own = value([area.id])
     const cityValues = cityIds.map((id) => value([id]))
-    const boroughValuesOfAreas = ds.areas.filter((candidate) => candidate.borough === area.borough).map((candidate) => value([candidate.id]))
     const comparison = compareSigned(own, average(cityIds, cityValues), `the citywide ${noun.one} average`)
     return {
       name: area.label,
-      context: `${area.borough} · ${ordinal(rankOf(own, boroughValuesOfAreas))} of ${boroughValuesOfAreas.length} in ${boroughInSentence(area.borough)} · ${ordinal(rankOf(own, cityValues))} of ${cityValues.length} citywide`,
+      context: `${area.borough} · ${ordinal(rankOf(own, cityValues))} of ${cityValues.length} neighborhoods citywide`,
       value: show(own),
       unit: unitAfter(metric),
       measure,
@@ -63,10 +61,10 @@ export function focusSummary(state: Input, ds: LayerDataset): FocusSummary {
 
   if (state.borough) {
     const own = value(areaIdsIn(ds, state.borough))
-    const comparison = compareSigned(own, average(cityIds, boroughValues), 'the average borough')
+    const comparison = 'Synthetic NYC battalion data'
     return {
       name: state.borough,
-      context: `${rankOf(own, boroughValues) === 1 ? 'Highest' : `${ordinal(rankOf(own, boroughValues))} highest`} of 5 boroughs · ${areaIdsIn(ds, state.borough).length} ${noun.many}`,
+      context: `${areaIdsIn(ds, state.borough).length} ${noun.many}`,
       value: show(own),
       unit: unitAfter(metric),
       measure,
@@ -75,14 +73,13 @@ export function focusSummary(state: Input, ds: LayerDataset): FocusSummary {
     }
   }
 
-  const highest = BOROUGHS[boroughValues.indexOf(Math.max(...boroughValues))]
   return {
-    name: 'New York City',
-    context: `All five boroughs · ${cityIds.length} ${noun.many}`,
+    name: 'San Francisco',
+    context: `${cityIds.length} ${noun.many}`,
     value: show(value(cityIds)),
     unit: unitAfter(metric),
     measure,
-    comparison: `Highest: ${highest}`,
+    comparison: 'Synthetic NYC battalion data',
     tone: 'neutral',
   }
 }

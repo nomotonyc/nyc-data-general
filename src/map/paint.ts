@@ -69,14 +69,15 @@ export function paintMap(map: PaintableMap, plan: Choropleth, show: Show, option
     }
   }
 
-  map.setPaintProperty(LAYERS.boroughLabel, 'text-opacity', show.labels && plan.focus === null ? 1 : 0)
+  map.setPaintProperty(LAYERS.boroughLabel, 'text-opacity', show.labels && plan.focus === null && plan.level === 'borough' ? 1 : 0)
   for (const g of GEOGRAPHIES) {
     const { label, highlight, property } = GEOGRAPHY_MAP[g]
     const current = g === plan.geography
-    map.setPaintProperty(label, 'text-opacity', current && show.labels && plan.focus !== null ? 1 : 0)
+    const labelBorough = plan.focus ?? (BOROUGHS.length === 1 ? BOROUGHS[0] : '')
+    map.setPaintProperty(label, 'text-opacity', current && show.labels && (plan.focus !== null || BOROUGHS.length === 1) ? 1 : 0)
     // Only the focused borough's numbers are placed; at city level none are, since
     // invisible labels still take up room and would crowd out the borough names.
-    map.setFilter(label, ['==', ['get', 'borough'], current ? (plan.focus ?? '') : ''])
+    map.setFilter(label, ['==', ['get', 'borough'], current ? labelBorough : ''])
     const pinned = current ? [...show.pinned] : []
     map.setLayoutProperty(highlight, 'visibility', pinned.length > 0 ? 'visible' : 'none')
     map.setFilter(highlight, ['in', ['get', property], ['literal', pinned]])

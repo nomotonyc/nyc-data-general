@@ -30,7 +30,7 @@ export function pictureCaption(of: PictureOf, state: Input, ds: LayerDataset): C
   const layer = activeMetric(state)
   const { range } = effectiveRange(ds, { from: state.yearFrom, to: state.yearTo })
   const area = areaNoun(state.geography).one
-  const city = state.borough ?? 'New York City'
+  const city = state.borough ?? 'San Francisco'
   // What the map is coloured by, as its legend says: the whole view's picture is mostly its map.
   const mapped = effectiveDetail(state) === 'borough' ? 'borough' : area
   const parts =

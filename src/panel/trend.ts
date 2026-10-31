@@ -52,7 +52,7 @@ export function trendSeries(state: Input, ds: LayerDataset, palette: TrendPalett
   const periods = indices.map((i) => ds.periods[i])
   const monthly = metric.data.resolution === 'month'
 
-  const places: { name: string; ids: string[]; colour: string }[] = [{ name: 'New York City', ids: areaIdsIn(ds, null), colour: palette.city }]
+  const places: { name: string; ids: string[]; colour: string }[] = [{ name: 'San Francisco', ids: areaIdsIn(ds, null), colour: palette.city }]
   if (state.borough) places.push({ name: state.borough, ids: areaIdsIn(ds, state.borough), colour: palette.ramp[1] })
   if (state.pinnedArea !== null) {
     const area = areaById(ds.areas, state.pinnedArea)

@@ -1,6 +1,7 @@
-export const BOROUGHS = ['Manhattan', 'Bronx', 'Brooklyn', 'Queens', 'Staten Island'] as const
+export type Borough = 'Manhattan' | 'Bronx' | 'Brooklyn' | 'Queens' | 'Staten Island' | 'San Francisco'
+/** This prototype presents San Francisco as its single city-level area. */
+export const BOROUGHS: readonly Borough[] = ['San Francisco']
 import { NEIGHBORHOOD_AREAS } from './neighborhoods.generated'
-export type Borough = (typeof BOROUGHS)[number]
 
 /** NYPD precincts as published in NYC Open Data dataset y76i-bdw7. */
 export const PRECINCTS: readonly number[] = [
@@ -42,7 +43,7 @@ export function boroughInSentence(borough: Borough): string {
 /** How the city is divided below the boroughs: FDNY divisions or battalions, or NYPD precincts. */
 export type Geography = 'divisions' | 'precincts' | 'battalions' | 'neighborhoods'
 /** The order shown in the Areas control. */
-export const GEOGRAPHIES: readonly Geography[] = ['divisions', 'precincts', 'battalions', 'neighborhoods']
+export const GEOGRAPHIES: readonly Geography[] = ['neighborhoods']
 
 /** A unit values are reported for: one division, precinct or battalion. */
 export type Area = {

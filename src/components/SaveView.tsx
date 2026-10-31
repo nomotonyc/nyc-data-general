@@ -7,9 +7,7 @@ import { chartSize, expandedTrend } from '../panel/expandedTrend'
 import { useTheme } from '../theme/context'
 import { MapPicture } from './MapPicture'
 import { MapShotContext, type MapShot } from './mapShot'
-import { BoroughBars } from './panel/BoroughBars'
 import { Breakdown } from './panel/Breakdown'
-import { Firehouses } from './panel/Firehouses'
 import { FocusSummary } from './panel/FocusSummary'
 import { TopAreas } from './panel/TopAreas'
 import { Trend } from './panel/Trend'
@@ -27,7 +25,6 @@ export const MIN_MAP_HEIGHT = 640
 const LEFT_COLUMN = 300 // focus and borough comparison
 const RIGHT_COLUMN = 360 // building type, battalions and trend
 const GAP = 32 // between each column and the map
-const BRAND_IMAGE = `${import.meta.env.BASE_URL}nyc-brand.png`
 
 /** The saved trend stays with the right-hand detail column. */
 export const TREND_WIDTH = RIGHT_COLUMN
@@ -102,13 +99,12 @@ export function SaveView() {
         <div className="picture-stage" inert>
           <div ref={ref} className="picture view-picture" style={layout}>
             <div className="view-picture__header">
-              <img className="view-picture__brand" src={BRAND_IMAGE} alt="Nomoto" />
+              <strong className="view-picture__brand">San Francisco Data Atlas</strong>
               <p className="picture__title">{caption.title}</p>
             </div>
             <div className="view-picture__body">
               <div ref={leftRef} className="panel view-picture__column view-picture__column--left">
                 <FocusSummary />
-                <BoroughBars />
               </div>
               <div className="view-picture__map">
                 <MapPicture shot={shot} legend={shot.legend} />
@@ -116,7 +112,6 @@ export function SaveView() {
               <div ref={rightRef} className="panel view-picture__column view-picture__column--right">
                 <Breakdown />
                 <TopAreas />
-                <Firehouses />
                 {big ? (
                   <section className="panel__section view-picture__trend">
                     <h3 className="panel__title">Trend · {big.place}</h3>

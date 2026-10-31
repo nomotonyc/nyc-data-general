@@ -11,8 +11,8 @@ export function DetailToggle() {
   const focused = state.borough !== null
   const noun = areaNoun(state.geography)
   const options: ReadonlyArray<[Detail, string]> = [
-    ['borough', 'Boroughs'],
-    ['area', noun.title],
+    ['borough', 'City'],
+    ['area', noun.many[0].toUpperCase() + noun.many.slice(1)],
   ]
 
   return (

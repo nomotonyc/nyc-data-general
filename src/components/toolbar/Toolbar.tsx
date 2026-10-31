@@ -13,7 +13,7 @@ type Props = {
 export function Toolbar({ analysis = false, onAnalysis, onStory }: Props) {
   return (
     <div className={`toolbar${analysis ? ' toolbar--analysis' : ''}`}>
-      <h1 className="visually-hidden">NYC Data Atlas</h1>
+      <h1 className="visually-hidden">San Francisco Data Atlas</h1>
       {!analysis && <Breadcrumb />}
       <StoryTabs analysis={analysis} onAnalysis={onAnalysis} onStory={onStory} />
       {!analysis && (

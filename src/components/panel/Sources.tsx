@@ -32,7 +32,7 @@ export function Sources() {
           {(ds.geography === 'battalions' || ds.geography === 'neighborhoods') && ds.placement && <p className="panel__placement">{placementText(ds.placement, ds.geography)}</p>}
           {ds.isSample && (
             <p className="panel__sample">
-              These values are samples, generated to show how the page works. Real data from the sources below is on the way.
+              These prototype values reuse NYC battalion series as synthetic San Francisco neighborhood data.
             </p>
           )}
           <ul className="panel__source-list">
